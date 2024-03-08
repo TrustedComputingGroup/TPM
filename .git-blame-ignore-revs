@@ -1,0 +1,22 @@
+# By default, the Github Blame UI ignores commits in this file.
+# To use this file locally, run either:
+#   git blame --ignore-revs-file .git-blame-ignore-revs
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# https://github.com/TrustedComputingGroup/TPM-Internal/pull/4
+# Mass trim whitespace from .c & .h files, preserving line endings.
+705706aa59d777566159f346ce8bf04cac0fa64c
+
+# https://github.com/TrustedComputingGroup/TPM-Internal/pull/2
+# Apply .clang-format
+c68483355e66d714266a3fe8cde8e12c907783b5
+
+# https://github.com/TrustedComputingGroup/TPM-Internal/pull/21
+# Run clang-format on samples folder
+5d12e6e85290252ee141ecfba4eb5338d30300ee
+
+# https://github.com/TrustedComputingGroup/TPM-Internal/pull/65
+# setup line normalization
+7ada6844eefed59c8d1eb53a27b43e7ca6b5bc1a
+# Apply clang-format.
+9a9eab4140ba61e3083996b8123c99cf94f66f57

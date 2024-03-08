@@ -1,0 +1,21 @@
+*           text=auto
+*.json      text eol=lf
+*.md        text eol=lf
+*.c         text eol=lf
+*.h         text eol=lf
+*.py        text eol=lf
+*.ps1       text eol=lf
+*.yml       text eol=lf
+# not sure if VS likes LF in its project files
+*.vcproj    text eol=crlf
+# ditto for CMD.exe
+*.cmd       text eol=crlf
+*.sh        text eol=lf
+
+###############################################################################
+# behavior for image files
+###############################################################################
+*.drawio    binary
+*.jpg       binary
+*.png       binary
+*.gif       binary

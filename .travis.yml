@@ -1,0 +1,38 @@
+language: c
+dist: bionic
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    packages:
+    - autoconf-archive
+
+arch:
+  - amd64
+  - arm64
+  - s390x
+
+matrix:
+  include:
+    - compiler: clang
+      env: CONF_OPT="--host=i686-pc-linux-gnu" CFLAGS="-m32" LDFLAGS="-m32"
+    - compiler: gcc
+      env: CONF_OPT="--host=i686-pc-linux-gnu" CFLAGS="-m32" LDFLAGS="-m32"
+
+before_install:
+  - |
+    if [ $LDFLAGS = "-m32" ]; then
+        sudo dpkg --add-architecture i386
+        sudo apt-get update
+        sudo apt-get install gcc-multilib libssl-dev:i386
+    fi
+
+before_script:
+  - cd TPMCmd
+
+script:
+  - ./bootstrap
+  - ./configure ${CONF_OPT}
+  - make --jobs=$(($(nproc)*3/2)) distcheck

@@ -1,0 +1,40 @@
+# editing pipeline due to message in ADO about a bad trigger.
+
+variables:
+  - name: BuildOutput
+    value: out
+  - name: VerboseOutput
+    value: true
+
+strategy:
+  matrix:
+    windows_x86_openssl:
+      imageName: windows-2019
+      targetArchitecture: Win32
+      cmakecryptoargs: -DcryptoLib_Symmetric=Ossl -DcryptoLib_Hash=Ossl -DcryptoLib_BnMath=Ossl -DcryptoLib_Math=TpmBigNum
+
+pool:
+  vmImage: $(imageName)
+
+steps:
+- checkout: self
+  submodules: true
+
+
+###################################################
+# Windows
+###################################################
+
+# Use CMake to setup target build environment
+- task: CMake@1
+  inputs:
+    cmakeArgs: -S $(BUILD.SOURCESDIRECTORY)\TPMCmd -B $(BUILD.SOURCESDIRECTORY)\TPMCmd\$(BuildOutput) -G "Visual Studio 16 2019" -A $(targetArchitecture) $(cmakecryptoargs)
+  displayName: CMake setup build environment
+  condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+# Use CMake to execute build
+- task: CMake@1
+  inputs:
+    cmakeArgs: --build $(BUILD.SOURCESDIRECTORY)\TPMCmd\$(BuildOutput)
+  displayName: CMake build TPM2
+  condition: eq( variables['Agent.OS'], 'Windows_NT' )

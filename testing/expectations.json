@@ -1,0 +1,23 @@
+{
+  "OkSkip": [
+    "^TestSm4$",
+    "^TestSm2EncryptDecrypt$",
+    "^TestCertifyX509$"
+  ],
+  "OkFail": [],
+  "TimeLimits": {
+    "^TestCreateEccPrimary$": 200,
+    "^TestSignVerify$": 200,
+    "^TestKeyCreation$": 200,
+    "^TestKeyGen$": 200,
+    "^TestRsaDpEp$": 200,
+    "^TestDerivationKAT.*$": 200,
+    "^TestEncryptDecrypt.*$": 200,
+    "^TestNvPartialWrite$": 200,
+    "^TestCmac$": 100,
+    "^TestDuplicateImport$": 100,
+    "^TestSimpleSign$": 100,
+    "^TestUnorderlyDA$": 100,
+    "^.*$": 80
+  }
+}

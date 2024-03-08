@@ -1,0 +1,77 @@
+# Run the tests against the simulator
+
+name: run_tests_on_fast_runner
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branches
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  RESULTS_SUMMARY: ""
+
+jobs:
+  run_tests:
+    # Run in a special container that has the .NET 6 SDK already set up and the compliance tests compiled
+    runs-on: GiantRunners
+    container:
+      image: ghcr.io/trustedcomputinggroup/compliance_pc-tpm-internal:r1.74.0
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: simulator
+
+      # Build the simulator
+      - name: Compile
+        run: |
+          cd simulator/TPMCmd
+          ./bootstrap
+          EXTRA_CFLAGS="--coverage" ./configure
+          make -j
+
+      # Run the tests against the simulator with a fixed seed
+      - name: Run tests against OpenSSL-based simulator
+        timeout-minutes: 10
+        run: >
+          DOTNET_ROOT=/dotnet6
+          /build/Debug/net5/TcgComplianceTestSuite
+          -tpm simulator/TPMCmd/Simulator/src/tpm2-simulator
+          -seed 1 -pick_ports -address localhost:30000
+          -expectations simulator/testing/expectations.json
+
+      - name: Generate coverage report
+        if: success() || failure()
+        run: gcovr -r simulator --html-details coverage.html
+
+      - name: Archive coverage report
+        if: success() || failure()
+        run: zip coverage.zip *.css coverage.*.html coverage.html
+
+      - name: Upload XML results
+        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: report.xml
+          path: TpmTests.Report.xml
+
+      - name: Upload HTML results
+        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: report.html
+          path: TpmTests.Report.html
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: coverage.zip
+          path: coverage.zip

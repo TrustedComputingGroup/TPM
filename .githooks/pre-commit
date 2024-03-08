@@ -1,0 +1,72 @@
+#!/bin/bash
+# run clang-format as a pre-commit hook.
+#
+# requires a specific path to clang-format be provided via git-config.
+# simply runs given clang-format with -style=file, expecting a .clang-format file
+# in the root of the repository. Format changes are automatically applied, but
+# any errors in this script result in commit failure.
+#
+# If reformatting the code undoes all the changes in the commit, then the commit will be blocked.
+# The only way around it is to use --no-verify. --allow-empty doesn't work because that
+# check happens prior to git calling the hook, and I don't know how to interrogate
+# the state of --allow-empty from inside the hook.
+#
+# this hook can be force-run on a segment of commits via rebase using exec.  For example
+# this will replay and format all the commits on the current branch since commit c77fa657.
+# git rebase --strategy-option=theirs -x "git reset --soft HEAD~1 && git commit -C HEAD@{1}" --onto c77fa657 c77fa657
+#
+# this trick suggested by: # https://www.dlyr.fr/stuff/2021/03/magic-rebase-and-format/
+#
+# This hook has only been tested on Windows, and on Windows the path to clang-format should be a
+# Windows, not Linux format path, for example:
+#
+# >git config --local --add hooks.clangformat.path "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\Llvm\bin\clang-format.exe"
+#
+# This should work on Windows and Linux (not-verified) if hooks.clangformat.path is set to "clang-format"
+# with clang-format already on your path.
+#
+# Redirect output to stderr.
+exec 1>&2
+# fail commit if hook fails
+set -e
+
+CLANG_FORMAT=$(git config --get hooks.clangformat.path)
+if [ -z "${CLANG_FORMAT}" ]; then
+  echo A path to clang-format must be set in hooks.clangformat.path
+  exit 1
+fi
+
+format_file() {
+  file="${1}"
+  echo "formatting ${file}"
+  if [ -f $file ]; then
+    # move working dir file out of the way
+    mv ${file} ${file}.working
+    # unstage the changes to be committed from the index
+    git restore --worktree ${file}
+    # and format it.
+    "${CLANG_FORMAT}" -i --style=file ${file}
+    # add back to index
+    git add ${file}
+    # replace pending worktree changes
+    mv ${file}.working ${file}
+  fi
+}
+
+for file in `git diff-index --cached --name-only HEAD | grep -iE '\.(cpp|cc|c|h|hpp|inl)$' ` ; do
+  format_file "${file}"
+done
+
+# after formatting there may be no remaining (staged) changes
+# so check and abort commit if nothing remains.
+set +e
+# Assume something remains
+EXIT_CODE=0
+# sets $? to 1 if anything is different
+git diff-index --cached --exit-code HEAD
+if [ $? -eq 0 ]; then
+  # nothing remains, fail hook
+  echo No changes remain after auto-format hook.  Aborting commit...
+  EXIT_CODE=1
+fi
+exit ${EXIT_CODE}
