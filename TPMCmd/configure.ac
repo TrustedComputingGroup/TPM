@@ -38,7 +38,14 @@ AS_IF([test "x$enable_usedeviceid" = "xyes"], [
     PKG_CHECK_MODULES([LIBUDEV], [libudev])
     [ADDITIONAL_LIBS="-ludev"]
 ])
-AX_PTHREAD([], [AC_MSG_ERROR([requires pthread])])
+
+AC_ARG_ENABLE([pthread],
+    [AS_HELP_STRING([--disable-pthread], [Disable pthread support (tpm simulator will not be built, but only the libraries)])],
+    [use_pthread=$enableval], [use_pthread=yes])
+AS_IF([test "x$use_pthread" = "xyes"],
+    [AX_PTHREAD([], [AC_MSG_ERROR([requires pthread])])],
+    [AC_MSG_NOTICE([pthread support disabled])])
+AM_CONDITIONAL([HAVE_PTHREAD], [test "x$use_pthread" = "xyes"])
 
 AC_DEFINE([HASH_LIB], [Ossl], [Crypto lib for hash algorithms])
 AC_DEFINE([SYM_LIB], [Ossl], [Crypto lib for symmetric encryption algorithms])
