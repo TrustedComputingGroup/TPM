@@ -24,12 +24,13 @@ libplatform = Platform/src/libplatform.a
 libtpm = tpm/src/libtpm.a
 tpm2_simulator = Simulator/src/tpm2-simulator
 
-bin_PROGRAMS = $(tpm2_simulator)
 noinst_LIBRARIES = $(libplatform) $(libtpm)
 
 Platform_src_libplatform_a_CFLAGS = $(EXTRA_CFLAGS) $(PLATFORM_INC) $(TPM_INC)
 Platform_src_libplatform_a_SOURCES = $(PLATFORM_C) $(PLATFORM_H) $(TPM_CONFIG_C)
 
+if HAVE_PTHREAD
+bin_PROGRAMS = $(tpm2_simulator)
 Simulator_src_tpm2_simulator_CFLAGS = $(EXTRA_CFLAGS) $(PLATFORM_INC) \
     $(TPM_INC) $(SIMULATOR_INC) $(LIBCRYPTO_CFLAGS) $(PTHREAD_CFLAGS)
 # the weird / duplicate static library is necessary for dealing with the
@@ -37,6 +38,7 @@ Simulator_src_tpm2_simulator_CFLAGS = $(EXTRA_CFLAGS) $(PLATFORM_INC) \
 Simulator_src_tpm2_simulator_LDADD = $(libplatform) $(libtpm) \
     $(libplatform) $(LIBCRYPTO_LIBS) $(PTHREAD_LIBS) @ADDITIONAL_LIBS@
 Simulator_src_tpm2_simulator_SOURCES = $(SIMULATOR_C) $(SIMULATOR_H)
+endif
 
 tpm_src_libtpm_a_CFLAGS = $(EXTRA_CFLAGS) $(PLATFORM_INC) $(TPM_INC) \
     $(LIBCRYPTO_CFLAGS)
