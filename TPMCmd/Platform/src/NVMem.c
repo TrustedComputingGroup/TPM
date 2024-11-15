@@ -185,6 +185,7 @@ LIB_EXPORT void _plat__NVDisable(
     int delete = ((intptr_t)platParameter != 0)
                      ? TRUE
                      : FALSE;  // IN: If TRUE (!=0), delete the NV contents.
+    NOT_REFERENCED(delete);  // to keep compiler quiet when FILE_BACKED_NV == NO
 
 #if FILE_BACKED_NV
     if(NULL != s_NvFile)
