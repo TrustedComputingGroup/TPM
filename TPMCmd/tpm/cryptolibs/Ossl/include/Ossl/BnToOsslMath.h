@@ -17,7 +17,7 @@
 #include <openssl/ec.h>
 #include <openssl/bn.h>
 
-#if OPENSSL_VERSION_NUMBER >= 0x30500000L
+#if OPENSSL_VERSION_NUMBER >= 0x30600000L
 // Check the bignum_st definition against the one below and either update the
 // version check or provide the new definition for this version.
 #  error Untested OpenSSL version
