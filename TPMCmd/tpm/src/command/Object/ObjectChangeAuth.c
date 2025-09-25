@@ -30,6 +30,10 @@ TPM2_ObjectChangeAuth(ObjectChangeAuth_In*  in,  // IN: input parameter list
     if(ObjectIsSequence(object))
         return TPM_RCS_TYPE + RC_ObjectChangeAuth_objectHandle;
 
+    // deliberately after ObjectIsSequence in case ObjectInSequence decides a
+    // null object is a non-fatal error
+    pAssert_RC(object != NULL);
+
     // Make sure that the authorization value is consistent with the nameAlg
     if(!AdjustAuthSize(&in->newAuth, object->publicArea.nameAlg))
         return TPM_RCS_SIZE + RC_ObjectChangeAuth_newAuth;
@@ -48,12 +52,11 @@ TPM2_ObjectChangeAuth(ObjectChangeAuth_In*  in,  // IN: input parameter list
     sensitive.authValue = in->newAuth;
 
     // Protect the sensitive area
-    SensitiveToPrivate(&sensitive,
-                       &object->name,
-                       HandleToObject(in->parentHandle),
-                       object->publicArea.nameAlg,
-                       &out->outPrivate);
-    return TPM_RC_SUCCESS;
+    return SensitiveToPrivate(&sensitive,
+                              &object->name,
+                              HandleToObject(in->parentHandle),
+                              object->publicArea.nameAlg,
+                              &out->outPrivate);
 }
 
 #endif  // CC_ObjectChangeAuth

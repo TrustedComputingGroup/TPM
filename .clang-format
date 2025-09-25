@@ -1,5 +1,11 @@
 ---
-# Last formatted with clang-format version 17.0.3
+# Current recommendation is to use only clang-format 19.1.1 (Visual Studio)
+# or 19.1.4 (debian).
+# clang-format 19.1.1 is available in Visual Studio 2022 (Developer Command Prompt v17.13.6)
+# clang-format 19.1.4 is available in Debian 12.10 (sudo apt install clang-19)
+#
+# Both of these versions handle PPIndent consistently, though differently
+# from older versions.
 Language:        Cpp
 BasedOnStyle:  Microsoft
 AccessModifierOffset: -4

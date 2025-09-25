@@ -1,8 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
 cmake_minimum_required(VERSION 3.16.3)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../tpm/cmake/tpm_support.cmake)
 
@@ -18,14 +13,18 @@ add_library(Tpm_PlatformLib STATIC
     src/DebugHelpers.c
     src/Entropy.c
     src/ExtraData.c
+    src/Init.c
+    src/Failure.c
     src/LocalityPlat.c
     src/NVMem.c
+    src/NVVirtual.c
     src/PlatformACT.c
     src/PlatformData.c
     src/PlatformPcr.c
     src/PowerPlat.c
     src/PPPlat.c
     src/RunCommand.c
+    src/SelfTest.c
     src/Unique.c
     src/VendorInfo.c
 )
@@ -33,6 +32,11 @@ add_library(Tpm_PlatformLib::Tpm_PlatformLib ALIAS Tpm_PlatformLib)
 
 target_include_directories(Tpm_PlatformLib PRIVATE
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/prototypes>"
+)
+
+# platform currently needs the private NV_*_fp headers
+target_include_directories(${PROJECT_NAME} PRIVATE
+     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../tpm/include>"
 )
 
 # project public platform include dependencies

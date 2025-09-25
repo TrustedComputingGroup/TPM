@@ -1,7 +1,7 @@
 #include "Tpm.h"
 
 // This function is called to process a _TPM_Hash_Data indication.
-LIB_EXPORT void _TPM_Hash_Data(uint32_t dataSize,   // IN: size of data to be extend
+LIB_EXPORT BOOL _TPM_Hash_Data(uint32_t dataSize,   // IN: size of data to be extend
                                unsigned char* data  // IN: data buffer
 )
 {
@@ -14,10 +14,15 @@ LIB_EXPORT void _TPM_Hash_Data(uint32_t dataSize,   // IN: size of data to be ex
     // was not called so this function returns without doing
     // anything.
     if(g_DRTMHandle == TPM_RH_UNASSIGNED)
-        return;
+    {
+        // do not enter failure mode because this is an ordering issue that
+        // can be triggered by a BIOS issue, not an internal failure.
+        return FALSE;
+    }
 
     hashObject = (HASH_OBJECT*)HandleToObject(g_DRTMHandle);
-    pAssert(hashObject->attributes.eventSeq);
+    pAssert_BOOL(hashObject != NULL);
+    pAssert_BOOL(hashObject->attributes.eventSeq);
 
     // For each of the implemented hash algorithms, update the digest with the
     // data provided.
@@ -29,5 +34,5 @@ LIB_EXPORT void _TPM_Hash_Data(uint32_t dataSize,   // IN: size of data to be ex
             CryptDigestUpdate(&hashObject->state.hashState[i], dataSize, data);
     }
 
-    return;
+    return TRUE;
 }

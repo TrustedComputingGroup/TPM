@@ -24,8 +24,11 @@
 #include "ACT_spt_fp.h"
 #include "PCR_fp.h"
 #include "DA_fp.h"
+#if SEC_CHANNEL_SUPPORT
+#  include "SecChannel_fp.h"
+#endif  // SEC_CHANNEL_SUPPORT
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
-#include <public/prototypes/TpmFail_fp.h>
+#include <tpm_public/prototypes/TpmFail_fp.h>
 #include "SessionProcess_fp.h"
 
 // Internal support functions

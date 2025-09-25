@@ -30,6 +30,7 @@ TPM2_PolicyAuthorize(PolicyAuthorize_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     if(in->keySign.t.size < 2)
     {
@@ -88,10 +89,8 @@ TPM2_PolicyAuthorize(PolicyAuthorize_In* in  // IN: input parameter list
     PolicyDigestClear(session);
 
     // Update policyDigest
-    PolicyContextUpdate(
+    return PolicyContextUpdate(
         TPM_CC_PolicyAuthorize, &in->keySign, &in->policyRef, NULL, 0, session);
-
-    return TPM_RC_SUCCESS;
 }
 
 #endif  // CC_PolicyAuthorize

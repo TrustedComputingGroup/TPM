@@ -29,6 +29,11 @@ TPM2_NV_Extend(NV_Extend_In* in  // IN: input parameter list
 
     // Input Validation
 
+    // Common Read-Only mode check. May return TPM_RC_READ_ONLY
+    result = NvReadOnlyModeChecks(nvIndex->publicArea.attributes);
+    if(result != TPM_RC_SUCCESS)
+        return result;
+
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
     result = NvWriteAccessChecks(
@@ -44,7 +49,7 @@ TPM2_NV_Extend(NV_Extend_In* in  // IN: input parameter list
 
     // Perform the write.
     oldDigest.t.size = CryptHashGetDigestSize(nvIndex->publicArea.nameAlg);
-    pAssert(oldDigest.t.size <= sizeof(oldDigest.t.buffer));
+    pAssert_RC(oldDigest.t.size <= sizeof(oldDigest.t.buffer));
     if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, WRITTEN))
     {
         NvGetIndexData(nvIndex, locator, 0, oldDigest.t.size, oldDigest.t.buffer);

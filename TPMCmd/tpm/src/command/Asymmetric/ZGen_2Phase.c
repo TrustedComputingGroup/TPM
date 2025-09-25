@@ -27,6 +27,7 @@ TPM2_ZGen_2Phase(ZGen_2Phase_In*  in,  // IN: input parameter list
     // Input Validation
 
     eccKey = HandleToObject(in->keyA);
+    pAssert_RC(eccKey != NULL);
 
     // keyA must be an ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)

@@ -38,6 +38,7 @@ TPM2_Certify(Certify_In*  in,  // IN: input parameter list
     certifyInfo.type = TPM_ST_ATTEST_CERTIFY;
     // NOTE: the certified object is not allowed to be TPM_ALG_NULL so
     // 'certifiedObject' will never be NULL
+    pAssert_RC(certifiedObject != NULL);  // should have been filtered earlier.
     certifyInfo.attested.certify.name = certifiedObject->name;
 
     // When using an anonymous signing scheme, need to set the qualified Name to the

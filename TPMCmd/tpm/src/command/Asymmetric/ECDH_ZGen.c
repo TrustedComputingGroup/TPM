@@ -24,6 +24,7 @@ TPM2_ECDH_ZGen(ECDH_ZGen_In*  in,  // IN: input parameter list
 
     // Input Validation
     eccKey = HandleToObject(in->keyHandle);
+    pAssert_RC(eccKey != NULL);
 
     // Selected key must be a non-restricted, decrypt ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)

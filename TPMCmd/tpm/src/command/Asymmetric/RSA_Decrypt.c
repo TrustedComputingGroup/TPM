@@ -34,6 +34,7 @@ TPM2_RSA_Decrypt(RSA_Decrypt_In*  in,  // IN: input parameter list
     // Input Validation
 
     rsaKey = HandleToObject(in->keyHandle);
+    pAssert_RC(rsaKey != NULL);
 
     // The selected key must be an RSA key
     if(rsaKey->publicArea.type != TPM_ALG_RSA)

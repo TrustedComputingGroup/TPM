@@ -3,10 +3,6 @@
 //
 // The 0th bit in the array is the right-most bit in the 0th octet in
 // the array.
-//
-// NOTE: If pAssert() is defined, the functions will assert if the indicated bit
-// number is outside of the range of 'bArray'. How the assert is handled is
-// implementation dependent.
 
 //** Includes
 
@@ -24,7 +20,8 @@ BOOL TestBit(unsigned int bitNum,       // IN: number of the bit in 'bArray'
              unsigned int bytesInArray  // IN: size in bytes of 'bArray'
 )
 {
-    pAssert(bytesInArray > (bitNum >> 3));
+    NOT_REFERENCED(bytesInArray);  // if assertions are disabled.
+    pAssert_BOOL(bytesInArray > (bitNum >> 3));
     return ((bArray[bitNum >> 3] & (1 << (bitNum & 7))) != 0);
 }
 
@@ -35,7 +32,10 @@ void SetBit(unsigned int bitNum,       // IN: number of the bit in 'bArray'
             unsigned int bytesInArray  // IN: size in bytes of 'bArray'
 )
 {
-    pAssert(bytesInArray > (bitNum >> 3));
+    NOT_REFERENCED(bytesInArray);  // if assertions are disabled.
+    // failure will get checked at the end of the command processing, which
+    // is soon enough for SetBit use cases.
+    pAssert_VOID_OK(bytesInArray > (bitNum >> 3));
     bArray[bitNum >> 3] |= (1 << (bitNum & 7));
 }
 
@@ -46,6 +46,9 @@ void ClearBit(unsigned int bitNum,       // IN: number of the bit in 'bArray'.
               unsigned int bytesInArray  // IN: size in bytes of 'bArray'
 )
 {
-    pAssert(bytesInArray > (bitNum >> 3));
+    NOT_REFERENCED(bytesInArray);  // if assertions are disabled.
+    // failure will get checked at the end of the command processing, which
+    // is soon enough for ClearBit use cases. (command auditing, self-test, etc.)
+    pAssert_VOID_OK(bytesInArray > (bitNum >> 3));
     bArray[bitNum >> 3] &= ~(1 << (bitNum & 7));
 }

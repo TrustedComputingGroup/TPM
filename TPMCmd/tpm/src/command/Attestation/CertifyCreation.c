@@ -31,6 +31,7 @@ TPM2_CertifyCreation(CertifyCreation_In*  in,  // IN: input parameter list
     if(!CryptSelectSignScheme(signObject, &in->inScheme))
         return TPM_RCS_SCHEME + RC_CertifyCreation_inScheme;
 
+    pAssert_RC(certified != NULL);
     // CertifyCreation specific input validation
     // Re-compute ticket
     result = TicketComputeCreation(

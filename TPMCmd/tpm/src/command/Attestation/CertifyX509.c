@@ -40,6 +40,8 @@ TPM2_CertifyX509(CertifyX509_In*  in,  // IN: input parameter list
     INT16                length;  // length for a tagged element
     ASN1UnmarshalContext ctx;
     ASN1MarshalContext   ctxOut;
+    pAssert_RC(object != NULL);
+
     // certTBS holds an array of pointers and lengths. Each entry references the
     // corresponding value in a TBSCertificate structure. For example, the 1th
     // element references the version number
@@ -166,7 +168,7 @@ TPM2_CertifyX509(CertifyX509_In*  in,  // IN: input parameter list
         TPM2B* digest = &out->tbsDigest.b;
         //
         digest->size = (INT16)CryptHashStart(&hash, signKey->publicArea.nameAlg);
-        pAssert(digest->size != 0);
+        pAssert_RC(digest->size != 0);
 
         // The serial number size is the smaller of the digest and the vendor-defined
         // value

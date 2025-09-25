@@ -122,7 +122,7 @@ typedef union
 typedef ANY_HASH_STATE*       PANY_HASH_STATE;
 typedef const ANY_HASH_STATE* PCANY_HASH_STATE;
 
-#define ALIGNED_SIZE(x, b) ((((x) + (b)-1) / (b)) * (b))
+#define ALIGNED_SIZE(x, b) ((((x) + (b) - 1) / (b)) * (b))
 // MAX_HASH_STATE_SIZE will change with each implementation. It is assumed that
 // a hash state will not be larger than twice the block size plus some
 // overhead (in this case, 16 bytes). The overall size needs to be as

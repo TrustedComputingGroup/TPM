@@ -102,8 +102,8 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 
         // SP800-108 is the only KDF supported by this implementation and there is
         // no default hash algorithm.
-        pAssert(scheme->details.xor.hashAlg != TPM_ALG_NULL
-                && scheme->details.xor.kdf == TPM_ALG_KDF1_SP800_108);
+        pAssert_RC(scheme->details.xor.hashAlg != TPM_ALG_NULL
+                   && scheme->details.xor.kdf == TPM_ALG_KDF1_SP800_108);
         // Don't derive RSA keys
         if(publicArea->type == TPM_ALG_RSA)
             return TPM_RCS_TYPE + RC_CreateLoaded_inPublic;
@@ -187,14 +187,18 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
     // if this is not a Primary key and not a derived key, then return the sensitive
     // area
     if(parent != NULL && !derivation)
+    {
         // Prepare output private data from sensitive
-        SensitiveToPrivate(&newObject->sensitive,
-                           &newObject->name,
-                           parent,
-                           newObject->publicArea.nameAlg,
-                           &out->outPrivate);
+        result = SensitiveToPrivate(&newObject->sensitive,
+                                    &newObject->name,
+                                    parent,
+                                    newObject->publicArea.nameAlg,
+                                    &out->outPrivate);
+    }
     else
+    {
         out->outPrivate.t.size = 0;
+    }
     // Set the remaining return values
     out->outPublic.publicArea = newObject->publicArea;
     out->name                 = newObject->name;

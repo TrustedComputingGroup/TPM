@@ -39,6 +39,7 @@
 #define NV_C
 #include "Tpm.h"
 #include "Marshal.h"
+#include <platform_interface/prototypes/platform_virtual_nv_fp.h>
 
 //** Local Functions
 
@@ -215,7 +216,17 @@ NvWriteNvListEnd(NV_REF end)
 
     // Copy the maxCount value to the marker buffer
     MemoryCopy(&listEndMarker[sizeof(UINT32)], &maxCount, sizeof(UINT64));
-    pAssert(end + sizeof(NV_LIST_TERMINATOR) <= s_evictNvEnd);
+
+    // was a pAssert that (end + sizeof(NV_LIST_TERMINATOR) <= s_evictNvEnd);
+    if(end + sizeof(NV_LIST_TERMINATOR) > s_evictNvEnd)
+    {
+        // enter failure mode, but don't return yet.
+        FAIL_NORET(FATAL_ERROR_ASSERT);
+        // write NV_REF at last valid space.
+        // This will truncate the last entry, but
+        // better than writing past buffer or leaving buffer unterminated.
+        end = s_evictNvEnd - sizeof(NV_LIST_TERMINATOR);
+    }
 
     // Write it to memory
     NvWrite(end, sizeof(NV_LIST_TERMINATOR), &listEndMarker);
@@ -302,7 +313,7 @@ static TPM_RC NvDelete(NV_REF entityRef  // IN: reference to entity to be delete
     // If this is not the last entry, move everything up
     if(nextAddr < endRef)
     {
-        pAssert(nextAddr > entryRef);
+        pAssert_RC(nextAddr > entryRef);
         _plat__NvMemoryMove(nextAddr, entryRef, (endRef - nextAddr));
     }
     // The end of the used space is now moved up by the amount of space we just
@@ -335,7 +346,9 @@ static TPM_RC NvDelete(NV_REF entityRef  // IN: reference to entity to be delete
 
 //*** NvRamNext()
 // This function is used to iterate trough the list of Ram Index values. *iter needs
-// to be initialized by calling
+// to be initialized to NV_RAM_REF_INIT before starting iteration.
+// returns the handle and REF of the current item and advances iterator.
+// return 0 when at the end of the list.
 static NV_RAM_REF NvRamNext(NV_RAM_REF* iter,   // IN/OUT: the list iterator
                             TPM_HANDLE* handle  // OUT: the handle of the next item.
 )
@@ -356,20 +369,34 @@ static NV_RAM_REF NvRamNext(NV_RAM_REF* iter,   // IN/OUT: the list iterator
     // that we are at the end of the list. The end of the list occurs when
     // we don't have space for a size and a handle
     if(currentAddr + sizeof(NV_RAM_HEADER) > RAM_ORDERLY_END)
+    {
         return NULL;
+    }
+
     // read the header of the next entry
     MemoryCopy(&header, currentAddr, sizeof(NV_RAM_HEADER));
 
     // if the size field is zero, then we have hit the end of the list
     if(header.size == 0)
+    {
         // leave the *iter pointing at the end of the list
         return NULL;
-    // advance the header by the size of the entry
-    *iter = currentAddr + header.size;
+    }
 
-    //    pAssert(*iter <= RAM_ORDERLY_END);
+    if(*iter + header.size > RAM_ORDERLY_END)
+    {
+        // enter failure mode and stop iteration.
+        FAIL_IMMEDIATE(FATAL_ERROR_INTERNAL, 0);
+    }
+
+    // advance the header by the size of the entry
+    *iter += header.size;
+
     if(handle != NULL)
+    {
         *handle = header.handle;
+    }
+
     return currentAddr;
 }
 
@@ -441,7 +468,7 @@ void NvUpdateIndexOrderlyData(void)
 // This function should be called after the NV Index space has been updated
 // and the index removed. This insures that NV is available so that checking
 // for NV availability is not required during this function.
-static void NvAddRAM(TPMS_NV_PUBLIC* index  // IN: the index descriptor
+static TPM_RC NvAddRAM(TPMS_NV_PUBLIC* index  // IN: the index descriptor
 )
 {
     NV_RAM_HEADER header;
@@ -451,7 +478,7 @@ static void NvAddRAM(TPMS_NV_PUBLIC* index  // IN: the index descriptor
     header.handle = index->nvIndex;
     MemoryCopy(&header.attributes, &index->attributes, sizeof(TPMA_NV));
 
-    pAssert(ORDERLY_RAM_ADDRESS_OK(end, header.size));
+    pAssert_RC(ORDERLY_RAM_ADDRESS_OK(end, header.size));
 
     // Copy the header to the memory
     MemoryCopy(end, &header, sizeof(NV_RAM_HEADER));
@@ -468,7 +495,7 @@ static void NvAddRAM(TPMS_NV_PUBLIC* index  // IN: the index descriptor
     // Write reserved RAM space to NV to reflect the newly added NV Index
     SET_NV_UPDATE(UT_ORDERLY);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** NvDeleteRAM()
@@ -481,7 +508,7 @@ static void NvAddRAM(TPMS_NV_PUBLIC* index  // IN: the index descriptor
 // This function should be called after the NV Index space has been updated
 // and the index removed. This insures that NV is available so that checking
 // for NV availability is not required during this function.
-static void NvDeleteRAM(TPMI_RH_NV_INDEX handle  // IN: NV handle
+static TPM_RC NvDeleteRAM(TPMI_RH_NV_INDEX handle  // IN: NV handle
 )
 {
     NV_RAM_REF nodeAddress;
@@ -491,7 +518,7 @@ static void NvDeleteRAM(TPMI_RH_NV_INDEX handle  // IN: NV handle
     //
     nodeAddress = NvRamGetIndex(handle);
 
-    pAssert(nodeAddress != 0);
+    pAssert_RC(nodeAddress != 0);
 
     // Get node size
     MemoryCopy(&size, nodeAddress, sizeof(size));
@@ -508,7 +535,7 @@ static void NvDeleteRAM(TPMI_RH_NV_INDEX handle  // IN: NV handle
     // Write reserved RAM space to NV to reflect the newly delete NV Index
     SET_NV_UPDATE(UT_ORDERLY);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** NvReadIndex()
@@ -520,7 +547,10 @@ void NvReadNvIndexInfo(NV_REF    ref,     // IN: points to NV where index is loc
                        NV_INDEX* nvIndex  // OUT: place to receive index data
 )
 {
-    pAssert(nvIndex != NULL);
+    // internal function that should have validated parameters. enter failure
+    // mode and return without reading. currently existing callers pass private
+    // buffers so are all guaranteed non-null
+    pAssert_VOID_OK(nvIndex != NULL);
     NvRead(nvIndex, ref, sizeof(NV_INDEX));
     return;
 }
@@ -692,9 +722,17 @@ BOOL NvIsOwnerPersistentHandle(TPM_HANDLE handle  // IN: handle
 //      TPM_RC_NV_WRITELOCKED   Index is present but locked for writing and command
 //                              writes to the index
 TPM_RC
-NvIndexIsAccessible(TPMI_RH_NV_INDEX handle  // IN: handle
-)
+NvIndexIsAccessible(TPMI_RH_NV_INDEX handle,  // IN: handle
+                    BOOL             commandAcceptsVirtualHandles)
 {
+    // For virtual indexes nothing is actually stored in the NV
+    // so if it exists, it's considered "accessible", though the relevant
+    // virtual API may return a locked result later.
+    if(_plat__IsNvVirtualIndex(handle))
+    {
+        return commandAcceptsVirtualHandles ? TPM_RC_SUCCESS : TPM_RC_NV_LOCKED;
+    }
+
     NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
     //
     if(nvIndex == NULL)
@@ -791,27 +829,35 @@ void NvGetIndexData(NV_INDEX* nvIndex,  // IN: the in RAM index descriptor
 )
 {
     TPMA_NV nvAttributes;
-    //
-    pAssert(nvIndex != NULL);
+
+    // early exit/fail to read is an appropriate response if input data is invalid.
+    // these should have been checked by NvReadAccessChecks before getting here, so
+    // failure mode is appropriate
+    pAssert_VOID_OK(nvIndex != NULL);
 
     nvAttributes = nvIndex->publicArea.attributes;
 
-    pAssert(IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN));
+    pAssert_VOID_OK(IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN));
 
     if(IS_ATTRIBUTE(nvAttributes, TPMA_NV, ORDERLY))
     {
         // Get data from RAM buffer
         NV_RAM_REF ramAddr = NvRamGetIndex(nvIndex->publicArea.nvIndex);
-        pAssert(ramAddr != 0
-                && (size <= ((NV_RAM_HEADER*)ramAddr)->size - sizeof(NV_RAM_HEADER)
-                                - offset));
+
+        // Copy the contents of ramAddr into a local NV_RAM_HEADER variable before
+        // performing the boundary check to avoid potential alignment issues
+        NV_RAM_HEADER nvRamHeader;
+        MemoryCopy(&nvRamHeader, ramAddr, sizeof(NV_RAM_HEADER));
+        pAssert_VOID_OK(
+            ramAddr != 0
+            && (size <= (nvRamHeader.size - sizeof(NV_RAM_HEADER) - offset)));
         MemoryCopy(data, ramAddr + sizeof(NV_RAM_HEADER) + offset, size);
     }
     else
     {
         // Validate that read falls within range of the index
-        pAssert(offset <= nvIndex->publicArea.dataSize
-                && size <= (nvIndex->publicArea.dataSize - offset));
+        pAssert_VOID_OK(offset <= nvIndex->publicArea.dataSize
+                        && size <= (nvIndex->publicArea.dataSize - offset));
         NvRead(data, locator + sizeof(NV_INDEX) + offset, size);
     }
     return;
@@ -980,15 +1026,15 @@ NvWriteIndexData(NV_INDEX* nvIndex,  // IN: the description of the index
 {
     TPM_RC result = TPM_RC_SUCCESS;
     //
-    pAssert(nvIndex != NULL);
+    pAssert_RC(nvIndex != NULL);
     // Make sure that this is dealing with the 'default' index.
     // Note: it is tempting to change the calling sequence so that the 'default' is
     // presumed.
-    pAssert(nvIndex->publicArea.nvIndex == s_cachedNvIndex.publicArea.nvIndex);
+    pAssert_RC(nvIndex->publicArea.nvIndex == s_cachedNvIndex.publicArea.nvIndex);
 
     // Validate that write falls within range of the index
-    pAssert(offset <= nvIndex->publicArea.dataSize
-            && size <= (nvIndex->publicArea.dataSize - offset));
+    pAssert_RC(offset <= nvIndex->publicArea.dataSize
+               && size <= (nvIndex->publicArea.dataSize - offset));
 
     // Update TPMA_NV_WRITTEN bit if necessary
     if(!IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, WRITTEN))
@@ -1085,8 +1131,25 @@ TPM2B_NAME* NvGetNameByIndexHandle(
     TPM2B_NAME*      name     // OUT: name of the index
 )
 {
-    NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
-    //
+    NV_INDEX* nvIndex   = NULL;
+    NV_INDEX  tempIndex = {0};
+
+    if(_plat__IsNvVirtualIndex(handle))
+    {
+        _plat__NvVirtual_PopulateNvIndexInfo(
+            handle, &tempIndex.publicArea, &tempIndex.authValue);
+        nvIndex = &tempIndex;
+    }
+    else
+    {
+        nvIndex = NvGetIndexInfo(handle, NULL);
+        if(nvIndex == NULL)
+        {
+            name->b.size = 0;  // set to empty reply.
+            return name;
+        }
+    }
+
     return NvGetIndexName(nvIndex, name);
 }
 
@@ -1135,7 +1198,9 @@ NvDefineIndex(TPMS_NV_PUBLIC* publicArea,  // IN: A template for an area to crea
     {
         // If the data of NV Index is RAM backed, add the data area in RAM as well
         if(IS_ATTRIBUTE(publicArea->attributes, TPMA_NV, ORDERLY))
-            NvAddRAM(publicArea);
+        {
+            result = NvAddRAM(publicArea);
+        }
     }
     return result;
 }
@@ -1199,7 +1264,13 @@ NvDeleteIndex(NV_INDEX* nvIndex,    // IN: an in RAM index descriptor
             return result;
         // If the NV Index is RAM backed, delete the RAM data as well
         if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, ORDERLY))
-            NvDeleteRAM(nvIndex->publicArea.nvIndex);
+        {
+            result = NvDeleteRAM(nvIndex->publicArea.nvIndex);
+        }
+
+        if(result != TPM_RC_SUCCESS)
+            return result;
+
         NvIndexCacheInit();
     }
     return TPM_RC_SUCCESS;
@@ -1398,7 +1469,7 @@ NvCapGetPersistent(TPMI_DH_OBJECT handle,  // IN: start handle
     NV_REF      currentAddr;
     TPM_HANDLE  entityHandle;
     //
-    pAssert(HandleGetType(handle) == TPM_HT_PERSISTENT);
+    VERIFY(HandleGetType(handle) == TPM_HT_PERSISTENT, FATAL_ERROR_INTERNAL, NO);
 
     // Initialize output handle list
     handleList->count = 0;
@@ -1437,7 +1508,7 @@ BOOL NvCapGetOnePersistent(TPMI_DH_OBJECT handle)  // IN: handle
     NV_REF     currentAddr;
     TPM_HANDLE entityHandle;
 
-    pAssert(HandleGetType(handle) == TPM_HT_PERSISTENT);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_PERSISTENT);
 
     while((currentAddr = NvNextEvict(&entityHandle, &iter)) != 0)
     {
@@ -1467,7 +1538,7 @@ NvCapGetIndex(TPMI_DH_OBJECT handle,     // IN: start handle
     NV_REF      currentAddr;
     TPM_HANDLE  nvHandle;
     //
-    pAssert(HandleGetType(handle) == TPM_HT_NV_INDEX);
+    VERIFY(HandleGetType(handle) == TPM_HT_NV_INDEX, FATAL_ERROR_INTERNAL, NO);
 
     // Initialize output handle list
     handleList->count = 0;
@@ -1493,6 +1564,10 @@ NvCapGetIndex(TPMI_DH_OBJECT handle,     // IN: start handle
         // used here.
         InsertSort(handleList, count, nvHandle);
     }
+
+    // Check virtual indices as well.
+    more |= _plat__NvVirtual_CapGetIndex(handle, count, handleList);
+
     return more;
 }
 
@@ -1504,7 +1579,7 @@ BOOL NvCapGetOneIndex(TPMI_DH_OBJECT handle)  // IN: handle
     NV_REF     currentAddr;
     TPM_HANDLE nvHandle;
 
-    pAssert(HandleGetType(handle) == TPM_HT_NV_INDEX);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_NV_INDEX);
 
     while((currentAddr = NvNextIndex(&nvHandle, &iter)) != 0)
     {

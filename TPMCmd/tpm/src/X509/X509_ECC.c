@@ -7,6 +7,8 @@
 #include "X509_spt_fp.h"
 #include "CryptHash_fp.h"
 
+#if ALG_ECC && CC_CertifyX509
+
 //** Functions
 
 //*** X509PushPoint()
@@ -103,3 +105,5 @@ X509AddPublicECC(OBJECT* object, ASN1MarshalContext* ctx)
     }
     return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);  // Ends SEQUENCE 1st
 }
+
+#endif // #if ALG_ECC && CC_CertifyX509

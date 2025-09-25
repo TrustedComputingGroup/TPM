@@ -230,9 +230,12 @@ LIB_EXPORT void _plat__ClockRateAdjust(_plat__ClockAdjustStep adjust)
     }
 
     if(s_adjustRate > (CLOCK_NOMINAL + CLOCK_ADJUST_LIMIT))
+    {
         s_adjustRate = CLOCK_NOMINAL + CLOCK_ADJUST_LIMIT;
-    if(s_adjustRate < (CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT))
-        s_adjustRate = CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT;
+    }
 
-    return;
+    if(s_adjustRate < (CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT))
+    {
+        s_adjustRate = CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT;
+    }
 }

@@ -77,7 +77,7 @@ BIGNUM* BigInitialized(BIGNUM* toInit, bigConst initializer)
 #    define BIGNUM_PRINT(label, bn, eol)
 #    define DEBUG_PRINT(x)
 #  else
-#    define DEBUG_PRINT(x)               printf("%s", x)
+#    define DEBUG_PRINT(x)               TPM_DEBUG_PRINTF("%s", x)
 #    define BIGNUM_PRINT(label, bn, eol) BIGNUM_print((label), (bn), (eol))
 
 //*** BIGNUM_print()
@@ -88,14 +88,19 @@ static void BIGNUM_print(const char* label, const BIGNUM* a, BOOL eol)
     int       notZero = FALSE;
 
     if(label != NULL)
-        printf("%s", label);
+    {
+        DEBUG_PRINT("%s", label);
+    }
+
     if(a == NULL)
     {
-        printf("NULL");
+        DEBUG_PRINT("NULL");
         goto done;
     }
     if(a->neg)
-        printf("-");
+    {
+        DEBUG_PRINT("-");
+    }
     for(i = a->top, d = &a->d[i - 1]; i > 0; i--)
     {
         int      j;
@@ -105,14 +110,20 @@ static void BIGNUM_print(const char* label, const BIGNUM* a, BOOL eol)
             BYTE b  = (BYTE)((l >> j) & 0xFF);
             notZero = notZero || (b != 0);
             if(notZero)
-                printf("%02x", b);
+            {
+                DEBUG_PRINT("%02x", b);
+            }
         }
         if(!notZero)
-            printf("0");
+        {
+            DEBUG_PRINT("0");
+        }
     }
 done:
     if(eol)
-        printf("\n");
+    {
+        DEBUG_PRINT("\n");
+    }
     return;
 }
 #  endif
@@ -127,7 +138,9 @@ static BIGNUM* BnNewVariable(BN_CTX* CTX)
     // This check is intended to protect against calling this function without
     // having initialized the CTX.
     if((CTX == NULL) || ((new = BN_CTX_get(CTX)) == NULL))
-        FAIL(FATAL_ERROR_ALLOCATION);
+    {
+        FAIL_NULL(FATAL_ERROR_ALLOCATION);
+    }
     return new;
 }
 
@@ -298,7 +311,6 @@ Exit:
     OSSL_LEAVE();
     return OK;
 }
-#  endif  // ALG_RSA
 
 //*** BnModInverse()
 // Modular multiplicative inverse
@@ -322,6 +334,7 @@ Exit:
     OSSL_LEAVE();
     return OK;
 }
+#  endif  // ALG_RSA
 
 #  if ALG_ECC
 

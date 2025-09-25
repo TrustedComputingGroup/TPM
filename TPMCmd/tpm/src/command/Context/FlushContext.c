@@ -21,7 +21,8 @@ TPM2_FlushContext(FlushContext_In* in  // IN: input parameter list
             if(!IsObjectPresent(in->flushHandle))
                 return TPM_RCS_HANDLE + RC_FlushContext_flushHandle;
             // Flush object
-            FlushObject(in->flushHandle);
+            if(!FlushObject(in->flushHandle))
+                return TPM_RC_FAILURE;
             break;
         case TPM_HT_HMAC_SESSION:
         case TPM_HT_POLICY_SESSION:
@@ -35,6 +36,7 @@ TPM2_FlushContext(FlushContext_In* in  // IN: input parameter list
 
             // Flush session
             SessionFlush(in->flushHandle);
+            VERIFY_NOT_FAILED();
             break;
         default:
             // This command only takes object or session handle.  Other handles

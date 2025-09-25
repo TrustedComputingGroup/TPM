@@ -29,9 +29,13 @@ TPM2_PolicyPCR(PolicyPCR_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Compute current PCR digest
-    PCRComputeCurrentDigest(session->authHashAlg, &in->pcrs, &pcrDigest);
+    TPM_RC result =
+        PCRComputeCurrentDigest(session->authHashAlg, &in->pcrs, &pcrDigest);
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Do validation for non trial session
     if(session->attributes.isTrialPolicy == CLEAR)

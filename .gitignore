@@ -368,3 +368,4 @@ TPMCmd/tpm/src/libtpm.a
 *.bkp
 # ignore Visual Studio's default output directory for CMake projects
 TPMCmd/out/
+testing/Temporary/CTestCostData.txt

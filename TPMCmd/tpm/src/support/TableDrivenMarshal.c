@@ -572,7 +572,7 @@ Unmarshal(UINT16  typeIndex,  // IN: the thing to marshal
             if(IS_SUCCESS(Unmarshal(m2bst->sizeIndex, target, buffer, size)))
             {
                 // fetch the size value and convert it to a 32-bit count value
-                count = (int32_t) * ((UINT16*)target);
+                count = (int32_t)*((UINT16*)target);
                 if(count == 0)
                 {
                     if(m2bst->modifiers & SIZE_EQUAL)
@@ -700,8 +700,8 @@ UINT16 Marshal(UINT16  typeIndex,  // IN: the thing to marshal
 #    define MM32 0
 #    define MM64 0
 #  else
-            // These flip the constant index values so that they count in reverse order when doing
-            // little-endian stuff
+// These flip the constant index values so that they count in reverse order when doing
+// little-endian stuff
 #    define MM16 1
 #    define MM32 3
 #    define MM64 7
@@ -790,7 +790,7 @@ UINT16 Marshal(UINT16  typeIndex,  // IN: the thing to marshal
         case TPM2B_MTYPE:
         {
             // Get the number of bytes being marshaled
-            INT32 val = (int32_t) * ((UINT16*)source);
+            INT32 val = (int32_t)*((UINT16*)source);
             //
             retVal = Marshal(UINT16_MARSHAL_REF, source, buffer, size);
 

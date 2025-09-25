@@ -5,7 +5,7 @@
 #define SIMULATOR_PRIVATE_H
 
 //** Includes, Locals, Defines and Function Prototypes
-#include <public/tpm_public.h>
+#include <tpm_public/tpm_public.h>
 
 #include "simulator_sysheaders.h"
 

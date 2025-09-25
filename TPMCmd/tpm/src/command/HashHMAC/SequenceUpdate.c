@@ -26,6 +26,7 @@ TPM2_SequenceUpdate(SequenceUpdate_In* in  // IN: input parameter list
     if(!ObjectIsSequence(object))
         return TPM_RCS_MODE + RC_SequenceUpdate_sequenceHandle;
 
+    pAssert_RC(object != NULL);
     // Internal Data Update
 
     if(object->attributes.eventSeq == SET)

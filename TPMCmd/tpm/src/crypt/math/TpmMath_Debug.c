@@ -39,6 +39,8 @@ static LIB_EXPORT BYTE FromHex(unsigned char c)
         return c - '0';
     else if(c >= 'A' && c <= 'F')
         return c - 'A';
+    else if(c >= 'a' && c <= 'f')
+        return c - 'a';
 
     return 255;
 }

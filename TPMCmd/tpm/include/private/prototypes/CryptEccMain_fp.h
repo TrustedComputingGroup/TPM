@@ -7,6 +7,7 @@
 #define _CRYPT_ECC_MAIN_FP_H_
 
 #if ALG_ECC
+#  include <private/CryptRand.h>
 
 //** Functions
 #  if SIMULATION

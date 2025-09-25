@@ -21,6 +21,7 @@ TPM2_Policy_AC_SendSelect(Policy_AC_SendSelect_In* in  // IN: input parameter li
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // cpHash in session context must be empty
     if(session->u1.cpHash.t.size != 0)

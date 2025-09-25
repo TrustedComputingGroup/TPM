@@ -36,9 +36,9 @@ void BnFromWolf(bigNum bn, mp_int* wolfBn)
     {
         int i;
 #  if WOLF_HALF_RADIX
-        pAssert((unsigned)wolfBn->used <= 2 * BnGetAllocated(bn));
+        pAssert_SKIPPED((unsigned)wolfBn->used <= 2 * BnGetAllocated(bn));
 #  else
-        pAssert((unsigned)wolfBn->used <= BnGetAllocated(bn));
+        pAssert_SKIPPED((unsigned)wolfBn->used <= BnGetAllocated(bn));
 #  endif
         for(i = 0; i < wolfBn->used; i++)
         {
@@ -149,7 +149,7 @@ LIB_EXPORT BOOL BnModMult(bigNum result, bigConst op1, bigConst op2, bigConst mo
     MP_INITIALIZED(bnTemp, NULL);
     BN_VAR(temp, LARGEST_NUMBER_BITS * 2);
 
-    pAssert(BnGetAllocated(result) >= BnGetSize(modulus));
+    pAssert_SKIPPED(BnGetAllocated(result) >= BnGetSize(modulus));
 
     OK = (mp_mul(bnOp1, bnOp2, bnTemp) == MP_OKAY);
     if(OK)
@@ -172,8 +172,8 @@ LIB_EXPORT BOOL BnMult(bigNum result, bigConst multiplicand, bigConst multiplier
     MP_INITIALIZED(bnA, multiplicand);
     MP_INITIALIZED(bnB, multiplier);
 
-    pAssert(result->allocated >= (BITS_TO_CRYPT_WORDS(
-                BnSizeInBits(multiplicand) + BnSizeInBits(multiplier))));
+    pAssert_SKIPPED(result->allocated >= (BITS_TO_CRYPT_WORDS(
+                        BnSizeInBits(multiplicand) + BnSizeInBits(multiplier))));
 
     OK = (mp_mul(bnA, bnB, bnTemp) == MP_OKAY);
     if(OK)
@@ -197,7 +197,7 @@ LIB_EXPORT BOOL BnDiv(
     MP_INITIALIZED(bnR, remainder);
     MP_INITIALIZED(bnDend, dividend);
     MP_INITIALIZED(bnSor, divisor);
-    pAssert(!BnEqualZero(divisor));
+    pAssert_SKIPPED(!BnEqualZero(divisor));
     if(BnGetSize(dividend) < BnGetSize(divisor))
     {
         if(quotient)
@@ -208,10 +208,11 @@ LIB_EXPORT BOOL BnDiv(
     }
     else
     {
-        pAssert(
+        pAssert_SKIPPED(
             (quotient == NULL)
             || (quotient->allocated >= (unsigned)(dividend->size - divisor->size)));
-        pAssert((remainder == NULL) || (remainder->allocated >= divisor->size));
+        pAssert_SKIPPED(
+            (remainder == NULL) || (remainder->allocated >= divisor->size));
         OK = (mp_div(bnDend, bnSor, bnQ, bnR) == MP_OKAY);
         if(OK)
         {
@@ -237,7 +238,7 @@ LIB_EXPORT BOOL BnGcd(bigNum   gcd,      // OUT: the common divisor
     MP_INITIALIZED(bnGcd, gcd);
     MP_INITIALIZED(bn1, number1);
     MP_INITIALIZED(bn2, number2);
-    pAssert(gcd != NULL);
+    pAssert_SKIPPED(gcd != NULL);
     OK = (mp_gcd(bn1, bn2, bnGcd) == MP_OKAY);
     if(OK)
     {
@@ -271,7 +272,6 @@ LIB_EXPORT BOOL BnModExp(bigNum   result,    // OUT: the result
     WOLF_LEAVE();
     return OK;
 }
-#  endif  // TPM_ALG_RSA
 
 //*** BnModInverse()
 // Modular multiplicative inverse
@@ -292,6 +292,7 @@ LIB_EXPORT BOOL BnModInverse(bigNum result, bigConst number, bigConst modulus)
     WOLF_LEAVE();
     return OK;
 }
+#  endif  // TPM_ALG_RSA
 
 #  if ALG_ECC
 
@@ -324,7 +325,7 @@ static ecc_point* EcPointInitialized(pointConst initializer)
     ecc_point* P;
 
     P = wc_ecc_new_point();
-    pAssert(P != NULL);
+    pAssert_SKIPPED(P != NULL);
     // mp_int x,y,z are stack allocated.
     // initializer is not required
     if(P != NULL && initializer != NULL)

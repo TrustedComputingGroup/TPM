@@ -1,8 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
 ####################################################
 # Project
 ####################################################
@@ -15,6 +10,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # this project builds the static TPM Corelibrary
 add_library(Tpm_CoreLib STATIC)
 add_library(Tpm_CoreLib::Tpm_CoreLib ALIAS Tpm_CoreLib)
+
+# don't directly link to TPM_PlatformLib because in a library ("parts") build
+# (i.e. not a single giant CMake project), the Platform is provided during
+# final link.
 target_link_libraries(Tpm_CoreLib PRIVATE
     TpmConfiguration
     Tpm_Public_Headers
@@ -33,7 +32,6 @@ target_include_directories(Tpm_CoreLib PRIVATE
     ../include
     ../include/private
     ../include/private/prototypes
-    ../include/public/include/Tpm_Public_Headers
     ../include/platform_interface/Tpm_Platform_Interface
     ../include/platform_interface/Tpm_Platform_Interface/prototypes
 )
@@ -117,6 +115,7 @@ function(full_generate_tpm_sources)
         "command/EA/PolicySigned.c"
         "command/EA/PolicyTemplate.c"
         "command/EA/PolicyTicket.c"
+        "command/EA/PolicyTransportSPDM.c"
         "command/Ecdaa/Commit.c"
         "command/FieldUpgrade/FieldUpgradeData.c"
         "command/FieldUpgrade/FieldUpgradeStart.c"
@@ -134,6 +133,7 @@ function(full_generate_tpm_sources)
         "command/Hierarchy/CreatePrimary.c"
         "command/Hierarchy/HierarchyChangeAuth.c"
         "command/Hierarchy/HierarchyControl.c"
+        "command/Hierarchy/ReadOnlyControl.c"
         "command/Hierarchy/SetPrimaryPolicy.c"
         "command/Misc/PP_Commands.c"
         "command/Misc/SetAlgorithmSet.c"
@@ -188,7 +188,7 @@ function(full_generate_tpm_sources)
         "command/Testing/GetTestResult.c"
         "command/Testing/IncrementalSelfTest.c"
         "command/Testing/SelfTest.c"
-        "command/Vendor/Vendor_TCG_Test.c"
+
         "crypt/AlgorithmTests.c"
         "crypt/CryptCmac.c"
         "crypt/CryptEccCrypt.c"
@@ -252,6 +252,7 @@ function(full_generate_tpm_sources)
         "support/PropertyCap.c"
         "support/Response.c"
         "support/ResponseCodeProcessing.c"
+        "support/SecChannel.c"
         "support/TableDrivenMarshal.c"
         "support/TableMarshalData.c"
         "support/TpmFail.c"

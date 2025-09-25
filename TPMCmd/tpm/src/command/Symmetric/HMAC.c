@@ -26,6 +26,7 @@ TPM2_HMAC(HMAC_In*  in,  // IN: input parameter list
 
     // Get HMAC key object and public area pointers
     hmacObject = HandleToObject(in->handle);
+    pAssert_RC(hmacObject != NULL);
     publicArea = &hmacObject->publicArea;
     // Make sure that the key is an HMAC key
     if(publicArea->type != TPM_ALG_KEYEDHASH)

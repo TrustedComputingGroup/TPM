@@ -24,6 +24,7 @@ TPM2_PolicyTemplate(PolicyTemplate_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // error if the templateHash in session context is not empty and is not the
     // same as the input or is not a template

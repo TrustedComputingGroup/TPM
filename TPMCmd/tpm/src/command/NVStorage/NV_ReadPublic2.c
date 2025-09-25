@@ -1,5 +1,7 @@
 #include "Tpm.h"
 #include "NV_ReadPublic2_fp.h"
+#include "NV_DefineSpace_fp.h"  // for the RC modifiers
+#include <platform_interface/prototypes/platform_virtual_nv_fp.h>
 
 #if CC_NV_ReadPublic2  // Conditional expansion of this file
 
@@ -13,6 +15,13 @@ TPM2_NV_ReadPublic2(NV_ReadPublic2_In*  in,  // IN: input parameter list
 {
     TPM_RC    result;
     NV_INDEX* nvIndex;
+
+    // Handle special cases for EK cert and special indexes
+    if(_plat__IsNvVirtualIndex(in->nvIndex))
+    {
+        // currently NV_ReadPublic2 doesn't know how to handle virtual indexes.
+        return TPM_RCS_HANDLE + RC_NV_DefineSpace_publicInfo;
+    }
 
     nvIndex = NvGetIndexInfo(in->nvIndex, NULL);
 

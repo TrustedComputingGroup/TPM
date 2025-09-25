@@ -18,14 +18,14 @@ void MemoryIoBufferZero(void);
 //*** MemoryGetInBuffer()
 // This function returns the address of the buffer into which the
 // command parameters will be unmarshaled in preparation for calling
-// the command actions.
+// the command actions.  Returns NULL if not possible.
 BYTE* MemoryGetInBuffer(UINT32 size  // Size, in bytes, required for the input
                                      // unmarshaling
 );
 
 //*** MemoryGetOutBuffer()
 // This function returns the address of the buffer into which the command
-// action code places its output values.
+// action code places its output values. Returns NULL if not possible.
 BYTE* MemoryGetOutBuffer(UINT32 size  // required size of the buffer
 );
 

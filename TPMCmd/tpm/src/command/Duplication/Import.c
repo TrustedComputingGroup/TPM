@@ -89,6 +89,7 @@ TPM2_Import(Import_In*  in,  // IN: input parameter list
 
     // Get parent pointer
     parentObject = HandleToObject(in->parentHandle);
+    pAssert_RC(parentObject != NULL);
 
     if(!ObjectIsParent(parentObject))
         return TPM_RCS_TYPE + RC_Import_parentHandle;
@@ -125,7 +126,7 @@ TPM2_Import(Import_In*  in,  // IN: input parameter list
         // TPM_RC_SIZE, TPM_RC_VALUE may be returned at this point
         result = CryptSecretDecrypt(
             parentObject, NULL, DUPLICATE_STRING, &in->inSymSeed, &data);
-        pAssert(result != TPM_RC_BINDING);
+        pAssert_RC(result != TPM_RC_BINDING);
         if(result != TPM_RC_SUCCESS)
             return RcSafeAddToResult(result, RC_Import_inSymSeed);
     }
@@ -172,11 +173,11 @@ TPM2_Import(Import_In*  in,  // IN: input parameter list
     if(result == TPM_RC_SUCCESS)
     {
         // Prepare output private data from sensitive
-        SensitiveToPrivate(&sensitive,
-                           &name,
-                           parentObject,
-                           in->objectPublic.publicArea.nameAlg,
-                           &out->outPrivate);
+        result = SensitiveToPrivate(&sensitive,
+                                    &name,
+                                    parentObject,
+                                    in->objectPublic.publicArea.nameAlg,
+                                    &out->outPrivate);
     }
     return result;
 }

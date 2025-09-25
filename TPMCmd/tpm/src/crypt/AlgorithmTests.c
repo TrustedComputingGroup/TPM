@@ -63,7 +63,7 @@ static TPM_RC TestHash(TPM_ALG_ID hashAlg, ALGORITHM_VECTOR* toTest)
     const TPM2B*        testDigest = NULL;
     //    TPM2B_TYPE(HMAC_BLOCK, DEFAULT_TEST_HASH_BLOCK_SIZE);
 
-    pAssert(hashAlg != TPM_ALG_NULL);
+    pAssert_RC(hashAlg != TPM_ALG_NULL);
 #  define HASH_CASE_FOR_TEST(HASH, hash)     \
       case ALG_##HASH##_VALUE:               \
           testDigest = &c_##HASH##_digest.b; \
@@ -258,7 +258,7 @@ static TPM_RC TestSymmetric(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
         }
     }
     else
-        pAssert(alg == 0 && alg != 0);
+        pAssert_RC(alg == 0 && alg != 0);
     return TPM_RC_SUCCESS;
 }
 
@@ -745,7 +745,7 @@ TestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
         // silently CLEAR it. Decided to just clear.
         if(!TEST_BIT(alg, g_implementedAlgorithms))
         {
-            CLEAR_BIT(alg, *toTest);
+            CLEAR_BOTH(alg);
             continue;
         }
         // Process whatever is left.
@@ -866,7 +866,7 @@ TestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
                 break;
 #  endif  // ALG_ECC
             default:
-                CLEAR_BIT(alg, *toTest);
+                CLEAR_BOTH(alg);
                 break;
         }
         if(result != TPM_RC_SUCCESS)

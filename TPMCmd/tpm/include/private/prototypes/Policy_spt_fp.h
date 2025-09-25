@@ -26,7 +26,7 @@ PolicyParameterChecks(SESSION*      session,
 //      objectName to it. This will also update the cpHash if it is present.
 //
 //  Return Type: void
-void PolicyContextUpdate(
+TPM_RC PolicyContextUpdate(
     TPM_CC        commandCode,    // IN: command code
     TPM2B_NAME*   name,           // IN: name of entity
     TPM2B_NONCE*  ref,            // IN: the reference data

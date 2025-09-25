@@ -39,6 +39,7 @@ TPM2_PolicyCounterTimer(PolicyCounterTimer_In* in  // IN: input parameter list
         return TPM_RCS_RANGE;
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     //If this is a trial policy, skip the check to see if the condition is met.
     if(session->attributes.isTrialPolicy == CLEAR)

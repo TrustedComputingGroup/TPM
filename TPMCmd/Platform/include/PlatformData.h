@@ -4,13 +4,15 @@
 #ifndef _PLATFORM_DATA_H_
 #define _PLATFORM_DATA_H_
 
-#ifndef EXTERN
-#  ifdef _PLATFORM_DATA_C_
-#    define EXTERN
-#  else
+#ifdef _PLATFORM_DATA_C_
+// instantiate the data below.
+#  undef EXTERN
+#  define EXTERN
+#else
+#  ifndef EXTERN
 #    define EXTERN extern
-#  endif  // _PLATFORM_DATA_C_
-#endif    // EXTERN
+#  endif  // EXTERN
+#endif    // _PLATFORM_DATA_C_
 
 // From Cancel.c
 // Cancel flag.  It is initialized as FALSE, which indicate the command is not
@@ -54,13 +56,13 @@ EXTERN unsigned char s_locality;
 // If this macro is defined, then a file is used as NV.  If it is not defined,
 // then RAM is used to back NV memory. Comment out to use RAM.
 
-#if(!defined VTPM) || ((VTPM != NO) && (VTPM != YES))
+#if (!defined VTPM) || ((VTPM != NO) && (VTPM != YES))
 #  undef VTPM
 #  define VTPM YES  // Default: Either YES or NO
 #endif
 
 // For a simulation, use a file to back up the NV
-#if(!defined FILE_BACKED_NV) || ((FILE_BACKED_NV != NO) && (FILE_BACKED_NV != YES))
+#if (!defined FILE_BACKED_NV) || ((FILE_BACKED_NV != NO) && (FILE_BACKED_NV != YES))
 #  undef FILE_BACKED_NV
 #  define FILE_BACKED_NV (VTPM && YES)  // Default: Either YES or NO
 #endif

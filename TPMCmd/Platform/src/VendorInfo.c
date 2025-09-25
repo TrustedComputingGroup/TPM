@@ -13,8 +13,8 @@
 #define VENDOR_STRING_2 "fTPM"
 #define VENDOR_STRING_3 "\0\0\0\0"
 #define VENDOR_STRING_4 "\0\0\0\0"
-#define FIRMWARE_V1     (0x20240125)
-#define FIRMWARE_V2     (0x00120000)
+#define FIRMWARE_V1     (0x20250320)
+#define FIRMWARE_V2     (0x00000000)
 #define MAX_SVN         255
 
 static uint32_t currentHash = FIRMWARE_V2;
@@ -143,7 +143,30 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret(
 #endif  // FW_LIMITED_SUPPORT
 
 // return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
-LIB_EXPORT uint32_t _plat__GetTpmType()
+LIB_EXPORT uint32_t _plat__GetVendorTpmType()
 {
     return 1;  // just the value the reference code has returned in the past.
+}
+
+LIB_EXPORT void _plat_GetSpecCapabilityValue(SPEC_CAPABILITY_VALUE* returnData)
+{
+    // clang-format off
+    // this is on the title page of part1 of the TPM spec
+    returnData->tpmSpecLevel      = 0;
+    // these come from part2 of the TPM spec
+    returnData->tpmSpecVersion    = 184;
+    returnData->tpmSpecYear       = 2025;
+    returnData->tpmSpecDayOfYear  = 79; // March 20
+    // these come from the PC Client Platform TPM Profile Specification
+    returnData->platformFamily    = 1;
+    returnData->platfromLevel     = 0;
+    // The platform spec version is recorded such that 0x00000101 means version 1.01
+    // Note this differs from some TPM/TCG specifications, but matches the behavior of Windows.
+    // more recent TCG specs have discontinued using this field, but Windows displays it, so we
+    // retain it using the historical encoding.
+    returnData->platformRevision  = 0x105;
+    returnData->platformYear      = 0;
+    returnData->platformDayOfYear = 0;
+    // clang-format on
+    return;
 }

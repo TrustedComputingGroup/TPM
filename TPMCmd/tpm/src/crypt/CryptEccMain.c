@@ -3,6 +3,7 @@
 #include "TpmMath_Util_fp.h"
 #include "TpmEcc_Util_fp.h"
 #include "TpmEcc_Signature_ECDSA_fp.h"  // required for pairwise test in key generation
+
 #if ALG_ECC
 //** Functions
 
@@ -454,7 +455,8 @@ BOOL TpmEcc_GenPrivateScalar(
     OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
     OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
     OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
-    return OK && !g_inFailureMode;
+
+    return OK && !_plat__InFailureMode();
 }
 
 //*** TpmEcc_GenerateKeyPair()
@@ -472,6 +474,7 @@ BOOL TpmEcc_GenerateKeyPair(Crypt_Int*            bnD,  // OUT: private scalar
 
     // Do a point multiply
     OK = OK && ExtEcc_PointMultiply(ecQ, NULL, bnD, E);
+
     return OK;
 }
 
@@ -558,6 +561,7 @@ LIB_EXPORT TPM_RC CryptEccPointMultiply(
         TpmEcc_PointTo2B(Rout, ecR, E);
     else
         ClearPoint2B(Rout);
+
     CRYPT_CURVE_FREE(E);
     return retVal;
 }
@@ -579,7 +583,7 @@ LIB_EXPORT BOOL CryptEccIsPointOnCurve(
     CRYPT_POINT_INITIALIZED(ecQ, Qin);
     BOOL OK;
     //
-    pAssert(Qin != NULL);
+    pAssert_BOOL(Qin != NULL);
     OK = (E != NULL && (ExtEcc_IsPointOnCurve(ecQ, E)));
     return OK;
 }
@@ -646,7 +650,7 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
         digest.t.size = MIN(sensitive->sensitive.ecc.t.size, sizeof(digest.t.buffer));
         // Get a random value to sign using the built in DRBG state
         DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
-        if(g_inFailureMode)
+        if(_plat__InFailureMode())
             return TPM_RC_FAILURE;
         TpmEcc_SignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
         // and make sure that we can validate the signature

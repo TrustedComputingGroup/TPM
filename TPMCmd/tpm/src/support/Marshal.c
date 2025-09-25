@@ -26,38 +26,10 @@ UINT8_Marshal(UINT8* source, BYTE** buffer, INT32* size)
             UINT8_TO_BYTE_ARRAY(*source, *buffer);
             *buffer += 1;
         }
-        pAssert(size == 0 || (*size >= 0));
+        pAssert_ZERO(size == 0 || (*size >= 0));
     }
     return (1);
 }
-
-//   BYTE definition
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-BYTE_Unmarshal(BYTE* target, BYTE** buffer, INT32* size)
-{
-    return UINT8_Unmarshal((UINT8*)target, buffer, size);
-}
-UINT16
-BYTE_Marshal(BYTE* source, BYTE** buffer, INT32* size)
-{
-    return UINT8_Marshal((UINT8*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-//   INT8 definition
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-INT8_Unmarshal(INT8* target, BYTE** buffer, INT32* size)
-{
-    return UINT8_Unmarshal((UINT8*)target, buffer, size);
-}
-UINT16
-INT8_Marshal(INT8* source, BYTE** buffer, INT32* size)
-{
-    return UINT8_Marshal((UINT8*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
 
 //   UINT16 definition
 TPM_RC
@@ -79,24 +51,10 @@ UINT16_Marshal(UINT16* source, BYTE** buffer, INT32* size)
             UINT16_TO_BYTE_ARRAY(*source, *buffer);
             *buffer += 2;
         }
-        pAssert(size == 0 || (*size >= 0));
+        pAssert_ZERO(size == 0 || (*size >= 0));
     }
     return (2);
 }
-
-//   INT16 definition
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-INT16_Unmarshal(INT16* target, BYTE** buffer, INT32* size)
-{
-    return UINT16_Unmarshal((UINT16*)target, buffer, size);
-}
-UINT16
-INT16_Marshal(INT16* source, BYTE** buffer, INT32* size)
-{
-    return UINT16_Marshal((UINT16*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
 
 //   UINT32 definition
 TPM_RC
@@ -118,24 +76,10 @@ UINT32_Marshal(UINT32* source, BYTE** buffer, INT32* size)
             UINT32_TO_BYTE_ARRAY(*source, *buffer);
             *buffer += 4;
         }
-        pAssert(size == 0 || (*size >= 0));
+        pAssert_ZERO(size == 0 || (*size >= 0));
     }
     return (4);
 }
-
-//   INT32 definition
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-INT32_Unmarshal(INT32* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-INT32_Marshal(INT32* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
 
 //   UINT64 definition
 TPM_RC
@@ -157,117 +101,22 @@ UINT64_Marshal(UINT64* source, BYTE** buffer, INT32* size)
             UINT64_TO_BYTE_ARRAY(*source, *buffer);
             *buffer += 8;
         }
-        pAssert(size == 0 || (*size >= 0));
+        pAssert_ZERO(size == 0 || (*size >= 0));
     }
     return (8);
 }
 
-//   INT64 definition
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-INT64_Unmarshal(INT64* target, BYTE** buffer, INT32* size)
-{
-    return UINT64_Unmarshal((UINT64*)target, buffer, size);
-}
-UINT16
-INT64_Marshal(INT64* source, BYTE** buffer, INT32* size)
-{
-    return UINT64_Marshal((UINT64*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for Documentation Clarity" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_ALGORITHM_ID_Unmarshal(TPM_ALGORITHM_ID* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_ALGORITHM_ID_Marshal(TPM_ALGORITHM_ID* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-TPM_RC
-TPM_AUTHORIZATION_SIZE_Unmarshal(
-    TPM_AUTHORIZATION_SIZE* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_AUTHORIZATION_SIZE_Marshal(
-    TPM_AUTHORIZATION_SIZE* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-TPM_RC
-TPM_KEY_BITS_Unmarshal(TPM_KEY_BITS* target, BYTE** buffer, INT32* size)
-{
-    return UINT16_Unmarshal((UINT16*)target, buffer, size);
-}
-UINT16
-TPM_KEY_BITS_Marshal(TPM_KEY_BITS* source, BYTE** buffer, INT32* size)
-{
-    return UINT16_Marshal((UINT16*)source, buffer, size);
-}
-TPM_RC
-TPM_KEY_SIZE_Unmarshal(TPM_KEY_SIZE* target, BYTE** buffer, INT32* size)
-{
-    return UINT16_Unmarshal((UINT16*)target, buffer, size);
-}
-UINT16
-TPM_KEY_SIZE_Marshal(TPM_KEY_SIZE* source, BYTE** buffer, INT32* size)
-{
-    return UINT16_Marshal((UINT16*)source, buffer, size);
-}
-TPM_RC
-TPM_MODIFIER_INDICATOR_Unmarshal(
-    TPM_MODIFIER_INDICATOR* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_MODIFIER_INDICATOR_Marshal(
-    TPM_MODIFIER_INDICATOR* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-TPM_RC
-TPM_PARAMETER_SIZE_Unmarshal(TPM_PARAMETER_SIZE* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_PARAMETER_SIZE_Marshal(TPM_PARAMETER_SIZE* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_CONSTANTS32 Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_CONSTANTS32_Marshal(TPM_CONSTANTS32* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_ALG_ID Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_ALG_ID_Unmarshal(TPM_ALG_ID* target, BYTE** buffer, INT32* size)
-{
-    return UINT16_Unmarshal((UINT16*)target, buffer, size);
-}
-UINT16
-TPM_ALG_ID_Marshal(TPM_ALG_ID* source, BYTE** buffer, INT32* size)
-{
-    return UINT16_Marshal((UINT16*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPM_ECC_CURVE Constants" (Part 2: Structures)
+#  if ALG_ECC
 TPM_RC
 TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE* target, BYTE** buffer, INT32* size)
 {
@@ -277,45 +126,45 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE* target, BYTE** buffer, INT32* size)
     {
         switch(*target)
         {
-#  if ECC_NIST_P192
+#    if ECC_NIST_P192
             case TPM_ECC_NIST_P192:
-#  endif  // ECC_NIST_P192
-#  if ECC_NIST_P224
+#    endif  // ECC_NIST_P192
+#    if ECC_NIST_P224
             case TPM_ECC_NIST_P224:
-#  endif  // ECC_NIST_P224
-#  if ECC_NIST_P256
+#    endif  // ECC_NIST_P224
+#    if ECC_NIST_P256
             case TPM_ECC_NIST_P256:
-#  endif  // ECC_NIST_P256
-#  if ECC_NIST_P384
+#    endif  // ECC_NIST_P256
+#    if ECC_NIST_P384
             case TPM_ECC_NIST_P384:
-#  endif  // ECC_NIST_P384
-#  if ECC_NIST_P521
+#    endif  // ECC_NIST_P384
+#    if ECC_NIST_P521
             case TPM_ECC_NIST_P521:
-#  endif  // ECC_NIST_P521
-#  if ECC_BN_P256
+#    endif  // ECC_NIST_P521
+#    if ECC_BN_P256
             case TPM_ECC_BN_P256:
-#  endif  // ECC_BN_P256
-#  if ECC_BN_P638
+#    endif  // ECC_BN_P256
+#    if ECC_BN_P638
             case TPM_ECC_BN_P638:
-#  endif  // ECC_BN_P638
-#  if ECC_SM2_P256
+#    endif  // ECC_BN_P638
+#    if ECC_SM2_P256
             case TPM_ECC_SM2_P256:
-#  endif  // ECC_SM2_P256
-#  if ECC_BP_P256_R1
+#    endif  // ECC_SM2_P256
+#    if ECC_BP_P256_R1
             case TPM_ECC_BP_P256_R1:
-#  endif  // ECC_BP_P256_R1
-#  if ECC_BP_P384_R1
+#    endif  // ECC_BP_P256_R1
+#    if ECC_BP_P384_R1
             case TPM_ECC_BP_P384_R1:
-#  endif  // ECC_BP_P384_R1
-#  if ECC_BP_P512_R1
+#    endif  // ECC_BP_P384_R1
+#    if ECC_BP_P512_R1
             case TPM_ECC_BP_P512_R1:
-#  endif  // ECC_BP_P512_R1
-#  if ECC_CURVE_25519
+#    endif  // ECC_BP_P512_R1
+#    if ECC_CURVE_25519
             case TPM_ECC_CURVE_25519:
-#  endif  // ECC_CURVE_25519
-#  if ECC_CURVE_448
+#    endif  // ECC_CURVE_25519
+#    if ECC_CURVE_448
             case TPM_ECC_CURVE_448:
-#  endif  // ECC_CURVE_448
+#    endif  // ECC_CURVE_448
                 break;
             default:
                 result = TPM_RC_CURVE;
@@ -324,36 +173,7 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_ECC_CURVE_Marshal(TPM_ECC_CURVE* source, BYTE** buffer, INT32* size)
-{
-    return UINT16_Marshal((UINT16*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_CC Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_CC_Unmarshal(TPM_CC* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_CC_Marshal(TPM_CC* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_RC Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_RC_Marshal(TPM_RC* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
+#  endif  // ALG_ECC
 
 // Table "Definition of TPM_CLOCK_ADJUST Constants" (Part 2: Structures)
 TPM_RC
@@ -411,28 +231,6 @@ TPM_EO_Unmarshal(TPM_EO* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_EO_Marshal(TPM_EO* source, BYTE** buffer, INT32* size)
-{
-    return UINT16_Marshal((UINT16*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_ST Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_ST_Unmarshal(TPM_ST* target, BYTE** buffer, INT32* size)
-{
-    return UINT16_Unmarshal((UINT16*)target, buffer, size);
-}
-UINT16
-TPM_ST_Marshal(TPM_ST* source, BYTE** buffer, INT32* size)
-{
-    return UINT16_Marshal((UINT16*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPM_SU Constants" (Part 2: Structures)
 TPM_RC
 TPM_SU_Unmarshal(TPM_SU* target, BYTE** buffer, INT32* size)
@@ -499,6 +297,10 @@ TPM_CAP_Unmarshal(TPM_CAP* target, BYTE** buffer, INT32* size)
 #  endif  // ALG_ECC
             case TPM_CAP_AUTH_POLICIES:
             case TPM_CAP_ACT:
+#  if SEC_CHANNEL_SUPPORT
+            case TPM_CAP_PUB_KEYS:
+            case TPM_CAP_SPDM_SESSION_INFO:
+#  endif  // SEC_CHANNEL_SUPPORT
             case TPM_CAP_VENDOR_PROPERTY:
                 break;
             default:
@@ -508,107 +310,6 @@ TPM_CAP_Unmarshal(TPM_CAP* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_CAP_Marshal(TPM_CAP* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_PT Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_PT_Unmarshal(TPM_PT* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_PT_Marshal(TPM_PT* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_PT_PCR Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_PT_PCR_Unmarshal(TPM_PT_PCR* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_PT_PCR_Marshal(TPM_PT_PCR* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_PS Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_PS_Marshal(TPM_PS* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for Handles" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_HANDLE_Unmarshal(TPM_HANDLE* target, BYTE** buffer, INT32* size)
-{
-    return UINT32_Unmarshal((UINT32*)target, buffer, size);
-}
-UINT16
-TPM_HANDLE_Marshal(TPM_HANDLE* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_HT Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_HT_Unmarshal(TPM_HT* target, BYTE** buffer, INT32* size)
-{
-    return UINT8_Unmarshal((UINT8*)target, buffer, size);
-}
-UINT16
-TPM_HT_Marshal(TPM_HT* source, BYTE** buffer, INT32* size)
-{
-    return UINT8_Marshal((UINT8*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_RH Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_RH_Unmarshal(TPM_RH* target, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Unmarshal((TPM_HANDLE*)target, buffer, size);
-}
-UINT16
-TPM_RH_Marshal(TPM_RH* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_HC Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM_HC_Unmarshal(TPM_HC* target, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Unmarshal((TPM_HANDLE*)target, buffer, size);
-}
-UINT16
-TPM_HC_Marshal(TPM_HC* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMA_ALGORITHM Bits" (Part 2: Structures)
 TPM_RC
 TPMA_ALGORITHM_Unmarshal(TPMA_ALGORITHM* target, BYTE** buffer, INT32* size)
@@ -623,14 +324,6 @@ TPMA_ALGORITHM_Unmarshal(TPMA_ALGORITHM* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_ALGORITHM_Marshal(TPMA_ALGORITHM* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMA_OBJECT Bits" (Part 2: Structures)
 TPM_RC
 TPMA_OBJECT_Unmarshal(TPMA_OBJECT* target, BYTE** buffer, INT32* size)
@@ -645,14 +338,6 @@ TPMA_OBJECT_Unmarshal(TPMA_OBJECT* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_OBJECT_Marshal(TPMA_OBJECT* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMA_SESSION Bits" (Part 2: Structures)
 TPM_RC
 TPMA_SESSION_Unmarshal(TPMA_SESSION* target, BYTE** buffer, INT32* size)
@@ -667,73 +352,6 @@ TPMA_SESSION_Unmarshal(TPMA_SESSION* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_SESSION_Marshal(TPMA_SESSION* source, BYTE** buffer, INT32* size)
-{
-    return UINT8_Marshal((UINT8*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPMA_LOCALITY Bits" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMA_LOCALITY_Unmarshal(TPMA_LOCALITY* target, BYTE** buffer, INT32* size)
-{
-    return UINT8_Unmarshal((UINT8*)target, buffer, size);
-}
-UINT16
-TPMA_LOCALITY_Marshal(TPMA_LOCALITY* source, BYTE** buffer, INT32* size)
-{
-    return UINT8_Marshal((UINT8*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPMA_PERMANENT Bits" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_PERMANENT_Marshal(TPMA_PERMANENT* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPMA_STARTUP_CLEAR Bits" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_STARTUP_CLEAR_Marshal(TPMA_STARTUP_CLEAR* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPMA_MEMORY Bits" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_MEMORY_Marshal(TPMA_MEMORY* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPMA_CC Bits" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_CC_Marshal(TPMA_CC* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPMA_MODES Bits" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_MODES_Marshal(TPMA_MODES* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMA_ACT Bits" (Part 2: Structures)
 TPM_RC
 TPMA_ACT_Unmarshal(TPMA_ACT* target, BYTE** buffer, INT32* size)
@@ -748,14 +366,6 @@ TPMA_ACT_Unmarshal(TPMA_ACT* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_ACT_Marshal(TPMA_ACT* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_YES_NO Type" (Part 2: Structures)
 TPM_RC
 TPMI_YES_NO_Unmarshal(TPMI_YES_NO* target, BYTE** buffer, INT32* size)
@@ -776,14 +386,6 @@ TPMI_YES_NO_Unmarshal(TPMI_YES_NO* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_YES_NO_Marshal(TPMI_YES_NO* source, BYTE** buffer, INT32* size)
-{
-    return BYTE_Marshal((BYTE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_DH_OBJECT Type" (Part 2: Structures)
 TPM_RC
 TPMI_DH_OBJECT_Unmarshal(
@@ -797,14 +399,6 @@ TPMI_DH_OBJECT_Unmarshal(
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_DH_OBJECT_Marshal(TPMI_DH_OBJECT* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_DH_PARENT Type" (Part 2: Structures)
 TPM_RC
 TPMI_DH_PARENT_Unmarshal(TPMI_DH_PARENT* target, BYTE** buffer, INT32* size)
@@ -838,14 +432,6 @@ TPMI_DH_PARENT_Unmarshal(TPMI_DH_PARENT* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_DH_PARENT_Marshal(TPMI_DH_PARENT* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_DH_PERSISTENT Type" (Part 2: Structures)
 TPM_RC
 TPMI_DH_PERSISTENT_Unmarshal(TPMI_DH_PERSISTENT* target, BYTE** buffer, INT32* size)
@@ -857,14 +443,6 @@ TPMI_DH_PERSISTENT_Unmarshal(TPMI_DH_PERSISTENT* target, BYTE** buffer, INT32* s
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_DH_PERSISTENT_Marshal(TPMI_DH_PERSISTENT* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_DH_ENTITY Type" (Part 2: Structures)
 TPM_RC
 TPMI_DH_ENTITY_Unmarshal(
@@ -920,14 +498,6 @@ TPMI_SH_AUTH_SESSION_Unmarshal(
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_SH_AUTH_SESSION_Marshal(TPMI_SH_AUTH_SESSION* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_SH_HMAC Type" (Part 2: Structures)
 TPM_RC
 TPMI_SH_HMAC_Unmarshal(TPMI_SH_HMAC* target, BYTE** buffer, INT32* size)
@@ -939,14 +509,6 @@ TPMI_SH_HMAC_Unmarshal(TPMI_SH_HMAC* target, BYTE** buffer, INT32* size)
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_SH_HMAC_Marshal(TPMI_SH_HMAC* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_SH_POLICY Type" (Part 2: Structures)
 TPM_RC
 TPMI_SH_POLICY_Unmarshal(TPMI_SH_POLICY* target, BYTE** buffer, INT32* size)
@@ -958,14 +520,6 @@ TPMI_SH_POLICY_Unmarshal(TPMI_SH_POLICY* target, BYTE** buffer, INT32* size)
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_SH_POLICY_Marshal(TPMI_SH_POLICY* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_DH_CONTEXT Type" (Part 2: Structures)
 TPM_RC
 TPMI_DH_CONTEXT_Unmarshal(TPMI_DH_CONTEXT* target, BYTE** buffer, INT32* size)
@@ -979,14 +533,6 @@ TPMI_DH_CONTEXT_Unmarshal(TPMI_DH_CONTEXT* target, BYTE** buffer, INT32* size)
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_DH_CONTEXT_Marshal(TPMI_DH_CONTEXT* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_DH_SAVED Type" (Part 2: Structures)
 TPM_RC
 TPMI_DH_SAVED_Unmarshal(TPMI_DH_SAVED* target, BYTE** buffer, INT32* size)
@@ -1011,14 +557,6 @@ TPMI_DH_SAVED_Unmarshal(TPMI_DH_SAVED* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_DH_SAVED_Marshal(TPMI_DH_SAVED* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_RH_HIERARCHY Type" (Part 2: Structures)
 TPM_RC
 TPMI_RH_HIERARCHY_Unmarshal(TPMI_RH_HIERARCHY* target, BYTE** buffer, INT32* size)
@@ -1050,14 +588,6 @@ TPMI_RH_HIERARCHY_Unmarshal(TPMI_RH_HIERARCHY* target, BYTE** buffer, INT32* siz
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RH_HIERARCHY_Marshal(TPMI_RH_HIERARCHY* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_RH_ENABLES Type" (Part 2: Structures)
 TPM_RC
 TPMI_RH_ENABLES_Unmarshal(
@@ -1082,14 +612,6 @@ TPMI_RH_ENABLES_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RH_ENABLES_Marshal(TPMI_RH_ENABLES* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_RH_HIERARCHY_AUTH Type" (Part 2: Structures)
 TPM_RC
 TPMI_RH_HIERARCHY_AUTH_Unmarshal(
@@ -1161,15 +683,6 @@ TPMI_RH_BASE_HIERARCHY_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RH_BASE_HIERARCHY_Marshal(
-    TPMI_RH_BASE_HIERARCHY* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_RH_PLATFORM Type" (Part 2: Structures)
 TPM_RC
 TPMI_RH_PLATFORM_Unmarshal(TPMI_RH_PLATFORM* target, BYTE** buffer, INT32* size)
@@ -1330,14 +843,6 @@ TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX* target, BYTE** buffer, INT32* size)
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RH_NV_INDEX_Marshal(TPMI_RH_NV_INDEX* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_RH_NV_DEFINED_INDEX Type" (Part 2: Structures)
 TPM_RC
 TPMI_RH_NV_DEFINED_INDEX_Unmarshal(
@@ -1364,15 +869,6 @@ TPMI_RH_NV_LEGACY_INDEX_Unmarshal(
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RH_NV_LEGACY_INDEX_Marshal(
-    TPMI_RH_NV_LEGACY_INDEX* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_RH_NV_EXP_INDEX Type" (Part 2: Structures)
 TPM_RC
 TPMI_RH_NV_EXP_INDEX_Unmarshal(
@@ -1385,14 +881,6 @@ TPMI_RH_NV_EXP_INDEX_Unmarshal(
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RH_NV_EXP_INDEX_Marshal(TPMI_RH_NV_EXP_INDEX* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_RH_AC Type" (Part 2: Structures)
 TPM_RC
 TPMI_RH_AC_Unmarshal(TPMI_RH_AC* target, BYTE** buffer, INT32* size)
@@ -1415,14 +903,6 @@ TPMI_RH_ACT_Unmarshal(TPMI_RH_ACT* target, BYTE** buffer, INT32* size)
         result = TPM_RC_VALUE;
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RH_ACT_Marshal(TPMI_RH_ACT* source, BYTE** buffer, INT32* size)
-{
-    return TPM_HANDLE_Marshal((TPM_HANDLE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_HASH Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_HASH_Unmarshal(TPMI_ALG_HASH* target, BYTE** buffer, INT32* size, BOOL flag)
@@ -1478,14 +958,6 @@ TPMI_ALG_HASH_Unmarshal(TPMI_ALG_HASH* target, BYTE** buffer, INT32* size, BOOL 
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_HASH_Marshal(TPMI_ALG_HASH* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_ASYM Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_ASYM_Unmarshal(TPMI_ALG_ASYM* target, BYTE** buffer, INT32* size, BOOL flag)
@@ -1511,14 +983,6 @@ TPMI_ALG_ASYM_Unmarshal(TPMI_ALG_ASYM* target, BYTE** buffer, INT32* size, BOOL 
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_ASYM_Marshal(TPMI_ALG_ASYM* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_SYM Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_SYM_Unmarshal(TPMI_ALG_SYM* target, BYTE** buffer, INT32* size, BOOL flag)
@@ -1550,14 +1014,6 @@ TPMI_ALG_SYM_Unmarshal(TPMI_ALG_SYM* target, BYTE** buffer, INT32* size, BOOL fl
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_SYM_Marshal(TPMI_ALG_SYM* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_SYM_OBJECT Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_SYM_OBJECT_Unmarshal(
@@ -1587,14 +1043,6 @@ TPMI_ALG_SYM_OBJECT_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_SYM_OBJECT_Marshal(TPMI_ALG_SYM_OBJECT* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_SYM_MODE Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_SYM_MODE_Unmarshal(
@@ -1633,14 +1081,6 @@ TPMI_ALG_SYM_MODE_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_SYM_MODE_Marshal(TPMI_ALG_SYM_MODE* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_KDF Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_KDF_Unmarshal(TPMI_ALG_KDF* target, BYTE** buffer, INT32* size, BOOL flag)
@@ -1672,14 +1112,6 @@ TPMI_ALG_KDF_Unmarshal(TPMI_ALG_KDF* target, BYTE** buffer, INT32* size, BOOL fl
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_KDF_Marshal(TPMI_ALG_KDF* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_SIG_SCHEME Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_SIG_SCHEME_Unmarshal(
@@ -1733,15 +1165,18 @@ TPMI_ALG_SIG_SCHEME_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_SIG_SCHEME_Marshal(TPMI_ALG_SIG_SCHEME* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ECC_KEY_EXCHANGE Type" (Part 2: Structures)
+
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+////////////////////////////////////////////////////////////////////////////////
+#  if ALG_ECC
 TPM_RC
 TPMI_ECC_KEY_EXCHANGE_Unmarshal(
     TPMI_ECC_KEY_EXCHANGE* target, BYTE** buffer, INT32* size, BOOL flag)
@@ -1752,15 +1187,15 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(
     {
         switch(*target)
         {
-#  if ALG_ECDH
+#    if ALG_ECDH
             case TPM_ALG_ECDH:
-#  endif  // ALG_ECDH
-#  if ALG_SM2
+#    endif  // ALG_ECDH
+#    if ALG_SM2
             case TPM_ALG_SM2:
-#  endif  // ALG_SM2
-#  if ALG_ECMQV
+#    endif  // ALG_SM2
+#    if ALG_ECMQV
             case TPM_ALG_ECMQV:
-#  endif  // ALG_ECMQV
+#    endif  // ALG_ECMQV
                 break;
             default:
                 if((*target != TPM_ALG_NULL) || !flag)
@@ -1770,14 +1205,7 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ECC_KEY_EXCHANGE_Marshal(
-    TPMI_ECC_KEY_EXCHANGE* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
+#  endif  // ALG_ECC
 
 // Table "Definition of TPMI_ST_COMMAND_TAG Type" (Part 2: Structures)
 TPM_RC
@@ -1799,14 +1227,6 @@ TPMI_ST_COMMAND_TAG_Unmarshal(TPMI_ST_COMMAND_TAG* target, BYTE** buffer, INT32*
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ST_COMMAND_TAG_Marshal(TPMI_ST_COMMAND_TAG* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ST_Marshal((TPM_ST*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_MAC_SCHEME Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_MAC_SCHEME_Unmarshal(
@@ -1866,14 +1286,6 @@ TPMI_ALG_MAC_SCHEME_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_MAC_SCHEME_Marshal(TPMI_ALG_MAC_SCHEME* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ALG_CIPHER_MODE Type" (Part 2: Structures)
 TPM_RC
 TPMI_ALG_CIPHER_MODE_Unmarshal(
@@ -1909,14 +1321,6 @@ TPMI_ALG_CIPHER_MODE_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_CIPHER_MODE_Marshal(TPMI_ALG_CIPHER_MODE* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMS_EMPTY Structure" (Part 2: Structures)
 TPM_RC
 TPMS_EMPTY_Unmarshal(TPMS_EMPTY* target, BYTE** buffer, INT32* size)
@@ -2206,48 +1610,6 @@ TPM2B_DATA_Marshal(TPM2B_DATA* source, BYTE** buffer, INT32* size)
                                            (INT32)source->t.size));
     return result;
 }
-
-// Table "Definition of Types for TPM2B_NONCE" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM2B_NONCE_Unmarshal(TPM2B_NONCE* target, BYTE** buffer, INT32* size)
-{
-    return TPM2B_DIGEST_Unmarshal((TPM2B_DIGEST*)target, buffer, size);
-}
-UINT16
-TPM2B_NONCE_Marshal(TPM2B_NONCE* source, BYTE** buffer, INT32* size)
-{
-    return TPM2B_DIGEST_Marshal((TPM2B_DIGEST*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for TPM2B_AUTH" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM2B_AUTH_Unmarshal(TPM2B_AUTH* target, BYTE** buffer, INT32* size)
-{
-    return TPM2B_DIGEST_Unmarshal((TPM2B_DIGEST*)target, buffer, size);
-}
-UINT16
-TPM2B_AUTH_Marshal(TPM2B_AUTH* source, BYTE** buffer, INT32* size)
-{
-    return TPM2B_DIGEST_Marshal((TPM2B_DIGEST*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for TPM2B_OPERAND" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPM2B_OPERAND_Unmarshal(TPM2B_OPERAND* target, BYTE** buffer, INT32* size)
-{
-    return TPM2B_DIGEST_Unmarshal((TPM2B_DIGEST*)target, buffer, size);
-}
-UINT16
-TPM2B_OPERAND_Marshal(TPM2B_OPERAND* source, BYTE** buffer, INT32* size)
-{
-    return TPM2B_DIGEST_Marshal((TPM2B_DIGEST*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
 
 // Table "Definition of TPM2B_EVENT Structure" (Part 2: Structures)
 TPM_RC
@@ -2720,6 +2082,23 @@ TPMS_ACT_DATA_Marshal(TPMS_ACT_DATA* source, BYTE** buffer, INT32* size)
     return result;
 }
 
+#  if SEC_CHANNEL_SUPPORT
+// Table "Definition of TPMS_SPDM_SESSION_INFO Structure" (Part 2: Structures)
+UINT16
+TPMS_SPDM_SESSION_INFO_Marshal(
+    TPMS_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size)
+{
+    UINT16 result = 0;
+    result        = (UINT16)(result
+                      + TPM2B_NAME_Marshal(
+                          (TPM2B_NAME*)&(source->reqKeyName), buffer, size));
+    result        = (UINT16)(result
+                      + TPM2B_NAME_Marshal(
+                          (TPM2B_NAME*)&(source->tpmKeyName), buffer, size));
+    return result;
+}
+#  endif  // SEC_CHANNEL_SUPPORT
+
 // Table "Definition of TPML_CC Structure" (Part 2: Structures)
 TPM_RC
 TPML_CC_Unmarshal(TPML_CC* target, BYTE** buffer, INT32* size)
@@ -2939,6 +2318,15 @@ TPML_TAGGED_PCR_PROPERTY_Marshal(
     return result;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPML_ECC_CURVE Structure" (Part 2: Structures)
 #  if ALG_ECC
 UINT16
@@ -2988,6 +2376,40 @@ TPML_ACT_DATA_Marshal(TPML_ACT_DATA* source, BYTE** buffer, INT32* size)
                                                (INT32)source->count));
     return result;
 }
+
+#  if SEC_CHANNEL_SUPPORT
+// Table "Definition of TPML_PUB_KEY Structure" (Part 2: Structures)
+UINT16
+TPML_PUB_KEY_Marshal(TPML_PUB_KEY* source, BYTE** buffer, INT32* size)
+{
+    UINT16 result = 0;
+    result =
+        (UINT16)(result + UINT32_Marshal((UINT32*)&(source->count), buffer, size));
+    result = (UINT16)(result
+                      + TPM2B_PUBLIC_Array_Marshal((TPM2B_PUBLIC*)&(source->pubKeys),
+                                                   buffer,
+                                                   size,
+                                                   (INT32)source->count));
+    return result;
+}
+
+// Table "Definition of TPML_SPDM_SESSION_INFO Structure" (Part 2: Structures)
+UINT16
+TPML_SPDM_SESSION_INFO_Marshal(
+    TPML_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size)
+{
+    UINT16 result = 0;
+    result =
+        (UINT16)(result + UINT32_Marshal((UINT32*)&(source->count), buffer, size));
+    result = (UINT16)(result
+                      + TPMS_SPDM_SESSION_INFO_Array_Marshal(
+                          (TPMS_SPDM_SESSION_INFO*)&(source->spdmSessionInfo),
+                          buffer,
+                          size,
+                          (INT32)source->count));
+    return result;
+}
+#  endif  // SEC_CHANNEL_SUPPORT
 
 // Table "Definition of TPML_VENDOR_PROPERTY Structure" (Part 2: Structures)
 TPM_RC
@@ -3060,6 +2482,14 @@ TPMU_CAPABILITIES_Marshal(
         case TPM_CAP_ACT:
             return TPML_ACT_DATA_Marshal(
                 (TPML_ACT_DATA*)&(source->actData), buffer, size);
+#  if SEC_CHANNEL_SUPPORT
+        case TPM_CAP_PUB_KEYS:
+            return TPML_PUB_KEY_Marshal(
+                (TPML_PUB_KEY*)&(source->pubKeys), buffer, size);
+        case TPM_CAP_SPDM_SESSION_INFO:
+            return TPML_SPDM_SESSION_INFO_Marshal(
+                (TPML_SPDM_SESSION_INFO*)&(source->spdmSessionInfo), buffer, size);
+#  endif  // SEC_CHANNEL_SUPPORT
     }
     return 0;
 }
@@ -3085,12 +2515,11 @@ TPM_RC
 TPMU_SET_CAPABILITIES_Unmarshal(
     TPMU_SET_CAPABILITIES* target, BYTE** buffer, INT32* size, UINT32 selector)
 {
+    // No settable capabilities are currently defined in the reference code.
     NOT_REFERENCED(target);
     NOT_REFERENCED(buffer);
     NOT_REFERENCED(size);
     NOT_REFERENCED(selector);
-
-    // No settable capabilities are currently defined in the reference code.
     return TPM_RC_SELECTOR;
 }
 
@@ -3311,15 +2740,6 @@ TPMS_NV_DIGEST_CERTIFY_INFO_Marshal(
     return result;
 }
 
-// Table "Definition of TPMI_ST_ATTEST Type" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ST_ATTEST_Marshal(TPMI_ST_ATTEST* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ST_Marshal((TPM_ST*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMU_ATTEST Union" (Part 2: Structures)
 UINT16
 TPMU_ATTEST_Marshal(TPMU_ATTEST* source, BYTE** buffer, INT32* size, UINT32 selector)
@@ -3437,6 +2857,15 @@ TPMS_AUTH_RESPONSE_Marshal(TPMS_AUTH_RESPONSE* source, BYTE** buffer, INT32* siz
     return result;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//                           ###    ########  ######
+//                          ## ##   ##       ##    ##
+//                         ##   ##  ##       ##
+//                        ##     ## ######    ######
+//                        ######### ##             ##
+//                        ##     ## ##       ##    ##
+//                        ##     ## ########  ######
+///////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPMI_AES_KEY_BITS Type" (Part 2: Structures)
 #  if ALG_AES
 TPM_RC
@@ -3465,14 +2894,7 @@ TPMI_AES_KEY_BITS_Unmarshal(TPMI_AES_KEY_BITS* target, BYTE** buffer, INT32* siz
     }
     return result;
 }
-#    if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_AES_KEY_BITS_Marshal(TPMI_AES_KEY_BITS* source, BYTE** buffer, INT32* size)
-{
-    return TPM_KEY_BITS_Marshal((TPM_KEY_BITS*)source, buffer, size);
-}
-#    endif  // !USE_MARSHALING_DEFINES
-#  endif    // ALG_AES
+#  endif  // ALG_AES
 
 // Table "Definition of TPMI_SM4_KEY_BITS Type" (Part 2: Structures)
 #  if ALG_SM4
@@ -3496,14 +2918,7 @@ TPMI_SM4_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS* target, BYTE** buffer, INT32* siz
     }
     return result;
 }
-#    if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_SM4_KEY_BITS_Marshal(TPMI_SM4_KEY_BITS* source, BYTE** buffer, INT32* size)
-{
-    return TPM_KEY_BITS_Marshal((TPM_KEY_BITS*)source, buffer, size);
-}
-#    endif  // !USE_MARSHALING_DEFINES
-#  endif    // ALG_SM4
+#  endif  // ALG_SM4
 
 // Table "Definition of TPMI_CAMELLIA_KEY_BITS Type" (Part 2: Structures)
 #  if ALG_CAMELLIA
@@ -3534,15 +2949,7 @@ TPMI_CAMELLIA_KEY_BITS_Unmarshal(
     }
     return result;
 }
-#    if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_CAMELLIA_KEY_BITS_Marshal(
-    TPMI_CAMELLIA_KEY_BITS* source, BYTE** buffer, INT32* size)
-{
-    return TPM_KEY_BITS_Marshal((TPM_KEY_BITS*)source, buffer, size);
-}
-#    endif  // !USE_MARSHALING_DEFINES
-#  endif    // ALG_CAMELLIA
+#  endif  // ALG_CAMELLIA
 
 // Table "Definition of TPMU_SYM_KEY_BITS Union" (Part 2: Structures)
 TPM_RC
@@ -3960,6 +3367,15 @@ TPMS_SCHEME_HASH_Marshal(TPMS_SCHEME_HASH* source, BYTE** buffer, INT32* size)
     return result;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+///////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPMS_SCHEME_ECDAA Structure" (Part 2: Structures)
 #  if ALG_ECC
 TPM_RC
@@ -4011,29 +3427,6 @@ TPMI_ALG_KEYEDHASH_SCHEME_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_KEYEDHASH_SCHEME_Marshal(
-    TPMI_ALG_KEYEDHASH_SCHEME* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for HMAC_SIG_SCHEME" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_SCHEME_HMAC_Unmarshal(TPMS_SCHEME_HMAC* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SCHEME_HMAC_Marshal(TPMS_SCHEME_HMAC* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMS_SCHEME_XOR Structure" (Part 2: Structures)
 TPM_RC
 TPMS_SCHEME_XOR_Unmarshal(TPMS_SCHEME_XOR* target, BYTE** buffer, INT32* size)
@@ -4134,108 +3527,6 @@ TPMT_KEYEDHASH_SCHEME_Marshal(
                           (UINT32)source->scheme));
     return result;
 }
-
-// Table "Definition of Types for RSA Signature Schemes" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_SIG_SCHEME_RSASSA_Unmarshal(
-    TPMS_SIG_SCHEME_RSASSA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_RSASSA_Marshal(
-    TPMS_SIG_SCHEME_RSASSA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIG_SCHEME_RSAPSS_Unmarshal(
-    TPMS_SIG_SCHEME_RSAPSS* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_RSAPSS_Marshal(
-    TPMS_SIG_SCHEME_RSAPSS* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for ECC Signature Schemes" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_SIG_SCHEME_ECDSA_Unmarshal(
-    TPMS_SIG_SCHEME_ECDSA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_ECDSA_Marshal(
-    TPMS_SIG_SCHEME_ECDSA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIG_SCHEME_ECDAA_Unmarshal(
-    TPMS_SIG_SCHEME_ECDAA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_ECDAA_Unmarshal((TPMS_SCHEME_ECDAA*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_ECDAA_Marshal(
-    TPMS_SIG_SCHEME_ECDAA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_ECDAA_Marshal((TPMS_SCHEME_ECDAA*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIG_SCHEME_SM2_Unmarshal(TPMS_SIG_SCHEME_SM2* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_SM2_Marshal(TPMS_SIG_SCHEME_SM2* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIG_SCHEME_ECSCHNORR_Unmarshal(
-    TPMS_SIG_SCHEME_ECSCHNORR* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_ECSCHNORR_Marshal(
-    TPMS_SIG_SCHEME_ECSCHNORR* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIG_SCHEME_EDDSA_Unmarshal(
-    TPMS_SIG_SCHEME_EDDSA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_EDDSA_Marshal(
-    TPMS_SIG_SCHEME_EDDSA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIG_SCHEME_EDDSA_PH_Unmarshal(
-    TPMS_SIG_SCHEME_EDDSA_PH* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_SIG_SCHEME_EDDSA_PH_Marshal(
-    TPMS_SIG_SCHEME_EDDSA_PH* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
 
 // Table "Definition of TPMU_SIG_SCHEME Union" (Part 2: Structures)
 TPM_RC
@@ -4399,120 +3690,6 @@ TPMT_SIG_SCHEME_Marshal(TPMT_SIG_SCHEME* source, BYTE** buffer, INT32* size)
     return result;
 }
 
-// Table "Definition of Types for Encryption Schemes" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_ENC_SCHEME_RSAES_Unmarshal(
-    TPMS_ENC_SCHEME_RSAES* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_EMPTY_Unmarshal((TPMS_EMPTY*)target, buffer, size);
-}
-UINT16
-TPMS_ENC_SCHEME_RSAES_Marshal(
-    TPMS_ENC_SCHEME_RSAES* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_EMPTY_Marshal((TPMS_EMPTY*)source, buffer, size);
-}
-TPM_RC
-TPMS_ENC_SCHEME_OAEP_Unmarshal(
-    TPMS_ENC_SCHEME_OAEP* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_ENC_SCHEME_OAEP_Marshal(TPMS_ENC_SCHEME_OAEP* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for ECC Key Exchange" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_KEY_SCHEME_ECDH_Unmarshal(
-    TPMS_KEY_SCHEME_ECDH* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_KEY_SCHEME_ECDH_Marshal(TPMS_KEY_SCHEME_ECDH* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_KEY_SCHEME_SM2_Unmarshal(TPMS_KEY_SCHEME_SM2* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_KEY_SCHEME_SM2_Marshal(TPMS_KEY_SCHEME_SM2* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_KEY_SCHEME_ECMQV_Unmarshal(
-    TPMS_KEY_SCHEME_ECMQV* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_KEY_SCHEME_ECMQV_Marshal(
-    TPMS_KEY_SCHEME_ECMQV* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of Types for KDF Schemes" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_KDF_SCHEME_MGF1_Unmarshal(
-    TPMS_KDF_SCHEME_MGF1* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_KDF_SCHEME_MGF1_Marshal(TPMS_KDF_SCHEME_MGF1* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_KDF_SCHEME_KDF1_SP800_56A_Unmarshal(
-    TPMS_KDF_SCHEME_KDF1_SP800_56A* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_KDF_SCHEME_KDF1_SP800_56A_Marshal(
-    TPMS_KDF_SCHEME_KDF1_SP800_56A* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_KDF_SCHEME_KDF2_Unmarshal(
-    TPMS_KDF_SCHEME_KDF2* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_KDF_SCHEME_KDF2_Marshal(TPMS_KDF_SCHEME_KDF2* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-TPM_RC
-TPMS_KDF_SCHEME_KDF1_SP800_108_Unmarshal(
-    TPMS_KDF_SCHEME_KDF1_SP800_108* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Unmarshal((TPMS_SCHEME_HASH*)target, buffer, size);
-}
-UINT16
-TPMS_KDF_SCHEME_KDF1_SP800_108_Marshal(
-    TPMS_KDF_SCHEME_KDF1_SP800_108* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SCHEME_HASH_Marshal((TPMS_SCHEME_HASH*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMU_KDF_SCHEME Union" (Part 2: Structures)
 TPM_RC
 TPMU_KDF_SCHEME_Unmarshal(
@@ -4675,14 +3852,6 @@ TPMI_ALG_ASYM_SCHEME_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_ASYM_SCHEME_Marshal(TPMI_ALG_ASYM_SCHEME* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMU_ASYM_SCHEME Union" (Part 2: Structures)
 TPM_RC
 TPMU_ASYM_SCHEME_Unmarshal(
@@ -4845,7 +4014,17 @@ TPMU_ASYM_SCHEME_Marshal(
     return 0;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//                       ########   ######     ###
+//                       ##     ## ##    ##   ## ##
+//                       ##     ## ##        ##   ##
+//                       ########   ######  ##     ##
+//                       ##   ##         ## #########
+//                       ##    ##  ##    ## ##     ##
+//                       ##     ##  ######  ##     ##
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPMI_ALG_RSA_SCHEME Type" (Part 2: Structures)
+#  if ALG_RSA
 TPM_RC
 TPMI_ALG_RSA_SCHEME_Unmarshal(
     TPMI_ALG_RSA_SCHEME* target, BYTE** buffer, INT32* size, BOOL flag)
@@ -4856,18 +4035,18 @@ TPMI_ALG_RSA_SCHEME_Unmarshal(
     {
         switch(*target)
         {
-#  if ALG_RSASSA
+#    if ALG_RSASSA
             case TPM_ALG_RSASSA:
-#  endif  // ALG_RSASSA
-#  if ALG_RSAES
+#    endif  // ALG_RSASSA
+#    if ALG_RSAES
             case TPM_ALG_RSAES:
-#  endif  // ALG_RSAES
-#  if ALG_RSAPSS
+#    endif  // ALG_RSAES
+#    if ALG_RSAPSS
             case TPM_ALG_RSAPSS:
-#  endif  // ALG_RSAPSS
-#  if ALG_OAEP
+#    endif  // ALG_RSAPSS
+#    if ALG_OAEP
             case TPM_ALG_OAEP:
-#  endif  // ALG_OAEP
+#    endif  // ALG_OAEP
                 break;
             default:
                 if((*target != TPM_ALG_NULL) || !flag)
@@ -4877,14 +4056,6 @@ TPMI_ALG_RSA_SCHEME_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_RSA_SCHEME_Marshal(TPMI_ALG_RSA_SCHEME* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMT_RSA_SCHEME Structure" (Part 2: Structures)
 TPM_RC
 TPMT_RSA_SCHEME_Unmarshal(
@@ -4927,12 +4098,12 @@ TPMI_ALG_RSA_DECRYPT_Unmarshal(
     {
         switch(*target)
         {
-#  if ALG_RSAES
+#    if ALG_RSAES
             case TPM_ALG_RSAES:
-#  endif  // ALG_RSAES
-#  if ALG_OAEP
+#    endif  // ALG_RSAES
+#    if ALG_OAEP
             case TPM_ALG_OAEP:
-#  endif  // ALG_OAEP
+#    endif  // ALG_OAEP
                 break;
             default:
                 if((*target != TPM_ALG_NULL) || !flag)
@@ -4942,14 +4113,6 @@ TPMI_ALG_RSA_DECRYPT_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_RSA_DECRYPT_Marshal(TPMI_ALG_RSA_DECRYPT* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMT_RSA_DECRYPT Structure" (Part 2: Structures)
 TPM_RC
 TPMT_RSA_DECRYPT_Unmarshal(
@@ -5022,21 +4185,21 @@ TPMI_RSA_KEY_BITS_Unmarshal(TPMI_RSA_KEY_BITS* target, BYTE** buffer, INT32* siz
     {
         switch(*target)
         {
-#  if RSA_1024
+#    if RSA_1024
             case 1024:
-#  endif  // RSA_1024
-#  if RSA_16384
-            case 16384:
-#  endif  // RSA_16384
-#  if RSA_2048
+#    endif  // RSA_1024
+#    if RSA_2048
             case 2048:
-#  endif  // RSA_2048
-#  if RSA_3072
+#    endif  // RSA_2048
+#    if RSA_3072
             case 3072:
-#  endif  // RSA_3072
-#  if RSA_4096
+#    endif  // RSA_3072
+#    if RSA_4096
             case 4096:
-#  endif  // RSA_4096
+#    endif  // RSA_4096
+#    if RSA_16384
+            case 16384:
+#    endif  // RSA_16384
                 break;
             default:
                 result = TPM_RC_VALUE;
@@ -5045,14 +4208,6 @@ TPMI_RSA_KEY_BITS_Unmarshal(TPMI_RSA_KEY_BITS* target, BYTE** buffer, INT32* siz
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_RSA_KEY_BITS_Marshal(TPMI_RSA_KEY_BITS* source, BYTE** buffer, INT32* size)
-{
-    return TPM_KEY_BITS_Marshal((TPM_KEY_BITS*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPM2B_PRIVATE_KEY_RSA Structure" (Part 2: Structures)
 TPM_RC
 TPM2B_PRIVATE_KEY_RSA_Unmarshal(
@@ -5084,7 +4239,17 @@ TPM2B_PRIVATE_KEY_RSA_Marshal(
                                            (INT32)source->t.size));
     return result;
 }
+#  endif  // ALG_RSA
 
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPM2B_ECC_PARAMETER Structure" (Part 2: Structures)
 #  if ALG_ECC
 TPM_RC
@@ -5115,10 +4280,8 @@ TPM2B_ECC_PARAMETER_Marshal(TPM2B_ECC_PARAMETER* source, BYTE** buffer, INT32* s
                                            (INT32)source->t.size));
     return result;
 }
-#  endif  // ALG_ECC
 
 // Table "Definition of TPMS_ECC_POINT Structure" (Part 2: Structures)
-#  if ALG_ECC
 TPM_RC
 TPMS_ECC_POINT_Unmarshal(TPMS_ECC_POINT* target, BYTE** buffer, INT32* size)
 {
@@ -5142,10 +4305,8 @@ TPMS_ECC_POINT_Marshal(TPMS_ECC_POINT* source, BYTE** buffer, INT32* size)
                           (TPM2B_ECC_PARAMETER*)&(source->y), buffer, size));
     return result;
 }
-#  endif  // ALG_ECC
 
 // Table "Definition of TPM2B_ECC_POINT Structure" (Part 2: Structures)
-#  if ALG_ECC
 TPM_RC
 TPM2B_ECC_POINT_Unmarshal(TPM2B_ECC_POINT* target, BYTE** buffer, INT32* size)
 {
@@ -5183,7 +4344,6 @@ TPM2B_ECC_POINT_Marshal(TPM2B_ECC_POINT* source, BYTE** buffer, INT32* size)
         UINT16_TO_BYTE_ARRAY((result - 2), (*buffer - result));
     return result;
 }
-#  endif  // ALG_ECC
 
 // Table "Definition of TPMI_ALG_ECC_SCHEME Type" (Part 2: Structures)
 TPM_RC
@@ -5196,30 +4356,30 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(
     {
         switch(*target)
         {
-#  if ALG_ECDSA
+#    if ALG_ECDSA
             case TPM_ALG_ECDSA:
-#  endif  // ALG_ECDSA
-#  if ALG_ECDH
+#    endif  // ALG_ECDSA
+#    if ALG_ECDH
             case TPM_ALG_ECDH:
-#  endif  // ALG_ECDH
-#  if ALG_ECDAA
+#    endif  // ALG_ECDH
+#    if ALG_ECDAA
             case TPM_ALG_ECDAA:
-#  endif  // ALG_ECDAA
-#  if ALG_SM2
+#    endif  // ALG_ECDAA
+#    if ALG_SM2
             case TPM_ALG_SM2:
-#  endif  // ALG_SM2
-#  if ALG_ECSCHNORR
+#    endif  // ALG_SM2
+#    if ALG_ECSCHNORR
             case TPM_ALG_ECSCHNORR:
-#  endif  // ALG_ECSCHNORR
-#  if ALG_ECMQV
+#    endif  // ALG_ECSCHNORR
+#    if ALG_ECMQV
             case TPM_ALG_ECMQV:
-#  endif  // ALG_ECMQV
-#  if ALG_EDDSA
+#    endif  // ALG_ECMQV
+#    if ALG_EDDSA
             case TPM_ALG_EDDSA:
-#  endif  // ALG_EDDSA
-#  if ALG_EDDSA_PH
+#    endif  // ALG_EDDSA
+#    if ALG_EDDSA_PH
             case TPM_ALG_EDDSA_PH:
-#  endif  // ALG_EDDSA_PH
+#    endif  // ALG_EDDSA_PH
                 break;
             default:
                 if((*target != TPM_ALG_NULL) || !flag)
@@ -5229,14 +4389,6 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_ECC_SCHEME_Marshal(TPMI_ALG_ECC_SCHEME* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMI_ECC_CURVE Type" (Part 2: Structures)
 TPM_RC
 TPMI_ECC_CURVE_Unmarshal(
@@ -5248,45 +4400,45 @@ TPMI_ECC_CURVE_Unmarshal(
     {
         switch(*target)
         {
-#  if ECC_NIST_P192
+#    if ECC_NIST_P192
             case TPM_ECC_NIST_P192:
-#  endif  // ECC_NIST_P192
-#  if ECC_NIST_P224
+#    endif  // ECC_NIST_P192
+#    if ECC_NIST_P224
             case TPM_ECC_NIST_P224:
-#  endif  // ECC_NIST_P224
-#  if ECC_NIST_P256
+#    endif  // ECC_NIST_P224
+#    if ECC_NIST_P256
             case TPM_ECC_NIST_P256:
-#  endif  // ECC_NIST_P256
-#  if ECC_NIST_P384
+#    endif  // ECC_NIST_P256
+#    if ECC_NIST_P384
             case TPM_ECC_NIST_P384:
-#  endif  // ECC_NIST_P384
-#  if ECC_NIST_P521
+#    endif  // ECC_NIST_P384
+#    if ECC_NIST_P521
             case TPM_ECC_NIST_P521:
-#  endif  // ECC_NIST_P521
-#  if ECC_BN_P256
+#    endif  // ECC_NIST_P521
+#    if ECC_BN_P256
             case TPM_ECC_BN_P256:
-#  endif  // ECC_BN_P256
-#  if ECC_BN_P638
+#    endif  // ECC_BN_P256
+#    if ECC_BN_P638
             case TPM_ECC_BN_P638:
-#  endif  // ECC_BN_P638
-#  if ECC_SM2_P256
+#    endif  // ECC_BN_P638
+#    if ECC_SM2_P256
             case TPM_ECC_SM2_P256:
-#  endif  // ECC_SM2_P256
-#  if ECC_BP_P256_R1
+#    endif  // ECC_SM2_P256
+#    if ECC_BP_P256_R1
             case TPM_ECC_BP_P256_R1:
-#  endif  // ECC_BP_P256_R1
-#  if ECC_BP_P384_R1
+#    endif  // ECC_BP_P256_R1
+#    if ECC_BP_P384_R1
             case TPM_ECC_BP_P384_R1:
-#  endif  // ECC_BP_P384_R1
-#  if ECC_BP_P512_R1
+#    endif  // ECC_BP_P384_R1
+#    if ECC_BP_P512_R1
             case TPM_ECC_BP_P512_R1:
-#  endif  // ECC_BP_P512_R1
-#  if ECC_CURVE_25519
+#    endif  // ECC_BP_P512_R1
+#    if ECC_CURVE_25519
             case TPM_ECC_CURVE_25519:
-#  endif  // ECC_CURVE_25519
-#  if ECC_CURVE_448
+#    endif  // ECC_CURVE_25519
+#    if ECC_CURVE_448
             case TPM_ECC_CURVE_448:
-#  endif  // ECC_CURVE_448
+#    endif  // ECC_CURVE_448
                 break;
             default:
                 if((*target != TPM_ECC_NONE) || !flag)
@@ -5296,16 +4448,7 @@ TPMI_ECC_CURVE_Unmarshal(
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ECC_CURVE_Marshal(TPMI_ECC_CURVE* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ECC_CURVE_Marshal((TPM_ECC_CURVE*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMT_ECC_SCHEME Structure" (Part 2: Structures)
-#  if ALG_ECC
 TPM_RC
 TPMT_ECC_SCHEME_Unmarshal(
     TPMT_ECC_SCHEME* target, BYTE** buffer, INT32* size, BOOL flag)
@@ -5335,10 +4478,8 @@ TPMT_ECC_SCHEME_Marshal(TPMT_ECC_SCHEME* source, BYTE** buffer, INT32* size)
                                             (UINT32)source->scheme));
     return result;
 }
-#  endif  // ALG_ECC
 
 // Table "Definition of TPMS_ALGORITHM_DETAIL_ECC Structure" (Part 2: Structures)
-#  if ALG_ECC
 UINT16
 TPMS_ALGORITHM_DETAIL_ECC_Marshal(
     TPMS_ALGORITHM_DETAIL_ECC* source, BYTE** buffer, INT32* size)
@@ -5380,7 +4521,17 @@ TPMS_ALGORITHM_DETAIL_ECC_Marshal(
 }
 #  endif  // ALG_ECC
 
+////////////////////////////////////////////////////////////////////////////////
+//                       ########   ######     ###
+//                       ##     ## ##    ##   ## ##
+//                       ##     ## ##        ##   ##
+//                       ########   ######  ##     ##
+//                       ##   ##         ## #########
+//                       ##    ##  ##    ## ##     ##
+//                       ##     ##  ######  ##     ##
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPMS_SIGNATURE_RSA Structure" (Part 2: Structures)
+#  if ALG_RSA
 TPM_RC
 TPMS_SIGNATURE_RSA_Unmarshal(TPMS_SIGNATURE_RSA* target, BYTE** buffer, INT32* size)
 {
@@ -5404,35 +4555,17 @@ TPMS_SIGNATURE_RSA_Marshal(TPMS_SIGNATURE_RSA* source, BYTE** buffer, INT32* siz
                           (TPM2B_PUBLIC_KEY_RSA*)&(source->sig), buffer, size));
     return result;
 }
+#  endif  // ALG_RSA
 
-// Table "Definition of Types for Signature" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_SIGNATURE_RSASSA_Unmarshal(
-    TPMS_SIGNATURE_RSASSA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_RSA_Unmarshal((TPMS_SIGNATURE_RSA*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_RSASSA_Marshal(
-    TPMS_SIGNATURE_RSASSA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_RSA_Marshal((TPMS_SIGNATURE_RSA*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIGNATURE_RSAPSS_Unmarshal(
-    TPMS_SIGNATURE_RSAPSS* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_RSA_Unmarshal((TPMS_SIGNATURE_RSA*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_RSAPSS_Marshal(
-    TPMS_SIGNATURE_RSAPSS* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_RSA_Marshal((TPMS_SIGNATURE_RSA*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPMS_SIGNATURE_ECC Structure" (Part 2: Structures)
 #  if ALG_ECC
 TPM_RC
@@ -5465,77 +4598,6 @@ TPMS_SIGNATURE_ECC_Marshal(TPMS_SIGNATURE_ECC* source, BYTE** buffer, INT32* siz
     return result;
 }
 #  endif  // ALG_ECC
-
-// Table "Definition of Types for TPMS_SIGNATURE_ECC" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-TPM_RC
-TPMS_SIGNATURE_ECDSA_Unmarshal(
-    TPMS_SIGNATURE_ECDSA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Unmarshal((TPMS_SIGNATURE_ECC*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_ECDSA_Marshal(TPMS_SIGNATURE_ECDSA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Marshal((TPMS_SIGNATURE_ECC*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIGNATURE_ECDAA_Unmarshal(
-    TPMS_SIGNATURE_ECDAA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Unmarshal((TPMS_SIGNATURE_ECC*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_ECDAA_Marshal(TPMS_SIGNATURE_ECDAA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Marshal((TPMS_SIGNATURE_ECC*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIGNATURE_SM2_Unmarshal(TPMS_SIGNATURE_SM2* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Unmarshal((TPMS_SIGNATURE_ECC*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_SM2_Marshal(TPMS_SIGNATURE_SM2* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Marshal((TPMS_SIGNATURE_ECC*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIGNATURE_ECSCHNORR_Unmarshal(
-    TPMS_SIGNATURE_ECSCHNORR* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Unmarshal((TPMS_SIGNATURE_ECC*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_ECSCHNORR_Marshal(
-    TPMS_SIGNATURE_ECSCHNORR* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Marshal((TPMS_SIGNATURE_ECC*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIGNATURE_EDDSA_Unmarshal(
-    TPMS_SIGNATURE_EDDSA* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Unmarshal((TPMS_SIGNATURE_ECC*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_EDDSA_Marshal(TPMS_SIGNATURE_EDDSA* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Marshal((TPMS_SIGNATURE_ECC*)source, buffer, size);
-}
-TPM_RC
-TPMS_SIGNATURE_EDDSA_PH_Unmarshal(
-    TPMS_SIGNATURE_EDDSA_PH* target, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Unmarshal((TPMS_SIGNATURE_ECC*)target, buffer, size);
-}
-UINT16
-TPMS_SIGNATURE_EDDSA_PH_Marshal(
-    TPMS_SIGNATURE_EDDSA_PH* source, BYTE** buffer, INT32* size)
-{
-    return TPMS_SIGNATURE_ECC_Marshal((TPMS_SIGNATURE_ECC*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
 
 // Table "Definition of TPMU_SIGNATURE Union" (Part 2: Structures)
 TPM_RC
@@ -5827,14 +4889,6 @@ TPMI_ALG_PUBLIC_Unmarshal(TPMI_ALG_PUBLIC* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMI_ALG_PUBLIC_Marshal(TPMI_ALG_PUBLIC* source, BYTE** buffer, INT32* size)
-{
-    return TPM_ALG_ID_Marshal((TPM_ALG_ID*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMU_PUBLIC_ID Union" (Part 2: Structures)
 TPM_RC
 TPMU_PUBLIC_ID_Unmarshal(
@@ -5914,7 +4968,17 @@ TPMS_KEYEDHASH_PARMS_Marshal(TPMS_KEYEDHASH_PARMS* source, BYTE** buffer, INT32*
     return result;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//                       ########   ######     ###
+//                       ##     ## ##    ##   ## ##
+//                       ##     ## ##        ##   ##
+//                       ########   ######  ##     ##
+//                       ##   ##         ## #########
+//                       ##    ##  ##    ## ##     ##
+//                       ##     ##  ######  ##     ##
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPMS_RSA_PARMS Structure" (Part 2: Structures)
+#  if ALG_RSA
 TPM_RC
 TPMS_RSA_PARMS_Unmarshal(TPMS_RSA_PARMS* target, BYTE** buffer, INT32* size)
 {
@@ -5948,8 +5012,19 @@ TPMS_RSA_PARMS_Marshal(TPMS_RSA_PARMS* source, BYTE** buffer, INT32* size)
         (UINT16)(result + UINT32_Marshal((UINT32*)&(source->exponent), buffer, size));
     return result;
 }
+#  endif  // ALG_RSA
 
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+////////////////////////////////////////////////////////////////////////////////
 // Table "Definition of TPMS_ECC_PARMS Structure" (Part 2: Structures)
+#  if ALG_ECC
 TPM_RC
 TPMS_ECC_PARMS_Unmarshal(TPMS_ECC_PARMS* target, BYTE** buffer, INT32* size)
 {
@@ -5985,6 +5060,7 @@ TPMS_ECC_PARMS_Marshal(TPMS_ECC_PARMS* source, BYTE** buffer, INT32* size)
                           (TPMT_KDF_SCHEME*)&(source->kdf), buffer, size));
     return result;
 }
+#  endif  // ALG_ECC
 
 // Table "Definition of TPMU_PUBLIC_PARMS Union" (Part 2: Structures)
 TPM_RC
@@ -6470,14 +5546,6 @@ TPMA_NV_Unmarshal(TPMA_NV* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_NV_Marshal(TPMA_NV* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMA_NV_EXP Bits" (Part 2: Structures)
 TPM_RC
 TPMA_NV_EXP_Unmarshal(TPMA_NV_EXP* target, BYTE** buffer, INT32* size)
@@ -6492,14 +5560,6 @@ TPMA_NV_EXP_Unmarshal(TPMA_NV_EXP* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPMA_NV_EXP_Marshal(TPMA_NV_EXP* source, BYTE** buffer, INT32* size)
-{
-    return UINT64_Marshal((UINT64*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMS_NV_PUBLIC Structure" (Part 2: Structures)
 TPM_RC
 TPMS_NV_PUBLIC_Unmarshal(TPMS_NV_PUBLIC* target, BYTE** buffer, INT32* size)
@@ -6925,23 +5985,6 @@ TPM_AT_Unmarshal(TPM_AT* target, BYTE** buffer, INT32* size)
     }
     return result;
 }
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_AT_Marshal(TPM_AT* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
-// Table "Definition of TPM_AE Constants" (Part 2: Structures)
-#  if !USE_MARSHALING_DEFINES
-UINT16
-TPM_AE_Marshal(TPM_AE* source, BYTE** buffer, INT32* size)
-{
-    return UINT32_Marshal((UINT32*)source, buffer, size);
-}
-#  endif  // !USE_MARSHALING_DEFINES
-
 // Table "Definition of TPMS_AC_OUTPUT Structure" (Part 2: Structures)
 UINT16
 TPMS_AC_OUTPUT_Marshal(TPMS_AC_OUTPUT* source, BYTE** buffer, INT32* size)
@@ -6986,16 +6029,19 @@ BYTE_Array_Unmarshal(BYTE* target, BYTE** buffer, INT32* size, INT32 count)
 UINT16
 BYTE_Array_Marshal(BYTE* source, BYTE** buffer, INT32* size, INT32 count)
 {
-    if(buffer != 0)
+    // all TPM sizes are much less than UINT16 in size, but the marshalling
+    // code uses INT32 (signed) to track underflow in size.  Any attempt to
+    // marshal more than 0xFFFF is an obvious error.
+    pAssert_ZERO(count < INT16_MAX);
+    if(buffer != 0 && count < INT16_MAX)
     {
         if((size == 0) || ((*size -= count) >= 0))
         {
             memcpy(*buffer, source, count);
             *buffer += count;
         }
-        pAssert((size == 0) || (*size >= 0));
+        pAssert_ZERO((size == 0) || (*size >= 0));
     }
-    pAssert(count < INT16_MAX);
     return ((UINT16)count);
 }
 
@@ -7048,6 +6094,15 @@ TPM_CC_Array_Marshal(TPM_CC* source, BYTE** buffer, INT32* size, INT32 count)
     return result;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//                        ########  ######   ######
+//                        ##       ##    ## ##    ##
+//                        ##       ##       ##
+//                        ######   ##       ##
+//                        ##       ##       ##
+//                        ##       ##    ## ##    ##
+//                        ########  ######   ######
+////////////////////////////////////////////////////////////////////////////////
 // Array Marshal for TPM_ECC_CURVE
 #  if ALG_ECC
 UINT16
@@ -7276,4 +6331,34 @@ TPMT_HA_Array_Marshal(TPMT_HA* source, BYTE** buffer, INT32* size, INT32 count)
     }
     return result;
 }
-#endif  // !TABLE_DRIVEN_MARSHAL
+
+#  if SEC_CHANNEL_SUPPORT
+// Array Marshal for TPM2B_PUBLIC
+UINT16
+TPM2B_PUBLIC_Array_Marshal(
+    TPM2B_PUBLIC* source, BYTE** buffer, INT32* size, INT32 count)
+{
+    UINT16 result = 0;
+    INT32  i;
+    for(i = 0; i < count; i++)
+    {
+        result += TPM2B_PUBLIC_Marshal(&source[i], buffer, size);
+    }
+    return result;
+}
+
+// Array Marshal for TPMS_SPDM_SESSION_INFO
+UINT16
+TPMS_SPDM_SESSION_INFO_Array_Marshal(
+    TPMS_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size, INT32 count)
+{
+    UINT16 result = 0;
+    INT32  i;
+    for(i = 0; i < count; i++)
+    {
+        result += TPMS_SPDM_SESSION_INFO_Marshal(&source[i], buffer, size);
+    }
+    return result;
+}
+#  endif  // SEC_CHANNEL_SUPPORT
+#endif    // !TABLE_DRIVEN_MARSHAL

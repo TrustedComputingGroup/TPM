@@ -31,6 +31,11 @@ TPM2_NV_Write(NV_Write_In* in  // IN: input parameter list
 
     // Input Validation
 
+    // Common Read-Only mode check. May return TPM_RC_READ_ONLY
+    result = NvReadOnlyModeChecks(attributes);
+    if(result != TPM_RC_SUCCESS)
+        return result;
+
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
     result = NvWriteAccessChecks(in->authHandle, in->nvIndex, attributes);

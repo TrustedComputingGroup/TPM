@@ -1,19 +1,30 @@
-<!-- Copyright Microsoft Corporation. All Rights Reserved
-     Licensed subject to: https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE -->
-
 # TPM Reference Code - Math Library Design
 
-- [TPM Reference Code - Math Library Design](#tpm-reference-code---math-library-design)
-  - [See Also](#see-also)
+* [TPM Reference Code - Math Library Design](#tpm-reference-code---math-library-design)
+  * [See Also](#see-also)
+  * [Overview](#overview)
+  * [Math Library Code Layers](#math-library-code-layers)
+  * [Math Library Interface](#math-library-interface)
+  * [Function Naming](#function-naming)
+    * [Function Examples](#function-examples)
+* [Data Types](#data-types)
+  * [Reserved for future use](#reserved-for-future-use)
+  * [Requirements for Externally Defined Types](#requirements-for-externally-defined-types)
+  * [Stack Allocation/Type Macros](#stack-allocationtype-macros)
+  * [Type Initialization](#type-initialization)
+  * [`ExtMath` Number Typedefs](#extmath-number-typedefs)
+  * [Binary Number Formats](#binary-number-formats)
+  * [Side Channel Considerations](#side-channel-considerations)
+* [Function List](#function-list)
 
 ## See Also
 
-- [Introduction](Introduction.md)
-- [Library Architecture](Library.Architecture.md)
-- [Tpm BigNum Library](Tpm.BigNum.Library.md)
-- [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
-- [Tpm Math Library](Tpm.Math.Library.md)
-- [Tpm Platform API](Tpm.Platform.Api.md)
+* [Introduction](Introduction.md)
+* [Library Architecture](Library.Architecture.md)
+* [Tpm BigNum Library](Tpm.BigNum.Library.md)
+* [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
+* [Tpm Math Library](Tpm.Math.Library.md)
+* [Tpm Platform API](Tpm.Platform.Api.md)
 
 ## Overview
 
@@ -44,7 +55,8 @@ static libraries:
 | Tpm          | Core     | Crypto implementation provided by the Core TPM Library, typically operating on raw numbers.  e.g. TpmEcc_ValidateSignatureEcdsa |
 | Ext          | varies   | Math and ECC implementation provided by the External Math library(-ies)                                                         |
 
-Within the `Tpm` and `Ext` layer there are multiple _sublayers_.  The `Crypt` layer has no sublayer, but calls the `Tpm` or `Ext` layers directly.
+Within the `Tpm` and `Ext` layer there are multiple _sublayers_.  The `Crypt`
+layer has no sublayer, but calls the `Tpm` or `Ext` layers directly.
 
 | SubLayer | Meaning                                             |
 | :------- | :-------------------------------------------------- |
@@ -70,9 +82,9 @@ considered the relevant source of truth.
 
 The name of each Function will consist of several parts:
 
-- a prefix+sublayer combination, followed by
-- an underscore, followed by
-- function name
+* a prefix+sublayer combination, followed by
+* an underscore, followed by
+* function name
 
 ### Function Examples
 
@@ -88,10 +100,10 @@ The name of each Function will consist of several parts:
 The Core library contains a number of TPM specific types defined in Part 2 of
 the TPM specification, and used in Part 3, such as:
 
-- `TPM2B_DIGEST`
-- `TPM2B_PUBLIC_KEY_RSA`
-- `TPMU_ASYM_SCHEME`
-- etc.
+* `TPM2B_DIGEST`
+* `TPM2B_PUBLIC_KEY_RSA`
+* `TPMU_ASYM_SCHEME`
+* etc.
 
 A design goal for the interface between the `Core` library and `MATH_LIB`
 library is to minimize the number of TPM specific types that are used.
@@ -99,13 +111,11 @@ library is to minimize the number of TPM specific types that are used.
 The concrete data types used between the `Core` and the `Ext` layers
 fall into these categories:
 
-- standard types from `<stdint.h>`
-  - e.g. uint16_t
-- some simple typedefs and enum types from the TPM specification to avoid
-  duplication.
-  - e.g. NUMBYTES, TPM_ECC_CURVE
-- typedefs that are provided by the external library, _**according to the rules
-  below**_.
+* standard types from `<stdint.h>`
+  * e.g. uint16_t
+* some simple typedefs and enum types from the TPM specification to avoid duplication.
+  * e.g. NUMBYTES, TPM_ECC_CURVE
+* typedefs that are provided by the external library, _**according to the rules below**_.
 
 The `Core` library uses `const` correctly in the Math Interface and may use any
 `<stdint.h>` type.  At the time of writing this, the TPM library uses these
@@ -264,8 +274,8 @@ are the size of TPM_RADIX_BITS.  Operations on "word" values (such as
 The TPM communicates to the `ExtMath` Library using the native TPM format,
 Most-Significant-Byte (MSB) first.  The Core always refers to buffer sizes as a
 number of bytes and value sizes as a number of bits.  Bits within bytes have the
-usual memory numbering and significance; bit 0 is the least-significant (value
-1) bit in the least-significant byte, bit 7 is the most significant (value 128)
+usual memory numbering and significance; bit 0 is the least-significant (value 1)
+bit in the least-significant byte, bit 7 is the most significant (value 128)
 bit in the least significant byte, etc.
 
 Note that not all cryptographic numbers are convenient sizes - some are
@@ -307,7 +317,6 @@ It is expected that `ExtMath` functions operate in a side-channel safe way. That
 is to say the performance of these functions may be `O(1)` or
 `O(f(allocated_bits))` for some function `f`, but MUST NOT be
 `O(size_of_value)`, unless noted on the function description (in the headers).
-
 
 # Function List
 

@@ -5,7 +5,6 @@
 //
 //** Includes, Locals, Defines and Function Prototypes
 #include "simulatorPrivate.h"
-#include <string.h>
 
 // To access key cache control in TPM
 void RsaKeyCacheControl(int state);
@@ -58,6 +57,25 @@ static int CreateSocket(
                WSAGetLastError());
         return -1;
     }
+
+    // Attempt to set TCP_NODELAY (https://www.unixguide.net/network/socketfaq/2.16.shtml)
+    // This tells the TCP subsystem to transmit its data right away, rather than
+    // trying to batch it up. Given that the TPM TCP protocol sends a lot of
+    // small messages, this tends to improve performance rather dramatically.
+    // On an AMD 5945WX running Linux, without TCP_NODELAY, GetCapability takes
+    // ~47000 microseconds end-to-end (from the perspective of the TCP client),
+    // and with TCP_NODELAY, GetCapability takes around 100 microseconds instead.
+    int flag = 1;
+    int result = setsockopt(*ListenSocket,
+                            IPPROTO_TCP,
+                            TCP_NODELAY,
+                            (char *) &flag,
+                            sizeof(int));
+    if(result != 0)
+    {
+        printf("setsockopt returned 0x%x. Continuing anyway, but performance may be reduced.\n", result);
+    }
+
     // bind the listening socket to the specified port
     ZeroMemory(&MyAddress, sizeof(MyAddress));
     MyAddress.sin_port   = htons((unsigned short)PortNumber);

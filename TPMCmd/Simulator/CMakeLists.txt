@@ -1,8 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
 cmake_minimum_required(VERSION 3.16.3)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../tpm/cmake/tpm_support.cmake)
 
@@ -52,6 +47,7 @@ if(PROJECT_IS_TOP_LEVEL)
     find_package(Tpm_CryptoLib_Math_Ossl CONFIG REQUIRED PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH )
     find_package(Tpm_CryptoLib_TpmBigNum CONFIG REQUIRED PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH )
     find_package(Tpm_CoreLib CONFIG REQUIRED PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH )
+    find_package(TpmVendorCommands_Handlers CONFIG REQUIRED PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH )
 endif()
 
 # Link libraries
@@ -61,6 +57,12 @@ target_link_libraries(Simulator PUBLIC Tpm_PlatformLib::Tpm_PlatformLib)
 target_link_libraries(Simulator PUBLIC Tpm_Platform_Interface::Tpm_Platform_Interface)
 target_link_libraries(Simulator PUBLIC Tpm_CoreLib::Tpm_CoreLib)
 target_link_libraries(Simulator PUBLIC Tpm_CryptoLib_TpmBigNum::Tpm_CryptoLib_TpmBigNum)
+target_link_libraries(Simulator PUBLIC TpmVendorCommands_Handlers::TpmVendorCommands_Handlers)
+
+# currently need access to non-public NV_Read api
+target_include_directories(Simulator PRIVATE
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../tpm/include>"
+)
 
 set(WIN_LIBCRYPTO_PATH)
 
@@ -97,9 +99,27 @@ if(WIN32)
 
     install(FILES ${WIN_LIBCRYPTO_PATH}/${source_filename}
             DESTINATION ${CMAKE_INSTALL_BINDIR})
-
 else()
-    # not supported yet.
+    find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+    
+    set(link_targets
+        TpmConfiguration::TpmConfiguration
+        Tpm_Public_Headers::Tpm_Public_Headers
+        Tpm_CoreLib::Tpm_CoreLib
+        Tpm_PlatformLib::Tpm_PlatformLib
+        Tpm_Platform_Interface::Tpm_Platform_Interface
+    )
+    if(NOT APPLE)
+        # Apple ld supports cycles but not --start-group, so we need to not pass these flags.
+        # using LINK_GROUP would be better, but requires CMake 3.24
+        set(link_targets
+            -Wl,--start-group
+            ${link_targets}
+            -Wl,--end-group
+        )
+    endif ()
+
+    target_link_libraries(Simulator PUBLIC ${link_targets})
 endif ()
 
 # include Simulator

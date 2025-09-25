@@ -80,11 +80,11 @@ TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context b
     MemorySet(proof.b.buffer, 0, proof.b.size);
 
     // Copy part of the returned value as the key
-    pAssert(symKey->t.size <= sizeof(symKey->t.buffer));
+    pAssert_RC(symKey->t.size <= sizeof(symKey->t.buffer));
     MemoryCopy(symKey->t.buffer, kdfResult, symKey->t.size);
 
     // Copy the rest as the IV
-    pAssert(iv->t.size <= sizeof(iv->t.buffer));
+    pAssert_RC(iv->t.size <= sizeof(iv->t.buffer));
     MemoryCopy(iv->t.buffer, &kdfResult[symKey->t.size], iv->t.size);
 
     return TPM_RC_SUCCESS;
@@ -150,7 +150,7 @@ TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
         &hmacState.hashState, sizeof(gp.totalResetCount), gp.totalResetCount);
 
     // If this is a ST_CLEAR object, add the clear count
-    // so that this contest cannot be loaded after a TPM Restart
+    // so that this context cannot be loaded after a TPM Restart
     if(contextBlob->savedHandle == 0x80000002)
         CryptDigestUpdateInt(
             &hmacState.hashState, sizeof(gr.clearCount), gr.clearCount);

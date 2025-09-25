@@ -4,7 +4,7 @@
 #include "TpmMath_Debug_fp.h"
 #include "TpmMath_Util_fp.h"
 
-#if(ALG_ECC && (ALG_ECSCHNORR || ALG_ECDAA))
+#if (ALG_ECC && (ALG_ECSCHNORR || ALG_ECDAA))
 
 //*** TpmEcc_SchnorrCalculateS()
 // This contains the Schnorr signature (S) computation. It is used by both ECDAA and

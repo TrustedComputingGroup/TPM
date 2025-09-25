@@ -69,7 +69,7 @@ AcCapabilitiesGet(TPMI_RH_AC            component,      // IN: the component
     // Get the list of capabilities and their values associated with the AC
     TPML_AC_CAPABILITIES* capabilities;
 
-    pAssert(HandleGetType(component) == TPM_HT_AC);
+    VERIFY(HandleGetType(component) == TPM_HT_AC, FATAL_ERROR_ASSERT, NO);
     capabilities = AcToCapabilities(component);
 
     // Initialize output handle list

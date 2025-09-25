@@ -6,9 +6,9 @@
 #ifndef _PCRSTRUCT_H_
 #define _PCRSTRUCT_H_
 
-#include <public/BaseTypes.h>
-#include <public/TpmAlgorithmDefines.h>
-#include <public/TpmTypes.h>
+#include <tpm_public/BaseTypes.h>
+#include <tpm_public/TpmAlgorithmDefines.h>
+#include <tpm_public/TpmTypes.h>
 
 // a single PCR
 typedef struct

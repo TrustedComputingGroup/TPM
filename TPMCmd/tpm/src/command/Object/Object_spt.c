@@ -363,9 +363,8 @@ CreateChecks(OBJECT*           parentObject,
                && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt)
                && IS_ATTRIBUTE(attributes, TPMA_OBJECT, sensitiveDataOrigin))
                 result = TPM_RC_ATTRIBUTES;
-            // comment out the next line in order to prevent a fixedTPM derivation
-            // parent
-            //            break;
+            // fall through to prevent a fixedTPM derivation parent
+            // [[fallthrough]];
         case TPM_ALG_SYMCIPHER:
             // A restricted key symmetric key (SYMCIPHER and KEYEDHASH)
             // must have sensitiveDataOrigin SET unless it has fixedParent and
@@ -528,7 +527,7 @@ SchemeChecks(OBJECT*      parentObject,  // IN: parent (null if primary seed)
                 curveID     = publicArea->parameters.eccDetail.curveID;
                 curveScheme = CryptGetCurveSignScheme(curveID);
                 // The curveId must be valid or the unmarshaling is busted.
-                pAssert(curveScheme != NULL);
+                pAssert_RC(curveScheme != NULL);
 
                 // If the curveID requires a specific scheme, then the key must
                 // select the same scheme
@@ -733,7 +732,7 @@ PublicAttributesValidation(
 //*** FillInCreationData()
 // Fill in creation data for an object.
 //  Return Type: void
-void FillInCreationData(
+TPM_RC FillInCreationData(
     TPMI_DH_OBJECT       parentHandle,   // IN: handle of parent
     TPMI_ALG_HASH        nameHashAlg,    // IN: name hash algorithm
     TPML_PCR_SELECTION*  creationPCR,    // IN: PCR selection
@@ -749,8 +748,10 @@ void FillInCreationData(
     // Fill in TPMS_CREATION_DATA in outCreation
 
     // Compute PCR digest
-    PCRComputeCurrentDigest(
+    TPM_RC result = PCRComputeCurrentDigest(
         nameHashAlg, creationPCR, &outCreation->creationData.pcrDigest);
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Put back PCR selection list
     outCreation->creationData.pcrSelect = *creationPCR;
@@ -796,7 +797,7 @@ void FillInCreationData(
     CryptDigestUpdate(&hashState, outCreation->size, creationBuffer);
     CryptHashEnd2B(&hashState, &creationDigest->b);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** GetSeedForKDF()
@@ -1003,7 +1004,7 @@ UnwrapOuter(OBJECT* protector,   // IN: The object that provides
 // This function is used to marshal a sensitive area. Among other things, it
 // adjusts the size of the authValue to be no smaller than the digest of
 // 'nameAlg'
-// Returns the size of the marshaled area.
+// Returns the size of the marshaled area.  0 indicates an error
 static UINT16 MarshalSensitive(
     OBJECT*         parent,     // IN: the object parent (optional)
     BYTE*           buffer,     // OUT: receiving buffer
@@ -1019,11 +1020,16 @@ static UINT16 MarshalSensitive(
     MemoryPad2B(&sensitive->authValue.b, CryptHashGetDigestSize(nameAlg));
     buffer += 2;
 
+#if !ALG_RSA
+    NOT_REFERENCED(parent);
+#endif
+
     // Marshal the structure
 #if ALG_RSA
     // If the sensitive size is the special case for a prime in the type
     if((sensitive->sensitive.rsa.t.size & RSA_prime_flag) > 0)
     {
+        pAssert_ZERO(sensitive->sensitiveType == ALG_RSA_VALUE);
         UINT16 sizeSave = sensitive->sensitive.rsa.t.size;
         //
         // Turn off the flag that indicates that the sensitive->sensitive contains
@@ -1042,7 +1048,9 @@ static UINT16 MarshalSensitive(
     }
     else
 #endif
+    {
         retVal = TPMT_SENSITIVE_Marshal(sensitive, &buffer, NULL);
+    }
 
     // Marshal the size
     retVal = (UINT16)(retVal + UINT16_Marshal(&retVal, &sizeField, NULL));
@@ -1056,7 +1064,7 @@ static UINT16 MarshalSensitive(
 //  1. marshal TPM2B_SENSITIVE structure into the buffer of TPM2B_PRIVATE
 //  2. apply encryption to the sensitive area.
 //  3. apply outer integrity computation.
-void SensitiveToPrivate(
+TPM_RC SensitiveToPrivate(
     TPMT_SENSITIVE* sensitive,  // IN: sensitive structure
     TPM2B_NAME*     name,       // IN: the name of the object
     OBJECT*         parent,     // IN: The parent object
@@ -1073,7 +1081,7 @@ void SensitiveToPrivate(
     UINT16        integritySize;
     UINT16        ivSize;
     //
-    pAssert(name != NULL && name->t.size != 0);
+    pAssert_RC(name != NULL && name->t.size != 0);
 
     // Find the hash algorithm for integrity computation
     if(parent == NULL)
@@ -1103,11 +1111,13 @@ void SensitiveToPrivate(
 
     // Marshal the sensitive area including authValue size adjustments.
     dataSize = MarshalSensitive(parent, sensitiveData, sensitive, nameAlg);
+    pAssert_RC(dataSize != 0);  // 0 indicates a failure mode assertion
 
     //Produce outer wrap, including encryption and HMAC
     outPrivate->t.size = ProduceOuterWrap(
         parent, &name->b, hashAlg, NULL, TRUE, dataSize, outPrivate->t.buffer);
-    return;
+
+    return TPM_RC_SUCCESS;
 }
 
 //*** PrivateToSensitive()
@@ -1151,7 +1161,7 @@ PrivateToSensitive(TPM2B*     inPrivate,  // IN: input private structure
     UINT16        ivSize;
     //
     // Make sure that name is provided
-    pAssert(name != NULL && name->size != 0);
+    pAssert_RC(name != NULL && name->size != 0);
 
     // Find the hash algorithm for integrity computation
     // For Temporary Object (parent == NULL) use self name algorithm;
@@ -1200,7 +1210,7 @@ PrivateToSensitive(TPM2B*     inPrivate,  // IN: input private structure
 //  1. marshal TPMT_SENSITIVE structure into the buffer of TPM2B_PRIVATE
 //  2. apply inner wrap to the sensitive area if required
 //  3. apply outer wrap if required
-void SensitiveToDuplicate(
+TPM_RC SensitiveToDuplicate(
     TPMT_SENSITIVE* sensitive,    // IN: sensitive structure
     TPM2B*          name,         // IN: the name of the object
     OBJECT*         parent,       // IN: The new parent object
@@ -1230,10 +1240,10 @@ void SensitiveToDuplicate(
     BOOL          doOuterWrap = FALSE;
     //
     // Make sure that name is provided
-    pAssert(name != NULL && name->size != 0);
+    pAssert_RC(name != NULL && name->size != 0);
 
     // Make sure symDef and innerSymKey are not NULL
-    pAssert(symDef != NULL && innerSymKey != NULL);
+    pAssert_RC(symDef != NULL && innerSymKey != NULL);
 
     // Starting of sensitive data without wrappers
     sensitiveData = outPrivate->t.buffer;
@@ -1262,6 +1272,7 @@ void SensitiveToDuplicate(
     }
     // Marshal sensitive area
     dataSize = MarshalSensitive(NULL, sensitiveData, sensitive, nameAlg);
+    pAssert_RC(dataSize != 0);  // 0 indicates a failure mode assertion
 
     // Apply inner wrap for duplication blob.  It includes both integrity and
     // encryption
@@ -1286,18 +1297,18 @@ void SensitiveToDuplicate(
         else
         {
             // assume the input key size should matches the symmetric definition
-            pAssert(innerSymKey->t.size == (symDef->keyBits.sym + 7) / 8);
+            pAssert_RC(innerSymKey->t.size == (symDef->keyBits.sym + 7) / 8);
         }
 
         // Encrypt inner buffer in place
-        CryptSymmetricEncrypt(innerBuffer,
-                              symDef->algorithm,
-                              symDef->keyBits.sym,
-                              innerSymKey->t.buffer,
-                              NULL,
-                              TPM_ALG_CFB,
-                              dataSize,
-                              innerBuffer);
+        VERIFY_RC(CryptSymmetricEncrypt(innerBuffer,
+                                        symDef->algorithm,
+                                        symDef->keyBits.sym,
+                                        innerSymKey->t.buffer,
+                                        NULL,
+                                        TPM_ALG_CFB,
+                                        dataSize,
+                                        innerBuffer));
 
         // If the symmetric encryption key is imported, clear the buffer for
         // output
@@ -1314,7 +1325,7 @@ void SensitiveToDuplicate(
     // Data size for output
     outPrivate->t.size = dataSize;
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** DuplicateToSensitive()
@@ -1356,10 +1367,10 @@ DuplicateToSensitive(
     UINT16 dataSizeInput;
     //
     // Make sure that name is provided
-    pAssert(name != NULL && name->size != 0);
+    pAssert_RC(name != NULL && name->size != 0);
 
     // Make sure symDef and innerSymKey are not NULL
-    pAssert(symDef != NULL && innerSymKey != NULL);
+    pAssert_RC(symDef != NULL && innerSymKey != NULL);
 
     // Starting of sensitive data
     sensitiveData = inPrivate->buffer;
@@ -1383,7 +1394,7 @@ DuplicateToSensitive(
     if(symDef->algorithm != TPM_ALG_NULL)
     {
         // assume the input key size matches the symmetric definition
-        pAssert(innerSymKey->size == (symDef->keyBits.sym + 7) / 8);
+        pAssert_RC(innerSymKey->size == (symDef->keyBits.sym + 7) / 8);
 
         // Decrypt inner buffer in place
         CryptSymmetricDecrypt(sensitiveData,
@@ -1430,11 +1441,11 @@ DuplicateToSensitive(
 //  2. encrypt the private buffer, excluding the leading integrity HMAC area
 //  3. compute integrity HMAC and append to the beginning of the buffer.
 //  4. Set the total size of TPM2B_ID_OBJECT buffer
-void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
-                        TPM2B*           name,        // IN: the name of the object
-                        TPM2B*           seed,        // IN: an external seed.
-                        OBJECT*          protector,   // IN: the protector
-                        TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
+TPM_RC SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
+                          TPM2B*           name,        // IN: the name of the object
+                          TPM2B*           seed,        // IN: an external seed.
+                          OBJECT*          protector,   // IN: the protector
+                          TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
 )
 {
     BYTE*         buffer;         // Auxiliary buffer pointer
@@ -1442,7 +1453,7 @@ void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
     TPMI_ALG_HASH outerHash;      // The hash algorithm for outer wrap
     UINT16        dataSize;       // data blob size
                                   //
-    pAssert(secret != NULL && outIDObject != NULL);
+    pAssert_RC(secret != NULL && outIDObject != NULL);
 
     // use protector's name algorithm as outer hash ????
     outerHash = protector->publicArea.nameAlg;
@@ -1457,7 +1468,7 @@ void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
     // Apply outer wrap
     outIDObject->t.size = ProduceOuterWrap(
         protector, name, outerHash, seed, FALSE, dataSize, outIDObject->t.credential);
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** CredentialToSecret()

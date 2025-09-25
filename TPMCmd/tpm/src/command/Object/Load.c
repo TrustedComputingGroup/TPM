@@ -50,7 +50,7 @@ TPM2_Load(Load_In*  in,  // IN: input parameter list
         return TPM_RCS_SIZE + RC_Load_inPrivate;
 
     parentObject = HandleToObject(in->parentHandle);
-    pAssert(parentObject != NULL);
+    pAssert_RC(parentObject != NULL);
     // Is the object that is being used as the parent actually a parent.
     if(!ObjectIsParent(parentObject))
         return TPM_RCS_TYPE + RC_Load_parentHandle;

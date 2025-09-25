@@ -21,6 +21,7 @@ TPM2_PolicyPassword(PolicyPassword_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Update policy hash
     // policyDigestnew = hash(policyDigestold || TPM_CC_PolicyAuthValue)

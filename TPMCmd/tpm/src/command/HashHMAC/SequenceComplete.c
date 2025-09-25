@@ -18,6 +18,7 @@ TPM2_SequenceComplete(SequenceComplete_In*  in,  // IN: input parameter list
     // Input validation
     // Get hash object pointer
     hashObject = (HASH_OBJECT*)HandleToObject(in->sequenceHandle);
+    pAssert_RC(hashObject != NULL);
 
     // input handle must be a hash or HMAC sequence object.
     if(hashObject->attributes.hashSeq == CLEAR

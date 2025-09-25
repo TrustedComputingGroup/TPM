@@ -42,6 +42,8 @@ TPM2_Duplicate(Duplicate_In*  in,  // IN: input parameter list
 
     // Get duplicate object pointer
     object = HandleToObject(in->objectHandle);
+    pAssert_RC(object != NULL);
+
     // Get new parent
     newParent = HandleToObject(in->newParentHandle);
 
@@ -111,18 +113,18 @@ TPM2_Duplicate(Duplicate_In*  in,  // IN: input parameter list
     // Note: If there is no encryption key, one will be provided by
     // SensitiveToDuplicate(). This is why the assignment of encryptionKeyIn to
     // encryptionKeyOut will work properly and is not conditional.
-    SensitiveToDuplicate(&sensitive,
-                         &object->name.b,
-                         newParent,
-                         object->publicArea.nameAlg,
-                         &data.b,
-                         &in->symmetricAlg,
-                         &in->encryptionKeyIn,
-                         &out->duplicate);
+    result                = SensitiveToDuplicate(&sensitive,
+                                  &object->name.b,
+                                  newParent,
+                                  object->publicArea.nameAlg,
+                                  &data.b,
+                                  &in->symmetricAlg,
+                                  &in->encryptionKeyIn,
+                                  &out->duplicate);
 
     out->encryptionKeyOut = in->encryptionKeyIn;
 
-    return TPM_RC_SUCCESS;
+    return result;
 }
 
 #endif  // CC_Duplicate

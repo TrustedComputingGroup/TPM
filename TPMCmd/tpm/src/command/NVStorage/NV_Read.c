@@ -1,5 +1,6 @@
 #include "Tpm.h"
 #include "NV_Read_fp.h"
+#include <platform_interface/prototypes/platform_virtual_nv_fp.h>
 
 #if CC_NV_Read  // Conditional expansion of this file
 
@@ -25,6 +26,12 @@ TPM2_NV_Read(NV_Read_In*  in,  // IN: input parameter list
              NV_Read_Out* out  // OUT: output parameter list
 )
 {
+    // Handle special cases for EK cert and EKICA cert.
+    if(_plat__IsNvVirtualIndex(in->nvIndex))
+    {
+        return _plat__NvVirtual_Read(in, out);
+    }
+
     NV_REF    locator;
     NV_INDEX* nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     TPM_RC    result;

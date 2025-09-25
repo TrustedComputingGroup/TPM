@@ -1,7 +1,7 @@
 #include "Tpm.h"
 
 // This function is called to process a _TPM_Hash_End indication.
-LIB_EXPORT void _TPM_Hash_End(void)
+LIB_EXPORT BOOL _TPM_Hash_End(void)
 {
     UINT32       i;
     TPM2B_DIGEST digest;
@@ -12,10 +12,16 @@ LIB_EXPORT void _TPM_Hash_End(void)
     // been called, _TPM_Hash_End was previously called, or some other command
     // was executed and the sequence was aborted.
     if(g_DRTMHandle == TPM_RH_UNASSIGNED)
-        return;
+    {
+        // do not enter failure mode because this is an ordering issue that
+        // can be triggered by a BIOS issue, not an internal failure.
+        return FALSE;
+    }
 
     // Get DRTM sequence object
     hashObject = (HASH_OBJECT*)HandleToObject(g_DRTMHandle);
+    pAssert_BOOL(hashObject != NULL);
+    pAssert_BOOL(hashObject->attributes.eventSeq);
 
     // Is this _TPM_Hash_End after Startup or before
     if(TPMIsStarted())
@@ -54,10 +60,9 @@ LIB_EXPORT void _TPM_Hash_End(void)
         }
     }
 
-    // Flush sequence object.
-    FlushObject(g_DRTMHandle);
-
-    g_DRTMHandle = TPM_RH_UNASSIGNED;
-
-    return;
+    // ensure g_DRTMHandle is cleared
+    // and Flush sequence object
+    TPMI_DH_OBJECT oldHandle = g_DRTMHandle;
+    g_DRTMHandle             = TPM_RH_UNASSIGNED;
+    return FlushObject(oldHandle);
 }

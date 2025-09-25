@@ -22,6 +22,7 @@ TPM2_PolicyCommandCode(PolicyCommandCode_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     if(session->commandCode != 0 && session->commandCode != in->code)
         return TPM_RCS_VALUE + RC_PolicyCommandCode_code;

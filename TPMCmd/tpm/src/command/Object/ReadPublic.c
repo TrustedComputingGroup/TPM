@@ -21,6 +21,10 @@ TPM2_ReadPublic(ReadPublic_In*  in,  // IN: input parameter list
     if(ObjectIsSequence(object))
         return TPM_RC_SEQUENCE;
 
+    // deliberately after ObjectIsSequence in case ObjectInSequence decides a
+    // null object is a non-fatal error
+    pAssert_RC(object != NULL);
+
     // Command Output
     out->outPublic.publicArea = object->publicArea;
     out->name                 = object->name;

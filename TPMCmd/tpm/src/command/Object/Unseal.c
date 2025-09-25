@@ -16,6 +16,7 @@ TPM2_Unseal(Unseal_In* in, Unseal_Out* out)
     // Input Validation
     // Get pointer to loaded object
     object = HandleToObject(in->itemHandle);
+    pAssert_RC(object != NULL);
 
     // Input handle must be a data object
     if(object->publicArea.type != TPM_ALG_KEYEDHASH)

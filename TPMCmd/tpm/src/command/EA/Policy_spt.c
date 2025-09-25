@@ -60,7 +60,7 @@ PolicyParameterChecks(SESSION*      session,
 //      objectName to it. This will also update the cpHash if it is present.
 //
 //  Return Type: void
-void PolicyContextUpdate(
+TPM_RC PolicyContextUpdate(
     TPM_CC        commandCode,    // IN: command code
     TPM2B_NAME*   name,           // IN: name of entity
     TPM2B_NONCE*  ref,            // IN: the reference data
@@ -75,8 +75,8 @@ void PolicyContextUpdate(
     CryptHashStart(&hashState, session->authHashAlg);
 
     // policyDigest size should always be the digest size of session hash algorithm.
-    pAssert(session->u2.policyDigest.t.size
-            == CryptHashGetDigestSize(session->authHashAlg));
+    pAssert_RC(session->u2.policyDigest.t.size
+               == CryptHashGetDigestSize(session->authHashAlg));
 
     // add old digest
     CryptDigestUpdate2B(&hashState, &session->u2.policyDigest.b);
@@ -125,7 +125,8 @@ void PolicyContextUpdate(
         if(session->timeout == 0 || session->timeout > policyTimeout)
             session->timeout = policyTimeout;
     }
-    return;
+    VERIFY_NOT_FAILED();
+    return TPM_RC_SUCCESS;
 }
 //*** ComputeAuthTimeout()
 // This function is used to determine what the authorization timeout value for

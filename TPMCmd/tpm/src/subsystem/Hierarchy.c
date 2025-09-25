@@ -41,7 +41,7 @@ void HierarchyPreInstall_Init(void)
     gp.EPSeed.t.size = sizeof(gp.EPSeed.t.buffer);
     gp.SPSeed.t.size = sizeof(gp.SPSeed.t.buffer);
     gp.PPSeed.t.size = sizeof(gp.PPSeed.t.buffer);
-#if(defined USE_PLATFORM_EPS) && (USE_PLATFORM_EPS != NO)
+#if (defined USE_PLATFORM_EPS) && (USE_PLATFORM_EPS != NO)
     _plat__GetEPS(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
 #else
     CryptRandomGenerate(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
@@ -110,6 +110,11 @@ BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
 
         // enable the storage and endorsement hierarchies and the platformNV
         gc.shEnable = gc.ehEnable = gc.phEnableNV = TRUE;
+
+#if CC_ReadOnlyControl
+        // clear read-only mode
+        gc.readOnly = FALSE;
+#endif
     }
 
     // nullProof and nullSeed are updated at every TPM_RESET

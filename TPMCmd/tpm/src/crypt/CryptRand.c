@@ -107,43 +107,42 @@ static void DfStart(PDF_STATE dfState, uint32_t inputLength)
 {
     BYTE       init[8];
     int        i;
-    UINT32     drbgSeedSize = sizeof(DRBG_SEED);
+    UINT32     drbgSeedSize               = sizeof(DRBG_SEED);
 
-    const BYTE dfKey[DRBG_KEY_SIZE_BYTES] =
-    { 0x00,
-      0x01,
-      0x02,
-      0x03,
-      0x04,
-      0x05,
-      0x06,
-      0x07,
-      0x08,
-      0x09,
-      0x0a,
-      0x0b,
-      0x0c,
-      0x0d,
-      0x0e,
-      0x0f
+    const BYTE dfKey[DRBG_KEY_SIZE_BYTES] = {0x00,
+                                             0x01,
+                                             0x02,
+                                             0x03,
+                                             0x04,
+                                             0x05,
+                                             0x06,
+                                             0x07,
+                                             0x08,
+                                             0x09,
+                                             0x0a,
+                                             0x0b,
+                                             0x0c,
+                                             0x0d,
+                                             0x0e,
+                                             0x0f
 #if DRBG_KEY_SIZE_BYTES > 16
-      ,
-      0x10,
-      0x11,
-      0x12,
-      0x13,
-      0x14,
-      0x15,
-      0x16,
-      0x17,
-      0x18,
-      0x19,
-      0x1a,
-      0x1b,
-      0x1c,
-      0x1d,
-      0x1e,
-      0x1f
+                                             ,
+                                             0x10,
+                                             0x11,
+                                             0x12,
+                                             0x13,
+                                             0x14,
+                                             0x15,
+                                             0x16,
+                                             0x17,
+                                             0x18,
+                                             0x19,
+                                             0x1a,
+                                             0x1b,
+                                             0x1c,
+                                             0x1d,
+                                             0x1e,
+                                             0x1f
 #endif
     };
     memset(dfState, 0, sizeof(DF_STATE));
@@ -178,7 +177,8 @@ static void DfUpdate(PDF_STATE dfState, int size, const BYTE* data)
         data += toFill;
         // increase the buffer contents count by the amount copied
         dfState->contents += toFill;
-        pAssert(dfState->contents <= DRBG_IV_SIZE_BYTES);
+        // error will eventually get handled
+        pAssert_VOID_OK(dfState->contents <= DRBG_IV_SIZE_BYTES);
         // If we have a full buffer, do a computation pass.
         if(dfState->contents == DRBG_IV_SIZE_BYTES)
             DfCompute(dfState);
@@ -252,7 +252,7 @@ BOOL DRBG_GetEntropy(UINT32 requiredEntropy,  // IN: requested number of bytes o
         {
             // In self-test, the caller should be asking for exactly the seed
             // size of entropy.
-            pAssert(requiredEntropy == sizeof(DRBG_NistTestVector_Entropy));
+            pAssert_BOOL(requiredEntropy == sizeof(DRBG_NistTestVector_Entropy));
             memcpy(entropy,
                    DRBG_NistTestVector_Entropy,
                    sizeof(DRBG_NistTestVector_Entropy));
@@ -380,7 +380,7 @@ static BOOL DRBG_Update(
     DRBG_IV*          iv   = pDRBG_IV(&drbgState->seed);
     DRBG_KEY_SCHEDULE localKeySchedule;
     //
-    pAssert(drbgState->magic == DRBG_MAGIC);
+    pAssert_BOOL(drbgState->magic == DRBG_MAGIC);
 
     // If an key schedule was not provided, make one
     if(keySchedule == NULL)
@@ -420,7 +420,7 @@ BOOL DRBG_Reseed(DRBG_STATE* drbgState,        // IN: the state to update
 {
     DRBG_SEED seed;
 
-    pAssert((drbgState != NULL) && (drbgState->magic == DRBG_MAGIC));
+    pAssert_BOOL((drbgState != NULL) && (drbgState->magic == DRBG_MAGIC));
 
     if(providedEntropy == NULL)
     {
@@ -457,7 +457,7 @@ BOOL DRBG_SelfTest(void)
     BYTE*      p;
     DRBG_STATE testState;
     //
-    pAssert(!IsSelfTest());
+    pAssert_BOOL(!IsSelfTest());  // no recursion
 
     SetSelfTest();
     SetDrbgTested();
@@ -538,7 +538,7 @@ LIB_EXPORT TPM_RC CryptRandomStir(UINT16 additionalDataSize, BYTE* additionalDat
                 &tmpBuf,
                 DfBuffer(&dfResult, additionalDataSize, additionalData));
     drbgDefault.reseedCounter = 1;
-
+    VERIFY_NOT_FAILED();
     return TPM_RC_SUCCESS;
 
 #else
@@ -661,7 +661,7 @@ LIB_EXPORT TPM_RC DRBG_InstantiateSeeded(
     // Used the derivation function output as the "entropy" input. This is not
     // how it is described in SP800-90A but this is the equivalent function
     DRBG_Reseed(((DRBG_STATE*)drbgState), DfEnd(&dfState), NULL);
-
+    VERIFY_NOT_FAILED();
     return TPM_RC_SUCCESS;
 }
 
@@ -868,7 +868,8 @@ LIB_EXPORT BOOL DRBG_Instantiate(
     DRBG_SEED seed;
     DRBG_SEED dfResult;
     //
-    pAssert((pSize == 0) || (pSize <= sizeof(seed)) || (personalization != NULL));
+    pAssert_BOOL(
+        (pSize == 0) || (pSize <= sizeof(seed)) || (personalization != NULL));
     // If the DRBG has not been tested, test when doing an instantiation. Since
     // Instantiation is called during self test, make sure we don't get stuck in a
     // loop.
@@ -886,7 +887,7 @@ LIB_EXPORT BOOL DRBG_Instantiate(
     // reseeding does. So, do a reduction on the personalization value (if any)
     // and do a reseed.
     DRBG_Reseed(drbgState, &seed, DfBuffer(&dfResult, pSize, personalization));
-
+    VERIFY(!_plat__InFailureMode(), FATAL_ERROR_ENTROPY, TPM_RC_FAILURE);
     return TRUE;
 }
 

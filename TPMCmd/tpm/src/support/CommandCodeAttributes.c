@@ -24,30 +24,6 @@ typedef UINT16 ATTRIBUTE_TYPE;
 
 //** Command Attribute Functions
 
-//*** NextImplementedIndex()
-// This function is used when the lists are not compressed. In a compressed list,
-// only the implemented commands are present. So, a search might find a value
-// but that value may not be implemented. This function checks to see if the input
-// commandIndex points to an implemented command and, if not, it searches upwards
-// until it finds one. When the list is compressed, this function gets defined
-// as a no-op.
-//  Return Type: COMMAND_INDEX
-//  UNIMPLEMENTED_COMMAND_INDEX     command is not implemented
-//  other                           index of the command
-#if !COMPRESSED_LISTS
-static COMMAND_INDEX NextImplementedIndex(COMMAND_INDEX commandIndex)
-{
-    for(; commandIndex < COMMAND_COUNT; commandIndex++)
-    {
-        if(s_commandAttributes[commandIndex] & IS_IMPLEMENTED)
-            return commandIndex;
-    }
-    return UNIMPLEMENTED_COMMAND_INDEX;
-}
-#else
-#  define NextImplementedIndex(x) (x)
-#endif
-
 //*** GetClosestCommandIndex()
 // This function returns the command index for the command with a value that is
 // equal to or greater than the input value
@@ -74,7 +50,7 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
     // vendor-command, then it is out of range.
     if(vendor)
     {
-#if VENDOR_COMMAND_ARRAY_SIZE > 0
+#if VENDOR_COMMAND_ARRAY_COUNT > 0
         COMMAND_INDEX commandIndex;
         COMMAND_INDEX min;
         COMMAND_INDEX max;
@@ -140,7 +116,7 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
        < searchIndex)
     {
         // requested index is out of the range to the top
-#if VENDOR_COMMAND_ARRAY_SIZE > 0
+#if VENDOR_COMMAND_ARRAY_COUNT > 0
         // If there are vendor commands, then the first vendor command
         // is the next value greater than the commandCode.
         // NOTE: we got here if the starting index did not have the V bit but we
@@ -158,24 +134,23 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
     // the lowest value (needs to be an index for an implemented command
     if(GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex) >= searchIndex)
     {
-        return NextImplementedIndex(0);
+        return 0;
     }
     else
     {
-#if COMPRESSED_LISTS
         COMMAND_INDEX commandIndex = UNIMPLEMENTED_COMMAND_INDEX;
         COMMAND_INDEX min          = 0;
         COMMAND_INDEX max          = LIBRARY_COMMAND_ARRAY_SIZE - 1;
         int           diff         = 1;
-#  if LIBRARY_COMMAND_ARRAY_SIZE == 0
-#    error "Something is terribly wrong"
-#  endif
+
         // The s_ccAttr array contains an extra entry at the end (a zero value).
         // Don't count this as an array entry. This means that max should start
         // out pointing to the last valid entry in the array which is - 2
-        pAssert(
-            max
-            == (sizeof(s_ccAttr) / sizeof(TPMA_CC) - VENDOR_COMMAND_ARRAY_SIZE - 2));
+        VERIFY(max
+                   == (sizeof(s_ccAttr) / sizeof(TPMA_CC) - VENDOR_COMMAND_ARRAY_COUNT
+                       - 2),
+               FATAL_ERROR_ASSERT,
+               UNIMPLEMENTED_COMMAND_INDEX);
         while(min <= max)
         {
             commandIndex = (min + max + 1) / 2;
@@ -199,13 +174,6 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
         // Note: this will necessarily be in range because of the earlier check
         // that the index was within range.
         return commandIndex + 1;
-#else
-        // The list is not compressed so offset into the array by the command
-        // code value of the first entry in the list. Then go find the first
-        // implemented command.
-        return NextImplementedIndex(
-            searchIndex - (COMMAND_INDEX)s_ccAttr[0].commandIndex);
-#endif
     }
 }
 
@@ -223,21 +191,6 @@ CommandCodeToCommandIndex(TPM_CC commandCode  // IN: the command code to look up
     COMMAND_INDEX searchIndex = (COMMAND_INDEX)commandCode;
     BOOL          vendor      = (commandCode & CC_VEND) != 0;
     COMMAND_INDEX commandIndex;
-#if !COMPRESSED_LISTS
-    if(!vendor)
-    {
-        commandIndex = searchIndex - (COMMAND_INDEX)s_ccAttr[0].commandIndex;
-        // Check for out of range or unimplemented.
-        // Note, since a COMMAND_INDEX is unsigned, if searchIndex is smaller than
-        // the lowest value of command, it will become a 'negative' number making
-        // it look like a large unsigned number, this will cause it to fail
-        // the unsigned check below.
-        if(commandIndex >= LIBRARY_COMMAND_ARRAY_SIZE
-           || (s_commandAttributes[commandIndex] & IS_IMPLEMENTED) == 0)
-            return UNIMPLEMENTED_COMMAND_INDEX;
-        return commandIndex;
-    }
-#endif
     // Need this code for any vendor code lookup or for compressed lists
     commandIndex = GetClosestCommandIndex(commandCode);
 
@@ -264,10 +217,7 @@ GetNextCommandIndex(COMMAND_INDEX commandIndex  // IN: the starting index
 {
     while(++commandIndex < COMMAND_COUNT)
     {
-#if !COMPRESSED_LISTS
-        if(s_commandAttributes[commandIndex] & IS_IMPLEMENTED)
-#endif
-            return commandIndex;
+        return commandIndex;
     }
     return UNIMPLEMENTED_COMMAND_INDEX;
 }
@@ -370,6 +320,13 @@ BOOL IsHandleInResponse(COMMAND_INDEX commandIndex)
     return ((s_commandAttributes[commandIndex] & R_HANDLE) != 0);
 }
 
+//*** IsDisallowedInReadOnlyMode()
+// This function determines if a command is disallowed when operating in Read-Only mode
+BOOL IsDisallowedInReadOnlyMode(COMMAND_INDEX commandIndex)
+{
+    return ((s_commandAttributes[commandIndex] & RO_DISALLOW) != 0);
+}
+
 //*** IsWriteOperation()
 // Checks to see if an operation will write to an NV Index and is subject to being
 // blocked by read-lock
@@ -462,11 +419,6 @@ CommandCapGetCCList(TPM_CC commandCode,  // IN: start command code
         commandIndex != UNIMPLEMENTED_COMMAND_INDEX;
         commandIndex = GetNextCommandIndex(commandIndex))
     {
-#if !COMPRESSED_LISTS
-        // this check isn't needed for compressed lists.
-        if(!(s_commandAttributes[commandIndex] & IS_IMPLEMENTED))
-            continue;
-#endif
         if(commandList->count < count)
         {
             // If the list is not full, add the attributes for this command.

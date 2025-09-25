@@ -1,8 +1,10 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
+function(print_generator_info)
+    message(STATUS "GENERATOR: ${CMAKE_GENERATOR}")
+    message(STATUS "Compiler ID is: [${CMAKE_C_COMPILER_ID}].")
+    if (CMAKE_GENERATOR STREQUAL "MSVC")
+        message(STATUS "- VS: ${CMAKE_VS_PLATFORM_NAME}; VS_TOOLSET: ${CMAKE_VS_PLATFORM_TOOLSET}")
+    endif()
+endfunction()
 
 function(print_project_info)
     message("${PROJECT_NAME} start")

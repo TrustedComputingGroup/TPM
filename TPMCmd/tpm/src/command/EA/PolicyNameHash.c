@@ -22,6 +22,7 @@ TPM2_PolicyNameHash(PolicyNameHash_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // A valid nameHash must have the same size as session hash digest
     // Since the authHashAlg for a session cannot be TPM_ALG_NULL, the digest size

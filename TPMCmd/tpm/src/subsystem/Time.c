@@ -73,7 +73,7 @@ void TimeClockUpdate(UINT64 newTime  // IN: New time value in mS.
     // Check to see if the update will cause a need for an nvClock update
     if((newTime | CLOCK_UPDATE_MASK) > (go.clock | CLOCK_UPDATE_MASK))
     {
-        pAssert(g_NvStatus == TPM_RC_SUCCESS);
+        pAssert_VOID_OK(g_NvStatus == TPM_RC_SUCCESS);
 
         // Going to update the NV time state so SET the safe flag
         go.clockSafe = YES;

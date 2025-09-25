@@ -112,7 +112,7 @@ LIB_EXPORT TPM_RC CryptSymmetricEncrypt(
     BYTE*                   iv;
     BYTE                    defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
     //
-    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    pAssert_RC(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
         return TPM_RC_SUCCESS;
 
@@ -273,7 +273,7 @@ LIB_EXPORT TPM_RC CryptSymmetricDecrypt(
     encrypt = NULL;
     decrypt = NULL;
 
-    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    pAssert_RC(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
         return TPM_RC_SUCCESS;
 

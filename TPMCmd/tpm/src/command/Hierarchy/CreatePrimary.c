@@ -108,12 +108,14 @@ TPM2_CreatePrimary(CreatePrimary_In*  in,  // IN: input parameter list
     out->name                 = newObject->name;
 
     // Fill in creation data
-    FillInCreationData(in->primaryHandle,
-                       publicArea->nameAlg,
-                       &in->creationPCR,
-                       &in->outsideInfo,
-                       &out->creationData,
-                       &out->creationHash);
+    result = FillInCreationData(in->primaryHandle,
+                                publicArea->nameAlg,
+                                &in->creationPCR,
+                                &in->outsideInfo,
+                                &out->creationData,
+                                &out->creationHash);
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Compute creation ticket
     result = TicketComputeCreation(EntityGetHierarchy(in->primaryHandle),
@@ -125,6 +127,7 @@ TPM2_CreatePrimary(CreatePrimary_In*  in,  // IN: input parameter list
 
     // Set the remaining attributes for a loaded object
     ObjectSetLoadedAttributes(newObject, in->primaryHandle);
+
     return result;
 }
 

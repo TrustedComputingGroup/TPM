@@ -94,6 +94,33 @@ NvWriteAccessChecks(
     return TPM_RC_SUCCESS;
 }
 
+//*** NvReadOnlyModeChecks()
+// Common routine to verify whether an NV command is allowed on an index
+// with the given 'attributes' while the TPM is in Read-Only mode
+// Used by TPM2_NV_Write, TPM2_NV_Extend, TPM2_SetBits, TPM2_NV_WriteLock
+// and TPM2_NV_ReadLock
+//  Return Type: TPM_RC
+//      TPM_RC_SUCCESS     The command is allowed
+//      TPM_RC_READ_ONLY   The TPM is in Read-Only mode and the command is
+//                         not allowed
+//
+TPM_RC
+NvReadOnlyModeChecks(TPMA_NV attributes  // IN: the attributes of the index to check
+)
+{
+
+#if CC_ReadOnlyControl
+    // When in Read-Only mode only allow the commands listed above on an
+    // index with the ORDERLY and CLEAR_STCLEAR attributes set
+    if(gc.readOnly
+       && !(IS_ATTRIBUTE(attributes, TPMA_NV, ORDERLY)
+            && IS_ATTRIBUTE(attributes, TPMA_NV, CLEAR_STCLEAR)))
+        return TPM_RC_READ_ONLY;
+#endif  // CC_ReadOnlyControl
+
+    return TPM_RC_SUCCESS;
+}
+
 //*** NvClearOrderly()
 // This function is used to cause gp.orderlyState to be cleared to the
 // non-orderly state.
@@ -106,6 +133,28 @@ NvClearOrderly(void)
     return TPM_RC_SUCCESS;
 }
 
+//*** GetIndexAttributesByHandle()
+// Function to return the TPMA_NV attributes of an index given a handle
+// On success 'attributes' is set to receive the result
+//   Return Type: BOOL
+//      TRUE(1)   'index' is found
+//      FALSE(0)  'index' is not found or not an NV index handle
+static BOOL GetIndexAttributesByHandle(TPM_HANDLE index,      // IN:  index handle
+                                       TPMA_NV*   attributes  // OUT: index attributes
+)
+{
+    if(HandleGetType(index) == TPM_HT_NV_INDEX)
+    {
+        NV_INDEX* nvIndex = NvGetIndexInfo(index, NULL);
+        if(nvIndex != NULL)
+        {
+            *attributes = nvIndex->publicArea.attributes;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 //*** NvIsPinPassIndex()
 // Function to check to see if an NV index is a PIN Pass Index
 //  Return Type: BOOL
@@ -114,13 +163,23 @@ NvClearOrderly(void)
 BOOL NvIsPinPassIndex(TPM_HANDLE index  // IN: Handle to check
 )
 {
-    if(HandleGetType(index) == TPM_HT_NV_INDEX)
-    {
-        NV_INDEX* nvIndex = NvGetIndexInfo(index, NULL);
+    TPMA_NV attributes;
+    return GetIndexAttributesByHandle(index, &attributes)
+           && IsNvPinPassIndex(attributes);
+}
 
-        return IsNvPinPassIndex(nvIndex->publicArea.attributes);
-    }
-    return FALSE;
+//*** NvIsPinCountedIndex()
+// Function to check to see if an NV index is either a PIN Pass
+// or a PIN FAIL Index
+//  Return Type: BOOL
+//      TRUE(1)         is pin pass or pin fail
+//      FALSE(0)        is neither pin pass nor pin fail
+BOOL NvIsPinCountedIndex(TPM_HANDLE index  // IN: Handle to check
+)
+{
+    TPMA_NV attributes;
+    return GetIndexAttributesByHandle(index, &attributes)
+           && (IsNvPinPassIndex(attributes) || IsNvPinFailIndex(attributes));
 }
 
 //*** NvGetIndexName()

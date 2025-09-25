@@ -114,14 +114,14 @@ static BOOL InitializeKeyCache(TPMT_PUBLIC*    publicArea,
         FILE*       cacheFile;
         const char* fn = CACHE_FILE_NAME;
 
-#    if defined     _MSC_VER
+#    if defined _MSC_VER
         if(fopen_s(&cacheFile, fn, "w+b") != 0)
 #    else
         cacheFile = fopen(fn, "w+b");
         if(NULL == cacheFile)
 #    endif
         {
-            printf("Can't open %s for write.\n", fn);
+            TPM_DEBUG_PRINTF("Can't open %s for write.\n", fn);
         }
         else
         {
@@ -129,7 +129,7 @@ static BOOL InitializeKeyCache(TPMT_PUBLIC*    publicArea,
             if(fwrite(s_rsaKeyCache, 1, sizeof(s_rsaKeyCache), cacheFile)
                != sizeof(s_rsaKeyCache))
             {
-                printf("Error writing cache to %s.", fn);
+                TPM_DEBUG_PRINTF("Error writing cache to %s.", fn);
             }
         }
         if(cacheFile)
@@ -155,7 +155,7 @@ static BOOL KeyCacheLoaded(TPMT_PUBLIC*    publicArea,
     {
         FILE*       cacheFile;
         const char* fn = CACHE_FILE_NAME;
-#    if defined     _MSC_VER && 1
+#    if defined _MSC_VER && 1
         if(fopen_s(&cacheFile, fn, "r+b") == 0)
 #    else
         cacheFile = fopen(fn, "r+b");

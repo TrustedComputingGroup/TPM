@@ -25,7 +25,8 @@ TPM2_GetSessionAuditDigest(
     GetSessionAuditDigest_Out* out  // OUT: output parameter list
 )
 {
-    SESSION*    session = SessionGet(in->sessionHandle);
+    SESSION* session = SessionGet(in->sessionHandle);
+    pAssert_RC(session);
     TPMS_ATTEST auditInfo;
     OBJECT*     signObject = HandleToObject(in->signHandle);
     // Input Validation

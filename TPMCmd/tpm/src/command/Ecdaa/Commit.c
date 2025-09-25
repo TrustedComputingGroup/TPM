@@ -37,7 +37,8 @@ TPM2_Commit(Commit_In*  in,  // IN: input parameter list
     // Input Validation
 
     eccKey = HandleToObject(in->signHandle);
-    parms  = &eccKey->publicArea.parameters.eccDetail;
+    pAssert_RC(eccKey != NULL);
+    parms = &eccKey->publicArea.parameters.eccDetail;
 
     // Input key must be an ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)

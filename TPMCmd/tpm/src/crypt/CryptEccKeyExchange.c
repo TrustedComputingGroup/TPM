@@ -30,7 +30,7 @@ static BOOL avf1(Crypt_Int* bnX,  // IN/OUT: the reduced value
     int f = (ExtMath_SizeInBits(bnN) + 1) / 2;
     // x' = 2^f + (x mod 2^f)
     ExtMath_MaskBits(bnX, f);  // This is mod 2*2^f but it doesn't matter because
-        // the next operation will SET the extra bit anyway
+    // the next operation will SET the extra bit anyway
     if(!ExtMath_SetBit(bnX, f))
     {
         FAIL(FATAL_ERROR_CRYPTO);
@@ -72,7 +72,7 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
     // Parameter checks
     if(E == NULL)
         ERROR_EXIT(TPM_RC_VALUE);
-    pAssert(
+    pAssert_RC(
         outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL && dsA != NULL);
     // Process:
     //  1. implicitsigA = (de,A + avf(Qe,A)ds,A ) mod n.
@@ -157,7 +157,7 @@ static TPM_RC C_2_2_ECDH(TPMS_ECC_POINT* outZs,  // OUT: Zs
     // Parameter checks
     if(E == NULL)
         ERROR_EXIT(TPM_RC_CURVE);
-    pAssert(
+    pAssert_RC(
         outZs != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 
     // Do the point multiply for the Zs value ([dsA]QsB)
@@ -192,7 +192,7 @@ LIB_EXPORT TPM_RC CryptEcc2PhaseKeyExchange(
     TPMS_ECC_POINT*      QeB       // IN: ephemeral public party B key
 )
 {
-    pAssert(
+    pAssert_RC(
         outZ1 != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 
     // Initialize the output points so that they are empty until one of the
@@ -298,7 +298,8 @@ LIB_EXPORT TPM_RC SM2KeyExchange(
     // Parameter checks
     if(E == NULL)
         ERROR_EXIT(TPM_RC_CURVE);
-    pAssert(outZ != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
+    pAssert_RC(
+        outZ != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 
     // Compute the value for w
     w = ComputeWForSM2(curveId);

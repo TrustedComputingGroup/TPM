@@ -37,7 +37,9 @@ TPM2_EncryptDecrypt(EncryptDecrypt_In*  in,  // IN: input parameter list
     TPMA_OBJECT attributes;
 
     // Input Validation
-    symKey     = HandleToObject(in->keyHandle);
+    symKey = HandleToObject(in->keyHandle);
+    pAssert_RC(symKey != NULL);
+
     mode       = symKey->publicArea.parameters.symDetail.sym.mode.sym;
     attributes = symKey->publicArea.objectAttributes;
 

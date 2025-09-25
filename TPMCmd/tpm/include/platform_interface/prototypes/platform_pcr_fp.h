@@ -4,8 +4,8 @@
 #ifndef _PLATFORM_PCR_FP_H_
 #define _PLATFORM_PCR_FP_H_
 
-#include <public/BaseTypes.h>
-#include <public/TpmTypes.h>
+#include <tpm_public/BaseTypes.h>
+#include <tpm_public/TpmTypes.h>
 #include <platform_interface/pcrstruct.h>
 
 // return the number of PCRs the platform recognizes for GetPcrInitializationAttributes.

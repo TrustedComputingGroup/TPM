@@ -1,11 +1,4 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
-# WARNING: CMAKE SUPPORT IS EXPERIMENTAL
-#
-##########################################################
+###################################################################################
 # Summary
 ##########################################################
 # Top-level CMakeLists file for building a TPM Application via CMake
@@ -64,8 +57,8 @@ endif()
 if (NOT EXISTS "${TPM_CMAKE_CORE_FOLDER}/cryptolibs/common")
     message(FATAL_ERROR "${TPM_CMAKE_CORE_FOLDER}/cryptolibs/common does not exist" )
 endif()
-if (NOT EXISTS "${TPM_CMAKE_CORE_FOLDER}/include/public")
-    message(FATAL_ERROR "${TPM_CMAKE_CORE_FOLDER}/include/public does not exist" )
+if (NOT EXISTS "${TPM_CMAKE_CORE_FOLDER}/include/tpm_public")
+    message(FATAL_ERROR "${TPM_CMAKE_CORE_FOLDER}/include/tpm_public does not exist" )
 endif()
 if (NOT EXISTS "${TPM_CMAKE_CORE_FOLDER}/include/private")
     message(FATAL_ERROR "${TPM_CMAKE_CORE_FOLDER}/include/private does not exist" )
@@ -192,7 +185,7 @@ target_compile_options(TpmConfiguration INTERFACE
 ###################################################################################
 # DO NOT MODIFY
 # this project builds the Tpm_Public_Headers Library
-add_subdirectory(tpm/include/public)
+add_subdirectory(tpm/include/tpm_public)
 # this project builds the Tpm_CryptoLib_Common Library
 add_subdirectory(tpm/cryptolibs/common)
 ##########################################################

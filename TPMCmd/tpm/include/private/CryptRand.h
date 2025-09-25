@@ -27,10 +27,11 @@
 #define DRBG_ENCRYPT(keySchedule, in, out) \
     TpmCryptEncryptAES(SWIZZLE(keySchedule, in, out))
 
-#if((DRBG_KEY_SIZE_BITS % RADIX_BITS) != 0) || ((DRBG_IV_SIZE_BITS % RADIX_BITS) != 0)
+#if ((DRBG_KEY_SIZE_BITS % RADIX_BITS) != 0) \
+    || ((DRBG_IV_SIZE_BITS % RADIX_BITS) != 0)
 #  error "Key size and IV for DRBG must be even multiples of the radix"
 #endif
-#if(DRBG_KEY_SIZE_BITS % DRBG_IV_SIZE_BITS) != 0
+#if (DRBG_KEY_SIZE_BITS % DRBG_IV_SIZE_BITS) != 0
 #  error "Key size for DRBG must be even multiple of the cypher block size"
 #endif
 

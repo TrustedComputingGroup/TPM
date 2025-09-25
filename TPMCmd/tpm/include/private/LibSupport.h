@@ -4,7 +4,7 @@
 #ifndef _LIB_SUPPORT_H_
 #define _LIB_SUPPORT_H_
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
-#include <public/tpm_radix.h>
+#include <tpm_public/tpm_radix.h>
 
 // Include the options for hashing and symmetric. Defer the load of the math package
 // Until the bignum parameters are defined.

@@ -410,7 +410,7 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
     ones = PrimeSieve(candidate, fieldSize, field);
 
     // PrimeSieve shouldn't fail, but does call functions that may.
-    if(!g_inFailureMode)
+    if(! _plat__InFailureMode())
     {
         pAssert(ones > 0 && ones < (fieldSize * 8));
         for(; ones > 0; ones--)
@@ -439,7 +439,7 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
         // Ran out of bits and couldn't find a prime in this field
         INSTRUMENT_INC(noPrimeFields[PrimeIndex]);
     }
-    return (g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_NO_RESULT);
+    return ( _plat__InFailureMode() ? TPM_RC_FAILURE : TPM_RC_NO_RESULT);
 }
 
 #  if RSA_INSTRUMENT

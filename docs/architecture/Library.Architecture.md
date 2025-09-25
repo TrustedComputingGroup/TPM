@@ -1,27 +1,23 @@
-<!-- Copyright Microsoft Corporation. All Rights Reserved
-     Licensed subject to: https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE -->
-
 # TPM Reference Code - High Level Architecture
 
-- [TPM Reference Code - High Level Architecture](#tpm-reference-code---high-level-architecture)
-  - [See Also](#see-also)
-  - [TPM code architecture and layering](#tpm-code-architecture-and-layering)
-    - [Protocol Layer](#protocol-layer)
-      - [Protocol Examples](#protocol-examples)
-    - [Core Library](#core-library)
-    - [Crypto Libraries](#crypto-libraries)
-    - [Platform Library](#platform-library)
-  - [Architecture Diagram](#architecture-diagram)
+* [TPM Reference Code - High Level Architecture](#tpm-reference-code---high-level-architecture)
+  * [See Also](#see-also)
+  * [TPM code architecture and layering](#tpm-code-architecture-and-layering)
+    * [Protocol Layer](#protocol-layer)
+      * [Protocol Examples](#protocol-examples)
+    * [Core Library](#core-library)
+    * [Crypto Libraries](#crypto-libraries)
+    * [Platform Library](#platform-library)
+  * [Architecture Diagram](#architecture-diagram)
 
 ## See Also
 
-- [Introduction](Introduction.md)
-- [Library Architecture](Library.Architecture.md)
-- [Tpm BigNum Library](Tpm.BigNum.Library.md)
-- [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
-- [Tpm Math Library](Tpm.Math.Library.md)
-- [Tpm Platform API](Tpm.Platform.Api.md)
-
+* [Introduction](Introduction.md)
+* [Library Architecture](Library.Architecture.md)
+* [Tpm BigNum Library](Tpm.BigNum.Library.md)
+* [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
+* [Tpm Math Library](Tpm.Math.Library.md)
+* [Tpm Platform API](Tpm.Platform.Api.md)
 
 ## TPM code architecture and layering
 
@@ -30,11 +26,11 @@ Reference Library. From the perspective of an outside caller into the TPM, the
 layers are:
 
 <!-- no toc -->
-- [Protocol Layer](#protocol-layer)
-  - [Protocol Examples](#protocol-examples)
-- [Core Library](#core-library)
-- [Crypto Libraries](#crypto-libraries)
-- [Platform Library](#platform-library)
+* [Protocol Layer](#protocol-layer)
+  * [Protocol Examples](#protocol-examples)
+* [Core Library](#core-library)
+* [Crypto Libraries](#crypto-libraries)
+* [Platform Library](#platform-library)
 
 ### Protocol Layer
 
@@ -42,7 +38,7 @@ The outermost, external layer.  This can implement any of the signaling
 protocols described in various platform specs, or be entirely custom. Some
 examples of the protocol layer are implementations of the Serial Peripheral
 Interface (SPI) interconnect and Command Response Buffer definition from
-[[8]](Introduction.md#references).  Other platform-specific TPM specifications
+[[7]](Introduction.md#references).  Other platform-specific TPM specifications
 such as mobile or automotive scenarios will define this layer.
 
 All code in this repository relating to the Protocol Layer is _INFORMATIVE_.
@@ -53,6 +49,7 @@ via other `Platform` API functions as defined in the [Platform
 Layer](#platform-library) headers.
 
 #### Protocol Examples
+
 In this repository, the `TPMCmd/Simulator` folder provides a `Protocol Layer`
 designed for test and development.  The Samples folder demonstrates other
 possible implementations of the Protocol Layer.  The Samples folder has been

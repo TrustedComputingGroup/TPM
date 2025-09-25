@@ -1,23 +1,19 @@
-<!-- Copyright Microsoft Corporation. All Rights Reserved
-     Licensed subject to: https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE -->
-
 # TPM Reference Code - TpmBigNum Library Design
 
-- [TPM Reference Code - TpmBigNum Library Design](#tpm-reference-code---tpmbignum-library-design)
-  - [See Also](#see-also)
-  - [Background](#background)
-  - [Design](#design)
-  - [Specifying the sub-libraries](#specifying-the-sub-libraries)
+* [TPM Reference Code - TpmBigNum Library Design](#tpm-reference-code---tpmbignum-library-design)
+  * [See Also](#see-also)
+  * [Background](#background)
+  * [Design](#design)
+  * [Specifying the sub-libraries](#specifying-the-sub-libraries)
 
 ## See Also
 
-- [Introduction](Introduction.md)
-- [Library Architecture](Library.Architecture.md)
-- [Tpm BigNum Library](Tpm.BigNum.Library.md)
-- [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
-- [Tpm Math Library](Tpm.Math.Library.md)
-- [Tpm Platform API](Tpm.Platform.Api.md)
-
+* [Introduction](Introduction.md)
+* [Library Architecture](Library.Architecture.md)
+* [Tpm BigNum Library](Tpm.BigNum.Library.md)
+* [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
+* [Tpm Math Library](Tpm.Math.Library.md)
+* [Tpm Platform API](Tpm.Platform.Api.md)
 
 ## Background
 

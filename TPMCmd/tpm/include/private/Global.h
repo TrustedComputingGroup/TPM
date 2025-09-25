@@ -29,9 +29,9 @@ _REDUCE_WARNING_LEVEL_(2)
 #  include <stddef.h>
 _NORMAL_WARNING_LEVEL_
 
-#  include "GpMacros.h"
-#  include "Capabilities.h"
-#  include "TpmTypes.h"  // requires GpMacros & Capabilities
+#  include "tpm_public/GpMacros.h"
+#  include "tpm_public/Capabilities.h"
+#  include "tpm_public/TpmTypes.h"  // requires GpMacros & Capabilities
 #  include "CommandAttributes.h"
 #  include "CryptTest.h"
 
@@ -47,7 +47,7 @@ _NORMAL_WARNING_LEVEL_
 #  include "CryptRsa.h"
 #  include "CryptTest.h"
 #  include "NV.h"
-#  include "ACT.h"
+#  include "tpm_public/ACT.h"
 
 //** Defines and Types
 
@@ -284,6 +284,19 @@ typedef struct SESSION_ATTRIBUTES
     // SET if TPMA_NV_WRITTEN is required to be SET. Used when 'checkNvWritten'
     // is SET
     unsigned nvWrittenState : 1;
+#  if SEC_CHANNEL_SUPPORT
+    // SET if the presence of a secure channel needs to be checked when the policy
+    // is used for authorization.
+    unsigned checkSecureChannel : 1;
+    // SET if the requester secure channel key needs to be checked when the policy
+    // is used for authorization. This attribute is only SET if checkSecureChannel
+    // is SET.
+    unsigned checkReqKey : 1;
+    // SET if the TPM secure channel key needs to be checked when the policy
+    // is used for authorization. This attribute is only SET if checkSecureChannel
+    // is SET.
+    unsigned checkTpmKey : 1;
+#  endif  // SEC_CHANNEL_SUPPORT
 } SESSION_ATTRIBUTES;
 
 //*** IsCpHashUnionOccupied()
@@ -342,6 +355,9 @@ typedef struct SESSION
         TPM2B_DIGEST policyDigest;  // policyHash
     } u2;                           // audit log and policyHash may
                                     // share space to save memory
+#  if SEC_CHANNEL_SUPPORT
+    TPM2B_DIGEST scKeyNameHash;  // the required secure channel key name hash
+#  endif                         // SEC_CHANNEL_SUPPORT
 } SESSION;
 
 #  define EXPIRES_ON_RESET   INT32_MIN
@@ -716,7 +732,7 @@ typedef struct
 // This implementation only supports a single group of PCR controlled by
 // policy. If more are required, then this structure would be changed to
 // an array.
-#  if defined  NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
+#  if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     PCR_POLICY pcrPolicies;
 #  endif
 
@@ -907,12 +923,14 @@ typedef struct state_clear_data
     // The set of PCR to be saved on Shutdown(STATE)
     PCR_SAVE pcrSave;  // default reset is 0...0
 
+#  if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     // This structure hold the authorization values for those PCR that have an
     // update authorization.
     // This implementation only supports a single group of PCR controlled by
     // authorization. If more are required, then this structure would be changed to
     // an array.
     PCR_AUTHVALUE pcrAuthValues;
+#  endif
 
 //*****************************************************************************
 //           ACT
@@ -923,6 +941,14 @@ typedef struct state_clear_data
 #  if STATE_CLEAR_DATA_PADDING != 0
     BYTE reserved[STATE_CLEAR_DATA_PADDING];
 #  endif
+
+#  if CC_ReadOnlyControl
+    //*****************************************************************************
+    //           Read-Only Control
+    //*****************************************************************************
+    BOOL readOnly;  // default reset is CLEAR
+#  endif
+
 } STATE_CLEAR_DATA;
 
 EXTERN STATE_CLEAR_DATA gc;
@@ -963,19 +989,17 @@ typedef struct state_reset_data
     // the TPM will return TPM_RC_RANGE and the TPM will only accept Shutdown(CLEAR).
     UINT32 clearCount;  // The default reset value is 0.
 
-    UINT64 objectContextID;  // This is the context ID for a saved
-                             //  object context. The default reset
-                             //  value is 0.
-    CONTEXT_SLOT contextArray[MAX_ACTIVE_SESSIONS];  // This array contains
-        // contains the values used to track
-        // the version numbers of saved
-        // contexts (see
-        // Session.c in for details). The
-        // default reset value is {0}.
+    // This is the context ID for a saved object context. The default reset
+    //  value is 0.
+    UINT64 objectContextID;
 
-    CONTEXT_COUNTER contextCounter;  // This is the value from which the
-                                     // 'contextID' is derived. The
-                                     // default reset value is {0}.
+    // This array contains the values used to track the version numbers of saved
+    // contexts (see Session.c in for details). The default reset value is {0}.
+    CONTEXT_SLOT contextArray[MAX_ACTIVE_SESSIONS];
+
+    // This is the value from which the 'contextID' is derived. The default
+    // reset value is {0}.
+    CONTEXT_COUNTER contextCounter;
 
     //*****************************************************************************
     //           Command Audit
@@ -1324,28 +1348,6 @@ EXTERN UINT32 s_actionIoAllocation;   // number of UIN64 allocated for the
 #  endif                              // IO_BUFFER_C
 
 //*****************************************************************************
-//*** From TPMFail.c
-//*****************************************************************************
-// This value holds the address of the string containing the name of the function
-// in which the failure occurred. This address value is not useful for anything
-// other than helping the vendor to know in which file the failure  occurred.
-EXTERN BOOL g_inFailureMode;  // Indicates that the TPM is in failure mode
-#  if ALLOW_FORCE_FAILURE_MODE
-EXTERN BOOL g_forceFailureMode;  // flag to force failure mode during test
-#  endif
-
-#  if FAIL_TRACE
-// The name of the function that triggered failure mode.
-EXTERN const char* s_failFunctionName;
-#  endif  // FAIL_TRACE
-// A numeric indicator of the function that triggered failure mode.
-EXTERN UINT32 s_failFunction;
-// The line in the file at which the error was signaled.
-EXTERN UINT32 s_failLine;
-// the reason for the failure.
-EXTERN UINT32 s_failCode;
-
-//*****************************************************************************
 //*** From ACT_spt.c
 //*****************************************************************************
 // This value is used to indicate if an ACT has been updated since the last
@@ -1364,4 +1366,7 @@ EXTERN UINT16 s_ActUpdated;
 extern const TPMA_CC            s_ccAttr[];
 extern const COMMAND_ATTRIBUTES s_commandAttributes[];
 
+// TRUE if _TPM_Init() ran to completion.
+// checked by execute command
+EXTERN BOOL g_initCompleted;
 #endif  // GLOBAL_H

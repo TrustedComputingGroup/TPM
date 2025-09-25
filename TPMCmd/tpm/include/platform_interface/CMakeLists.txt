@@ -1,8 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
 project(Tpm_Platform_Interface VERSION 1.0)
 print_project_info()
 add_library(Tpm_Platform_Interface INTERFACE)
@@ -34,6 +29,9 @@ install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/ExecCommand_fp.h
         ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/Manufacture_fp.h
         ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/platform_pcr_fp.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/platform_init_fp.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/platform_failure_mode_fp.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/platform_virtual_nv_fp.h
         ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/_TPM_Hash_Data_fp.h
         ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/_TPM_Hash_End_fp.h
         ${CMAKE_CURRENT_SOURCE_DIR}/prototypes/_TPM_Hash_Start_fp.h
@@ -42,4 +40,3 @@ install(FILES
 
 # LAST: create the targets.cmake file for this package
 export_targets_cmake_file(${PROJECT_NAME})
-

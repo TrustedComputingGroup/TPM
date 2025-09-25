@@ -215,7 +215,7 @@ void ASN1InitialializeMarshalContext(
 // that was previously placed in the structure.
 void ASN1StartMarshalContext(ASN1MarshalContext* ctx)
 {
-    pAssert((ctx->depth + 1) < MAX_DEPTH);
+    pAssert_VOID_OK((ctx->depth + 1) < MAX_DEPTH);
     ctx->depth++;
     ctx->ends[ctx->depth] = ctx->end;
     ctx->end              = ctx->offset;
@@ -230,7 +230,7 @@ INT16
 ASN1EndMarshalContext(ASN1MarshalContext* ctx)
 {
     INT16 length;
-    pAssert(ctx->depth >= 0);
+    pAssert_ZERO(ctx->depth >= 0);
     length   = ctx->end - ctx->offset;
     ctx->end = ctx->ends[ctx->depth--];
     return length;

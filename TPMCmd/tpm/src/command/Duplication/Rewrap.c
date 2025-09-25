@@ -46,6 +46,8 @@ TPM2_Rewrap(Rewrap_In*  in,  // IN: input parameter list
         // old parent key must be a storage object
         if(!ObjectIsStorage(in->oldParent))
             return TPM_RCS_TYPE + RC_Rewrap_oldParent;
+
+        pAssert_RC(oldParent != NULL);
         // Decrypt input secret data via asymmetric decryption.  A
         // TPM_RC_VALUE, TPM_RC_KEY or unmarshal errors may be returned at this
         // point
@@ -67,7 +69,7 @@ TPM2_Rewrap(Rewrap_In*  in,  // IN: input parameter list
         hashSize =
             sizeof(UINT16) + CryptHashGetDigestSize(oldParent->publicArea.nameAlg);
         privateBlob.t.size = in->inDuplicate.t.size - hashSize;
-        pAssert(privateBlob.t.size <= sizeof(privateBlob.t.buffer));
+        pAssert_RC(privateBlob.t.size <= sizeof(privateBlob.t.buffer));
         MemoryCopy(privateBlob.t.buffer,
                    in->inDuplicate.t.buffer + hashSize,
                    privateBlob.t.size);
@@ -85,6 +87,9 @@ TPM2_Rewrap(Rewrap_In*  in,  // IN: input parameter list
         // New parent must be a storage object
         if(!ObjectIsStorage(in->newParent))
             return TPM_RCS_TYPE + RC_Rewrap_newParent;
+
+        pAssert_RC(newParent != NULL);
+
         // Make new encrypt key and its associated secret structure.  A
         // TPM_RC_VALUE error may be returned at this point if RSA algorithm is
         // enabled in TPM
@@ -100,11 +105,12 @@ TPM2_Rewrap(Rewrap_In*  in,  // IN: input parameter list
         // Note: this is mostly only an issue if there was no outer wrapper on
         // 'inDuplicate'. It could be as large as a TPM2B_PRIVATE buffer. If we add
         // a digest for an outer wrapper, it won't fit anymore.
-        if((privateBlob.t.size + hashSize) > sizeof(out->outDuplicate.t.buffer))
+        if((size_t)(privateBlob.t.size + hashSize) > sizeof(out->outDuplicate.t.buffer))
             return TPM_RCS_VALUE + RC_Rewrap_inDuplicate;
         // Command output
         out->outDuplicate.t.size = privateBlob.t.size;
-        pAssert(privateBlob.t.size <= sizeof(out->outDuplicate.t.buffer) - hashSize);
+        pAssert_RC(
+            privateBlob.t.size <= sizeof(out->outDuplicate.t.buffer) - hashSize);
         MemoryCopy(out->outDuplicate.t.buffer + hashSize,
                    privateBlob.t.buffer,
                    privateBlob.t.size);

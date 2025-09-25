@@ -3507,6 +3507,42 @@ PolicyParameters_COMMAND_DESCRIPTOR_t _PolicyParametersData = {
 #define _PolicyParametersDataAddress 0
 #endif // CC_PolicyParameters
 
+#if       CC_PolicyTransportSPDM
+#include    "PolicyTransportSPDM_fp.h"
+
+typedef TPM_RC (PolicyTransportSPDM_Entry)(
+    PolicyTransportSPDM_In*     in
+);
+
+typedef const struct
+{
+    PolicyTransportSPDM_Entry   *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[2];
+    BYTE                        types[5];
+} PolicyTransportSPDM_COMMAND_DESCRIPTOR_t;
+
+PolicyTransportSPDM_COMMAND_DESCRIPTOR_t _PolicyTransportSPDMData = {
+    /* entry         */         &TPM2_PolicyTransportSPDM,
+    /* inSize        */         (UINT16)(sizeof(PolicyTransportSPDM_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(PolicyTransportSPDM_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(PolicyTransportSPDM_In, reqKeyName)),
+                                 (UINT16)(offsetof(PolicyTransportSPDM_In, tpmKeyName))},
+    /* types         */         {TPMI_SH_POLICY_H_UNMARSHAL,
+                                 TPM2B_NAME_P_UNMARSHAL,
+                                 TPM2B_NAME_P_UNMARSHAL,
+                                 END_OF_LIST,
+                                 END_OF_LIST}
+};
+
+#define _PolicyTransportSPDMDataAddress (&_PolicyTransportSPDMData)
+#else
+#define _PolicyTransportSPDMDataAddress 0
+#endif // CC_PolicyTransportSPDM
+
 #if       CC_CreatePrimary
 #include    "CreatePrimary_fp.h"
 
@@ -5003,6 +5039,40 @@ SetCapability_COMMAND_DESCRIPTOR_t _SetCapabilityData = {
 #define _SetCapabilityDataAddress 0
 #endif // CC_SetCapability
 
+#if       CC_ReadOnlyControl
+#include    "ReadOnlyControl_fp.h"
+
+typedef TPM_RC (ReadOnlyControl_Entry)(
+    ReadOnlyControl_In*        in
+);
+
+typedef const struct
+{
+    ReadOnlyControl_Entry       *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[1];
+    BYTE                        types[4];
+} ReadOnlyControl_COMMAND_DESCRIPTOR_t;
+
+ReadOnlyControl_COMMAND_DESCRIPTOR_t _ReadOnlyControlData = {
+    /* entry         */         &TPM2_ReadOnlyControl,
+    /* inSize        */         (UINT16)(sizeof(ReadOnlyControl_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(ReadOnlyControl_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(ReadOnlyControl_In, state))},
+    /* types         */         {TPMI_RH_PLATFORM_H_UNMARSHAL,
+                                 TPMI_YES_NO_P_UNMARSHAL,
+                                 END_OF_LIST,
+                                 END_OF_LIST}
+};
+
+#define _ReadOnlyControlDataAddress (&_ReadOnlyControlData)
+#else
+#define _ReadOnlyControlDataAddress 0
+#endif // CC_ReadOnlyControl
+
 #if       CC_AC_Send
 #include    "AC_Send_fp.h"
 
@@ -5120,208 +5190,171 @@ ACT_SetTimeout_COMMAND_DESCRIPTOR_t _ACT_SetTimeoutData = {
 #define _ACT_SetTimeoutDataAddress 0
 #endif // CC_ACT_SetTimeout
 
-#if       CC_Vendor_TCG_Test
-#include    "Vendor_TCG_Test_fp.h"
-
-typedef TPM_RC (Vendor_TCG_Test_Entry)(
-    Vendor_TCG_Test_In*         in,
-    Vendor_TCG_Test_Out*        out
-);
-
-
-typedef const struct
-{
-    Vendor_TCG_Test_Entry       *entry;
-    UINT16                      inSize;
-    UINT16                      outSize;
-    UINT16                      offsetOfTypes;
-    BYTE                        types[4];
-} Vendor_TCG_Test_COMMAND_DESCRIPTOR_t;
-
-Vendor_TCG_Test_COMMAND_DESCRIPTOR_t _Vendor_TCG_TestData = {
-    /* entry         */         &TPM2_Vendor_TCG_Test,
-    /* inSize        */         (UINT16)(sizeof(Vendor_TCG_Test_In)),
-    /* outSize       */         (UINT16)(sizeof(Vendor_TCG_Test_Out)),
-    /* offsetOfTypes */         offsetof(Vendor_TCG_Test_COMMAND_DESCRIPTOR_t, types),
-    /* offsets       */         // No parameter offsets
-    /* types         */         {TPM2B_DATA_P_UNMARSHAL,
-                                 END_OF_LIST,
-                                 TPM2B_DATA_P_MARSHAL,
-                                 END_OF_LIST}
-};
-
-#define _Vendor_TCG_TestDataAddress (&_Vendor_TCG_TestData)
-#else
-#define _Vendor_TCG_TestDataAddress 0
-#endif // CC_Vendor_TCG_Test
-
+#include <TpmConfiguration/VendorCommands/CommandDispatchData_CommandStructures.inl>
 
 // Lookup table to access the per-command tables above
 
 COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
-#if (PAD_LIST || CC_NV_UndefineSpaceSpecial)
+#if CC_NV_UndefineSpaceSpecial
         (COMMAND_DESCRIPTOR_t*)_NV_UndefineSpaceSpecialDataAddress,
 #endif // CC_NV_UndefineSpaceSpecial
-#if (PAD_LIST || CC_EvictControl)
+#if CC_EvictControl
         (COMMAND_DESCRIPTOR_t*)_EvictControlDataAddress,
 #endif // CC_EvictControl
-#if (PAD_LIST || CC_HierarchyControl)
+#if CC_HierarchyControl
         (COMMAND_DESCRIPTOR_t*)_HierarchyControlDataAddress,
 #endif // CC_HierarchyControl
-#if (PAD_LIST || CC_NV_UndefineSpace)
+#if CC_NV_UndefineSpace
         (COMMAND_DESCRIPTOR_t*)_NV_UndefineSpaceDataAddress,
 #endif // CC_NV_UndefineSpace
-#if (PAD_LIST)
-       (COMMAND_DESCRIPTOR_t*)0,
-#endif //
-#if (PAD_LIST || CC_ChangeEPS)
+#if CC_ChangeEPS
         (COMMAND_DESCRIPTOR_t*)_ChangeEPSDataAddress,
 #endif // CC_ChangeEPS
-#if (PAD_LIST || CC_ChangePPS)
+#if CC_ChangePPS
         (COMMAND_DESCRIPTOR_t*)_ChangePPSDataAddress,
 #endif // CC_ChangePPS
-#if (PAD_LIST || CC_Clear)
+#if CC_Clear
         (COMMAND_DESCRIPTOR_t*)_ClearDataAddress,
 #endif // CC_Clear
-#if (PAD_LIST || CC_ClearControl)
+#if CC_ClearControl
         (COMMAND_DESCRIPTOR_t*)_ClearControlDataAddress,
 #endif // CC_ClearControl
-#if (PAD_LIST || CC_ClockSet)
+#if CC_ClockSet
         (COMMAND_DESCRIPTOR_t*)_ClockSetDataAddress,
 #endif // CC_ClockSet
-#if (PAD_LIST || CC_HierarchyChangeAuth)
+#if CC_HierarchyChangeAuth
         (COMMAND_DESCRIPTOR_t*)_HierarchyChangeAuthDataAddress,
 #endif // CC_HierarchyChangeAuth
-#if (PAD_LIST || CC_NV_DefineSpace)
+#if CC_NV_DefineSpace
         (COMMAND_DESCRIPTOR_t*)_NV_DefineSpaceDataAddress,
 #endif // CC_NV_DefineSpace
-#if (PAD_LIST || CC_PCR_Allocate)
+#if CC_PCR_Allocate
         (COMMAND_DESCRIPTOR_t*)_PCR_AllocateDataAddress,
 #endif // CC_PCR_Allocate
-#if (PAD_LIST || CC_PCR_SetAuthPolicy)
+#if CC_PCR_SetAuthPolicy
         (COMMAND_DESCRIPTOR_t*)_PCR_SetAuthPolicyDataAddress,
 #endif // CC_PCR_SetAuthPolicy
-#if (PAD_LIST || CC_PP_Commands)
+#if CC_PP_Commands
         (COMMAND_DESCRIPTOR_t*)_PP_CommandsDataAddress,
 #endif // CC_PP_Commands
-#if (PAD_LIST || CC_SetPrimaryPolicy)
+#if CC_SetPrimaryPolicy
         (COMMAND_DESCRIPTOR_t*)_SetPrimaryPolicyDataAddress,
 #endif // CC_SetPrimaryPolicy
-#if (PAD_LIST || CC_FieldUpgradeStart)
+#if CC_FieldUpgradeStart
         (COMMAND_DESCRIPTOR_t*)_FieldUpgradeStartDataAddress,
 #endif // CC_FieldUpgradeStart
-#if (PAD_LIST || CC_ClockRateAdjust)
+#if CC_ClockRateAdjust
         (COMMAND_DESCRIPTOR_t*)_ClockRateAdjustDataAddress,
 #endif // CC_ClockRateAdjust
-#if (PAD_LIST || CC_CreatePrimary)
+#if CC_CreatePrimary
         (COMMAND_DESCRIPTOR_t*)_CreatePrimaryDataAddress,
 #endif // CC_CreatePrimary
-#if (PAD_LIST || CC_NV_GlobalWriteLock)
+#if CC_NV_GlobalWriteLock
         (COMMAND_DESCRIPTOR_t*)_NV_GlobalWriteLockDataAddress,
 #endif // CC_NV_GlobalWriteLock
-#if (PAD_LIST || CC_GetCommandAuditDigest)
+#if CC_GetCommandAuditDigest
         (COMMAND_DESCRIPTOR_t*)_GetCommandAuditDigestDataAddress,
 #endif // CC_GetCommandAuditDigest
-#if (PAD_LIST || CC_NV_Increment)
+#if CC_NV_Increment
         (COMMAND_DESCRIPTOR_t*)_NV_IncrementDataAddress,
 #endif // CC_NV_Increment
-#if (PAD_LIST || CC_NV_SetBits)
+#if CC_NV_SetBits
         (COMMAND_DESCRIPTOR_t*)_NV_SetBitsDataAddress,
 #endif // CC_NV_SetBits
-#if (PAD_LIST || CC_NV_Extend)
+#if CC_NV_Extend
         (COMMAND_DESCRIPTOR_t*)_NV_ExtendDataAddress,
 #endif // CC_NV_Extend
-#if (PAD_LIST || CC_NV_Write)
+#if CC_NV_Write
         (COMMAND_DESCRIPTOR_t*)_NV_WriteDataAddress,
 #endif // CC_NV_Write
-#if (PAD_LIST || CC_NV_WriteLock)
+#if CC_NV_WriteLock
         (COMMAND_DESCRIPTOR_t*)_NV_WriteLockDataAddress,
 #endif // CC_NV_WriteLock
-#if (PAD_LIST || CC_DictionaryAttackLockReset)
+#if CC_DictionaryAttackLockReset
         (COMMAND_DESCRIPTOR_t*)_DictionaryAttackLockResetDataAddress,
 #endif // CC_DictionaryAttackLockReset
-#if (PAD_LIST || CC_DictionaryAttackParameters)
+#if CC_DictionaryAttackParameters
         (COMMAND_DESCRIPTOR_t*)_DictionaryAttackParametersDataAddress,
 #endif // CC_DictionaryAttackParameters
-#if (PAD_LIST || CC_NV_ChangeAuth)
+#if CC_NV_ChangeAuth
         (COMMAND_DESCRIPTOR_t*)_NV_ChangeAuthDataAddress,
 #endif // CC_NV_ChangeAuth
-#if (PAD_LIST || CC_PCR_Event)
+#if CC_PCR_Event
         (COMMAND_DESCRIPTOR_t*)_PCR_EventDataAddress,
 #endif // CC_PCR_Event
-#if (PAD_LIST || CC_PCR_Reset)
+#if CC_PCR_Reset
         (COMMAND_DESCRIPTOR_t*)_PCR_ResetDataAddress,
 #endif // CC_PCR_Reset
-#if (PAD_LIST || CC_SequenceComplete)
+#if CC_SequenceComplete
         (COMMAND_DESCRIPTOR_t*)_SequenceCompleteDataAddress,
 #endif // CC_SequenceComplete
-#if (PAD_LIST || CC_SetAlgorithmSet)
+#if CC_SetAlgorithmSet
         (COMMAND_DESCRIPTOR_t*)_SetAlgorithmSetDataAddress,
 #endif // CC_SetAlgorithmSet
-#if (PAD_LIST || CC_SetCommandCodeAuditStatus)
+#if CC_SetCommandCodeAuditStatus
         (COMMAND_DESCRIPTOR_t*)_SetCommandCodeAuditStatusDataAddress,
 #endif // CC_SetCommandCodeAuditStatus
-#if (PAD_LIST || CC_FieldUpgradeData)
+#if CC_FieldUpgradeData
         (COMMAND_DESCRIPTOR_t*)_FieldUpgradeDataDataAddress,
 #endif // CC_FieldUpgradeData
-#if (PAD_LIST || CC_IncrementalSelfTest)
+#if CC_IncrementalSelfTest
         (COMMAND_DESCRIPTOR_t*)_IncrementalSelfTestDataAddress,
 #endif // CC_IncrementalSelfTest
-#if (PAD_LIST || CC_SelfTest)
+#if CC_SelfTest
         (COMMAND_DESCRIPTOR_t*)_SelfTestDataAddress,
 #endif // CC_SelfTest
-#if (PAD_LIST || CC_Startup)
+#if CC_Startup
         (COMMAND_DESCRIPTOR_t*)_StartupDataAddress,
 #endif // CC_Startup
-#if (PAD_LIST || CC_Shutdown)
+#if CC_Shutdown
         (COMMAND_DESCRIPTOR_t*)_ShutdownDataAddress,
 #endif // CC_Shutdown
-#if (PAD_LIST || CC_StirRandom)
+#if CC_StirRandom
         (COMMAND_DESCRIPTOR_t*)_StirRandomDataAddress,
 #endif // CC_StirRandom
-#if (PAD_LIST || CC_ActivateCredential)
+#if CC_ActivateCredential
         (COMMAND_DESCRIPTOR_t*)_ActivateCredentialDataAddress,
 #endif // CC_ActivateCredential
-#if (PAD_LIST || CC_Certify)
+#if CC_Certify
         (COMMAND_DESCRIPTOR_t*)_CertifyDataAddress,
 #endif // CC_Certify
-#if (PAD_LIST || CC_PolicyNV)
+#if CC_PolicyNV
         (COMMAND_DESCRIPTOR_t*)_PolicyNVDataAddress,
 #endif // CC_PolicyNV
-#if (PAD_LIST || CC_CertifyCreation)
+#if CC_CertifyCreation
         (COMMAND_DESCRIPTOR_t*)_CertifyCreationDataAddress,
 #endif // CC_CertifyCreation
-#if (PAD_LIST || CC_Duplicate)
+#if CC_Duplicate
         (COMMAND_DESCRIPTOR_t*)_DuplicateDataAddress,
 #endif // CC_Duplicate
-#if (PAD_LIST || CC_GetTime)
+#if CC_GetTime
         (COMMAND_DESCRIPTOR_t*)_GetTimeDataAddress,
 #endif // CC_GetTime
-#if (PAD_LIST || CC_GetSessionAuditDigest)
+#if CC_GetSessionAuditDigest
         (COMMAND_DESCRIPTOR_t*)_GetSessionAuditDigestDataAddress,
 #endif // CC_GetSessionAuditDigest
-#if (PAD_LIST || CC_NV_Read)
+#if CC_NV_Read
         (COMMAND_DESCRIPTOR_t*)_NV_ReadDataAddress,
 #endif // CC_NV_Read
-#if (PAD_LIST || CC_NV_ReadLock)
+#if CC_NV_ReadLock
         (COMMAND_DESCRIPTOR_t*)_NV_ReadLockDataAddress,
 #endif // CC_NV_ReadLock
-#if (PAD_LIST || CC_ObjectChangeAuth)
+#if CC_ObjectChangeAuth
         (COMMAND_DESCRIPTOR_t*)_ObjectChangeAuthDataAddress,
 #endif // CC_ObjectChangeAuth
-#if (PAD_LIST || CC_PolicySecret)
+#if CC_PolicySecret
         (COMMAND_DESCRIPTOR_t*)_PolicySecretDataAddress,
 #endif // CC_PolicySecret
-#if (PAD_LIST || CC_Rewrap)
+#if CC_Rewrap
         (COMMAND_DESCRIPTOR_t*)_RewrapDataAddress,
 #endif // CC_Rewrap
-#if (PAD_LIST || CC_Create)
+#if CC_Create
         (COMMAND_DESCRIPTOR_t*)_CreateDataAddress,
 #endif // CC_Create
-#if (PAD_LIST || CC_ECDH_ZGen)
+#if CC_ECDH_ZGen
         (COMMAND_DESCRIPTOR_t*)_ECDH_ZGenDataAddress,
 #endif // CC_ECDH_ZGen
-#if (PAD_LIST || (CC_HMAC || CC_MAC))
+#if ((CC_HMAC || CC_MAC))
 #   if CC_HMAC
         (COMMAND_DESCRIPTOR_t*)_HMACDataAddress,
 #   endif
@@ -5329,22 +5362,19 @@ COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
         (COMMAND_DESCRIPTOR_t*)_MACDataAddress,
 #   endif
 #endif // (CC_HMAC || CC_MAC)
-#if (PAD_LIST || CC_Import)
+#if CC_Import
         (COMMAND_DESCRIPTOR_t*)_ImportDataAddress,
 #endif // CC_Import
-#if (PAD_LIST || CC_Load)
+#if CC_Load
         (COMMAND_DESCRIPTOR_t*)_LoadDataAddress,
 #endif // CC_Load
-#if (PAD_LIST || CC_Quote)
+#if CC_Quote
         (COMMAND_DESCRIPTOR_t*)_QuoteDataAddress,
 #endif // CC_Quote
-#if (PAD_LIST || CC_RSA_Decrypt)
+#if CC_RSA_Decrypt
         (COMMAND_DESCRIPTOR_t*)_RSA_DecryptDataAddress,
 #endif // CC_RSA_Decrypt
-#if (PAD_LIST)
-       (COMMAND_DESCRIPTOR_t*)0,
-#endif //
-#if (PAD_LIST || (CC_HMAC_Start || CC_MAC_Start))
+#if ((CC_HMAC_Start || CC_MAC_Start))
 #   if CC_HMAC_Start
         (COMMAND_DESCRIPTOR_t*)_HMAC_StartDataAddress,
 #   endif
@@ -5352,214 +5382,212 @@ COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
         (COMMAND_DESCRIPTOR_t*)_MAC_StartDataAddress,
 #   endif
 #endif // (CC_HMAC_Start || CC_MAC_Start)
-#if (PAD_LIST || CC_SequenceUpdate)
+#if CC_SequenceUpdate
         (COMMAND_DESCRIPTOR_t*)_SequenceUpdateDataAddress,
 #endif // CC_SequenceUpdate
-#if (PAD_LIST || CC_Sign)
+#if CC_Sign
         (COMMAND_DESCRIPTOR_t*)_SignDataAddress,
 #endif // CC_Sign
-#if (PAD_LIST || CC_Unseal)
+#if CC_Unseal
         (COMMAND_DESCRIPTOR_t*)_UnsealDataAddress,
 #endif // CC_Unseal
-#if (PAD_LIST)
-       (COMMAND_DESCRIPTOR_t*)0,
-#endif //
-#if (PAD_LIST || CC_PolicySigned)
+#if CC_PolicySigned
         (COMMAND_DESCRIPTOR_t*)_PolicySignedDataAddress,
 #endif // CC_PolicySigned
-#if (PAD_LIST || CC_ContextLoad)
+#if CC_ContextLoad
         (COMMAND_DESCRIPTOR_t*)_ContextLoadDataAddress,
 #endif // CC_ContextLoad
-#if (PAD_LIST || CC_ContextSave)
+#if CC_ContextSave
         (COMMAND_DESCRIPTOR_t*)_ContextSaveDataAddress,
 #endif // CC_ContextSave
-#if (PAD_LIST || CC_ECDH_KeyGen)
+#if CC_ECDH_KeyGen
         (COMMAND_DESCRIPTOR_t*)_ECDH_KeyGenDataAddress,
 #endif // CC_ECDH_KeyGen
-#if (PAD_LIST || CC_EncryptDecrypt)
+#if CC_EncryptDecrypt
         (COMMAND_DESCRIPTOR_t*)_EncryptDecryptDataAddress,
 #endif // CC_EncryptDecrypt
-#if (PAD_LIST || CC_FlushContext)
+#if CC_FlushContext
         (COMMAND_DESCRIPTOR_t*)_FlushContextDataAddress,
 #endif // CC_FlushContext
-#if (PAD_LIST)
-       (COMMAND_DESCRIPTOR_t*)0,
-#endif //
-#if (PAD_LIST || CC_LoadExternal)
+#if CC_LoadExternal
         (COMMAND_DESCRIPTOR_t*)_LoadExternalDataAddress,
 #endif // CC_LoadExternal
-#if (PAD_LIST || CC_MakeCredential)
+#if CC_MakeCredential
         (COMMAND_DESCRIPTOR_t*)_MakeCredentialDataAddress,
 #endif // CC_MakeCredential
-#if (PAD_LIST || CC_NV_ReadPublic)
+#if CC_NV_ReadPublic
         (COMMAND_DESCRIPTOR_t*)_NV_ReadPublicDataAddress,
 #endif // CC_NV_ReadPublic
-#if (PAD_LIST || CC_PolicyAuthorize)
+#if CC_PolicyAuthorize
         (COMMAND_DESCRIPTOR_t*)_PolicyAuthorizeDataAddress,
 #endif // CC_PolicyAuthorize
-#if (PAD_LIST || CC_PolicyAuthValue)
+#if CC_PolicyAuthValue
         (COMMAND_DESCRIPTOR_t*)_PolicyAuthValueDataAddress,
 #endif // CC_PolicyAuthValue
-#if (PAD_LIST || CC_PolicyCommandCode)
+#if CC_PolicyCommandCode
         (COMMAND_DESCRIPTOR_t*)_PolicyCommandCodeDataAddress,
 #endif // CC_PolicyCommandCode
-#if (PAD_LIST || CC_PolicyCounterTimer)
+#if CC_PolicyCounterTimer
         (COMMAND_DESCRIPTOR_t*)_PolicyCounterTimerDataAddress,
 #endif // CC_PolicyCounterTimer
-#if (PAD_LIST || CC_PolicyCpHash)
+#if CC_PolicyCpHash
         (COMMAND_DESCRIPTOR_t*)_PolicyCpHashDataAddress,
 #endif // CC_PolicyCpHash
-#if (PAD_LIST || CC_PolicyLocality)
+#if CC_PolicyLocality
         (COMMAND_DESCRIPTOR_t*)_PolicyLocalityDataAddress,
 #endif // CC_PolicyLocality
-#if (PAD_LIST || CC_PolicyNameHash)
+#if CC_PolicyNameHash
         (COMMAND_DESCRIPTOR_t*)_PolicyNameHashDataAddress,
 #endif // CC_PolicyNameHash
-#if (PAD_LIST || CC_PolicyOR)
+#if CC_PolicyOR
         (COMMAND_DESCRIPTOR_t*)_PolicyORDataAddress,
 #endif // CC_PolicyOR
-#if (PAD_LIST || CC_PolicyTicket)
+#if CC_PolicyTicket
         (COMMAND_DESCRIPTOR_t*)_PolicyTicketDataAddress,
 #endif // CC_PolicyTicket
-#if (PAD_LIST || CC_ReadPublic)
+#if CC_ReadPublic
         (COMMAND_DESCRIPTOR_t*)_ReadPublicDataAddress,
 #endif // CC_ReadPublic
-#if (PAD_LIST || CC_RSA_Encrypt)
+#if CC_RSA_Encrypt
         (COMMAND_DESCRIPTOR_t*)_RSA_EncryptDataAddress,
 #endif // CC_RSA_Encrypt
-#if (PAD_LIST)
-       (COMMAND_DESCRIPTOR_t*)0,
-#endif //
-#if (PAD_LIST || CC_StartAuthSession)
+#if CC_StartAuthSession
         (COMMAND_DESCRIPTOR_t*)_StartAuthSessionDataAddress,
 #endif // CC_StartAuthSession
-#if (PAD_LIST || CC_VerifySignature)
+#if CC_VerifySignature
         (COMMAND_DESCRIPTOR_t*)_VerifySignatureDataAddress,
 #endif // CC_VerifySignature
-#if (PAD_LIST || CC_ECC_Parameters)
+#if CC_ECC_Parameters
         (COMMAND_DESCRIPTOR_t*)_ECC_ParametersDataAddress,
 #endif // CC_ECC_Parameters
-#if (PAD_LIST || CC_FirmwareRead)
+#if CC_FirmwareRead
         (COMMAND_DESCRIPTOR_t*)_FirmwareReadDataAddress,
 #endif // CC_FirmwareRead
-#if (PAD_LIST || CC_GetCapability)
+#if CC_GetCapability
         (COMMAND_DESCRIPTOR_t*)_GetCapabilityDataAddress,
 #endif // CC_GetCapability
-#if (PAD_LIST || CC_GetRandom)
+#if CC_GetRandom
         (COMMAND_DESCRIPTOR_t*)_GetRandomDataAddress,
 #endif // CC_GetRandom
-#if (PAD_LIST || CC_GetTestResult)
+#if CC_GetTestResult
         (COMMAND_DESCRIPTOR_t*)_GetTestResultDataAddress,
 #endif // CC_GetTestResult
-#if (PAD_LIST || CC_Hash)
+#if CC_Hash
         (COMMAND_DESCRIPTOR_t*)_HashDataAddress,
 #endif // CC_Hash
-#if (PAD_LIST || CC_PCR_Read)
+#if CC_PCR_Read
         (COMMAND_DESCRIPTOR_t*)_PCR_ReadDataAddress,
 #endif // CC_PCR_Read
-#if (PAD_LIST || CC_PolicyPCR)
+#if CC_PolicyPCR
         (COMMAND_DESCRIPTOR_t*)_PolicyPCRDataAddress,
 #endif // CC_PolicyPCR
-#if (PAD_LIST || CC_PolicyRestart)
+#if CC_PolicyRestart
         (COMMAND_DESCRIPTOR_t*)_PolicyRestartDataAddress,
 #endif // CC_PolicyRestart
-#if (PAD_LIST || CC_ReadClock)
+#if CC_ReadClock
         (COMMAND_DESCRIPTOR_t*)_ReadClockDataAddress,
 #endif // CC_ReadClock
-#if (PAD_LIST || CC_PCR_Extend)
+#if CC_PCR_Extend
         (COMMAND_DESCRIPTOR_t*)_PCR_ExtendDataAddress,
 #endif // CC_PCR_Extend
-#if (PAD_LIST || CC_PCR_SetAuthValue)
+#if CC_PCR_SetAuthValue
         (COMMAND_DESCRIPTOR_t*)_PCR_SetAuthValueDataAddress,
 #endif // CC_PCR_SetAuthValue
-#if (PAD_LIST || CC_NV_Certify)
+#if CC_NV_Certify
         (COMMAND_DESCRIPTOR_t*)_NV_CertifyDataAddress,
 #endif // CC_NV_Certify
-#if (PAD_LIST || CC_EventSequenceComplete)
+#if CC_EventSequenceComplete
         (COMMAND_DESCRIPTOR_t*)_EventSequenceCompleteDataAddress,
 #endif // CC_EventSequenceComplete
-#if (PAD_LIST || CC_HashSequenceStart)
+#if CC_HashSequenceStart
         (COMMAND_DESCRIPTOR_t*)_HashSequenceStartDataAddress,
 #endif // CC_HashSequenceStart
-#if (PAD_LIST || CC_PolicyPhysicalPresence)
+#if CC_PolicyPhysicalPresence
         (COMMAND_DESCRIPTOR_t*)_PolicyPhysicalPresenceDataAddress,
 #endif // CC_PolicyPhysicalPresence
-#if (PAD_LIST || CC_PolicyDuplicationSelect)
+#if CC_PolicyDuplicationSelect
         (COMMAND_DESCRIPTOR_t*)_PolicyDuplicationSelectDataAddress,
 #endif // CC_PolicyDuplicationSelect
-#if (PAD_LIST || CC_PolicyGetDigest)
+#if CC_PolicyGetDigest
         (COMMAND_DESCRIPTOR_t*)_PolicyGetDigestDataAddress,
 #endif // CC_PolicyGetDigest
-#if (PAD_LIST || CC_TestParms)
+#if CC_TestParms
         (COMMAND_DESCRIPTOR_t*)_TestParmsDataAddress,
 #endif // CC_TestParms
-#if (PAD_LIST || CC_Commit)
+#if CC_Commit
         (COMMAND_DESCRIPTOR_t*)_CommitDataAddress,
 #endif // CC_Commit
-#if (PAD_LIST || CC_PolicyPassword)
+#if CC_PolicyPassword
         (COMMAND_DESCRIPTOR_t*)_PolicyPasswordDataAddress,
 #endif // CC_PolicyPassword
-#if (PAD_LIST || CC_ZGen_2Phase)
+#if CC_ZGen_2Phase
         (COMMAND_DESCRIPTOR_t*)_ZGen_2PhaseDataAddress,
 #endif // CC_ZGen_2Phase
-#if (PAD_LIST || CC_EC_Ephemeral)
+#if CC_EC_Ephemeral
         (COMMAND_DESCRIPTOR_t*)_EC_EphemeralDataAddress,
 #endif // CC_EC_Ephemeral
-#if (PAD_LIST || CC_PolicyNvWritten)
+#if CC_PolicyNvWritten
         (COMMAND_DESCRIPTOR_t*)_PolicyNvWrittenDataAddress,
 #endif // CC_PolicyNvWritten
-#if (PAD_LIST || CC_PolicyTemplate)
+#if CC_PolicyTemplate
         (COMMAND_DESCRIPTOR_t*)_PolicyTemplateDataAddress,
 #endif // CC_PolicyTemplate
-#if (PAD_LIST || CC_CreateLoaded)
+#if CC_CreateLoaded
         (COMMAND_DESCRIPTOR_t*)_CreateLoadedDataAddress,
 #endif // CC_CreateLoaded
-#if (PAD_LIST || CC_PolicyAuthorizeNV)
+#if CC_PolicyAuthorizeNV
         (COMMAND_DESCRIPTOR_t*)_PolicyAuthorizeNVDataAddress,
 #endif // CC_PolicyAuthorizeNV
-#if (PAD_LIST || CC_EncryptDecrypt2)
+#if CC_EncryptDecrypt2
         (COMMAND_DESCRIPTOR_t*)_EncryptDecrypt2DataAddress,
 #endif // CC_EncryptDecrypt2
-#if (PAD_LIST || CC_AC_GetCapability)
-        (COMMAND_DESCRIPTOR_t*)_GetCapabilityDataAddress,
+#if CC_AC_GetCapability
+#error "Not Implemented the Dispatch structure needs to be created"
+        (COMMAND_DESCRIPTOR_t*)_AC_GetCapabilityDataAddress,
 #endif // CC_AC_GetCapability
-#if (PAD_LIST || CC_AC_Send)
+#if CC_AC_Send
         (COMMAND_DESCRIPTOR_t*)_AC_SendDataAddress,
 #endif // CC_AC_Send
-#if (PAD_LIST || CC_Policy_AC_SendSelect)
+#if CC_Policy_AC_SendSelect
         (COMMAND_DESCRIPTOR_t*)_Policy_AC_SendSelectDataAddress,
 #endif // CC_Policy_AC_SendSelect
-#if (PAD_LIST || CC_CertifyX509)
+#if CC_CertifyX509
         (COMMAND_DESCRIPTOR_t*)_CertifyX509DataAddress,
 #endif // CC_CertifyX509
-#if (PAD_LIST || CC_ACT_SetTimeout)
+#if CC_ACT_SetTimeout
         (COMMAND_DESCRIPTOR_t*)_ACT_SetTimeoutDataAddress,
 #endif // CC_ACT_SetTimeout
-#if (PAD_LIST || CC_ECC_Encrypt)
+#if CC_ECC_Encrypt
         (COMMAND_DESCRIPTOR_t*)_ECC_EncryptDataAddress,
 #endif // CC_ECC_Encrypt
-#if (PAD_LIST || CC_ECC_Decrypt)
+#if CC_ECC_Decrypt
         (COMMAND_DESCRIPTOR_t*)_ECC_DecryptDataAddress,
 #endif // CC_ECC_Decrypt
-#if (PAD_LIST || CC_PolicyCapability)
+#if CC_PolicyCapability
         (COMMAND_DESCRIPTOR_t*)_PolicyCapabilityDataAddress,
 #endif // CC_PolicyCapability
-#if (PAD_LIST || CC_PolicyParameters)
+#if CC_PolicyParameters
         (COMMAND_DESCRIPTOR_t*)_PolicyParametersDataAddress,
 #endif // CC_PolicyParameters
-#if (PAD_LIST || CC_NV_DefineSpace2)
+#if CC_NV_DefineSpace2
         (COMMAND_DESCRIPTOR_t*)_NV_DefineSpace2DataAddress,
 #endif // CC_NV_DefineSpace2
-#if (PAD_LIST || CC_NV_ReadPublic2)
+#if CC_NV_ReadPublic2
         (COMMAND_DESCRIPTOR_t*)_NV_ReadPublic2DataAddress,
 #endif // CC_NV_ReadPublic2
-#if (PAD_LIST || CC_SetCapability)
+#if CC_SetCapability
         (COMMAND_DESCRIPTOR_t*)_SetCapabilityDataAddress,
 #endif // CC_SetCapability
-#if (PAD_LIST || CC_Vendor_TCG_Test)
-        (COMMAND_DESCRIPTOR_t*)_Vendor_TCG_TestDataAddress,
-#endif // CC_Vendor_TCG_Test
+#if CC_ReadOnlyControl
+        (COMMAND_DESCRIPTOR_t*)_ReadOnlyControlDataAddress,
+#endif // CC_ReadOnlyControl
+#if CC_PolicyTransportSPDM
+        (COMMAND_DESCRIPTOR_t*)_PolicyTransportSPDMDataAddress,
+#endif // CC_PolicyTransportSPDM
 
+#include <TpmConfiguration/VendorCommands/CommandDispatchData_s_CommandDataArray.inl>
+
+// list terminator
         0
 };
 

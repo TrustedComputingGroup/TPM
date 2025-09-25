@@ -22,15 +22,13 @@
 // a structure element, it computes the stride between elements that are in a
 // structure array. This is used instead of sizeof() because the sizeof() operator on
 // a structure can return an implementation dependent value.
-#define STRIDE(s) ((UINT16)(size_t) & (((s*)0)[1]))
+#define STRIDE(s) ((UINT16)(size_t)&(((s*)0)[1]))
 
 #define MARSHAL_REF(TYPE) ((UINT16)(offsetof(MARSHAL_DATA, TYPE)))
 
 // This macro creates the entry in the array lookup table
-#define ARRAY_MARSHAL_ENTRY(TYPE)                                 \
-    {                                                             \
-        (marshalIndex_t) TYPE##_MARSHAL_REF, (UINT16)STRIDE(TYPE) \
-    }
+#define ARRAY_MARSHAL_ENTRY(TYPE) \
+    {(marshalIndex_t)TYPE##_MARSHAL_REF, (UINT16)STRIDE(TYPE)}
 
 // Defines for array lookup
 #define UINT8_ARRAY_MARSHAL_INDEX                  0   // 0x00
@@ -673,11 +671,8 @@
               (size))
 #define TPMI_DH_OBJECT_Marshal(source, buffer, size) \
     Marshal(TPMI_DH_OBJECT_MARSHAL_REF, (source), (buffer), (size))
-#define TPMI_DH_PARENT_Unmarshal(target, buffer, size, flag)       \
-    Unmarshal(TPMI_DH_PARENT_MARSHAL_REF | (flag ? NULL_FLAG : 0), \
-              (target),                                            \
-              (buffer),                                            \
-              (size))
+#define TPMI_DH_PARENT_Unmarshal(target, buffer, size) \
+    Unmarshal(TPMI_DH_PARENT_MARSHAL_REF, (target), (buffer), (size))
 #define TPMI_DH_PARENT_Marshal(source, buffer, size) \
     Marshal(TPMI_DH_PARENT_MARSHAL_REF, (source), (buffer), (size))
 #define TPMI_DH_PERSISTENT_Unmarshal(target, buffer, size) \
@@ -717,11 +712,8 @@
     Unmarshal(TPMI_DH_SAVED_MARSHAL_REF, (target), (buffer), (size))
 #define TPMI_DH_SAVED_Marshal(source, buffer, size) \
     Marshal(TPMI_DH_SAVED_MARSHAL_REF, (source), (buffer), (size))
-#define TPMI_RH_HIERARCHY_Unmarshal(target, buffer, size, flag)       \
-    Unmarshal(TPMI_RH_HIERARCHY_MARSHAL_REF | (flag ? NULL_FLAG : 0), \
-              (target),                                               \
-              (buffer),                                               \
-              (size))
+#define TPMI_RH_HIERARCHY_Unmarshal(target, buffer, size) \
+    Unmarshal(TPMI_RH_HIERARCHY_MARSHAL_REF, (target), (buffer), (size))
 #define TPMI_RH_HIERARCHY_Marshal(source, buffer, size) \
     Marshal(TPMI_RH_HIERARCHY_MARSHAL_REF, (source), (buffer), (size))
 #define TPMI_RH_ENABLES_Unmarshal(target, buffer, size, flag)       \
@@ -735,6 +727,8 @@
     Unmarshal(TPMI_RH_HIERARCHY_AUTH_MARSHAL_REF, (target), (buffer), (size))
 #define TPMI_RH_HIERARCHY_POLICY_Unmarshal(target, buffer, size) \
     Unmarshal(TPMI_RH_HIERARCHY_POLICY_MARSHAL_REF, (target), (buffer), (size))
+#define TPMI_RH_BASE_HIERARCHY_Unmarshal(target, buffer, size) \
+    Unmarshal(TPMI_RH_BASE_HIERARCHY_MARSHAL_REF, (target), (buffer), (size))
 #define TPMI_RH_PLATFORM_Unmarshal(target, buffer, size) \
     Unmarshal(TPMI_RH_PLATFORM_MARSHAL_REF, (target), (buffer), (size))
 #define TPMI_RH_OWNER_Unmarshal(target, buffer, size, flag)       \

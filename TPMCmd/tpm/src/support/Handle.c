@@ -99,7 +99,7 @@ PermanentCapGetHandles(TPM_HANDLE   handle,     // IN: start handle
     TPMI_YES_NO more = NO;
     UINT32      i;
 
-    pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    VERIFY(HandleGetType(handle) == TPM_HT_PERMANENT, FATAL_ERROR_ASSERT, NO);
 
     // Initialize output handle list
     handleList->count = 0;
@@ -135,7 +135,7 @@ BOOL PermanentCapGetOneHandle(TPM_HANDLE handle)  // IN: handle
 {
     UINT32 i;
 
-    pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_PERMANENT);
 
     // Iterate permanent handle range
     for(i = NextPermanentHandle(handle); i != 0; i = NextPermanentHandle(i + 1))
@@ -163,7 +163,7 @@ PermanentHandleGetPolicy(TPM_HANDLE handle,  // IN: start handle
 {
     TPMI_YES_NO more = NO;
 
-    pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    VERIFY(HandleGetType(handle) == TPM_HT_PERMANENT, FATAL_ERROR_ASSERT, NO);
 
     // Initialize output handle list
     policyList->count = 0;
@@ -210,7 +210,7 @@ BOOL PermanentHandleGetOnePolicy(TPM_HANDLE          handle,  // IN: handle
                                  TPMS_TAGGED_POLICY* policy   // OUT: tagged policy
 )
 {
-    pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_PERMANENT);
 
     if(NextPermanentHandle(handle) == handle)
     {

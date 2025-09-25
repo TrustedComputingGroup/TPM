@@ -21,6 +21,7 @@ TPM2_EventSequenceComplete(
     // Input validation
     // get the event sequence object pointer
     hashObject = (HASH_OBJECT*)HandleToObject(in->sequenceHandle);
+    pAssert_RC(hashObject != NULL);
 
     // input handle must reference an event sequence object
     if(hashObject->attributes.eventSeq != SET)

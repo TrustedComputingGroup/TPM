@@ -1,8 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
 # This demonstrates how to create a crypto library.  Ultimately, the Core Tpm
 # library will expect 3 crypto libraries to be created, plus 3 related header
 # libraries. They can all be created in a single CMakeLists.txt as demonstrated
@@ -67,7 +62,6 @@ target_include_directories(Tpm_CryptoLib_Math_Ossl PUBLIC
 )
 
 if (WIN32)
-
     cmake_path(RELATIVE_PATH OSSL_INCLUDE_SUBDIR
             BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             OUTPUT_VARIABLE rel_ossl)
@@ -87,9 +81,8 @@ if (WIN32)
                             )
     target_link_libraries(Tpm_CryptoLib_Math_Ossl INTERFACE libcrypto)
 else()
-    message(FATAL_ERROR "CMake not supported on Linux yet.")
-#    find_package(OpenSLL MODULE REQUIRED)
-#    target_link_libraries(Tpm_CryptoLib_Math_Ossl INTERFACE OpenSSL::Crypto)
+   find_package(OpenSSL MODULE REQUIRED)
+   target_link_libraries(Tpm_CryptoLib_Math_Ossl INTERFACE OpenSSL::Crypto)
 endif()
 
 # create install and export information for downstream projects to use

@@ -32,6 +32,7 @@ TPM2_ActivateCredential(ActivateCredential_In*  in,  // IN: input parameter list
 
     // Get decrypt key pointer
     object = HandleToObject(in->keyHandle);
+    pAssert_RC(object != NULL);
 
     // Get certificated object pointer
     activateObject = HandleToObject(in->activateHandle);
@@ -54,6 +55,9 @@ TPM2_ActivateCredential(ActivateCredential_In*  in,  // IN: input parameter list
             return TPM_RC_FAILURE;
         return RcSafeAddToResult(result, RC_ActivateCredential_secret);
     }
+    // this assertion is deliberately late, after other validation has happened
+    // soas to not change existing behavior of the function
+    pAssert_RC(activateObject != NULL);
 
     // Retrieve secret data.  A TPM_RC_INTEGRITY error or unmarshal
     // errors may be returned at this point

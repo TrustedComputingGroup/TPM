@@ -32,7 +32,7 @@ LocalityGetAttributes(UINT8 locality  // IN: locality value
             SET_ATTRIBUTE(locality_attributes, TPMA_LOCALITY, TPM_LOC_FOUR);
             break;
         default:
-            pAssert(locality > 31);
+            VERIFY(locality > 31, FATAL_ERROR_ASSERT, 0);
             *localityAsByte = locality;
             break;
     }

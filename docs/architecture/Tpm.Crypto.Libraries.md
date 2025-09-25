@@ -1,25 +1,21 @@
-<!-- Copyright Microsoft Corporation. All Rights Reserved
-     Licensed subject to: https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE -->
-
 # TPM Reference Code - TPM Crypto Library Introduction
 
-- [TPM Reference Code - TPM Crypto Library Introduction](#tpm-reference-code---tpm-crypto-library-introduction)
-  - [See Also](#see-also)
-  - [Background](#background)
-  - [Components of a Cryptographic Protocol](#components-of-a-cryptographic-protocol)
-  - [TPM Crypto Support Library Design](#tpm-crypto-support-library-design)
-    - [Implications](#implications)
-  - [Specifying the libraries](#specifying-the-libraries)
+* [TPM Reference Code - TPM Crypto Library Introduction](#tpm-reference-code---tpm-crypto-library-introduction)
+  * [See Also](#see-also)
+  * [Background](#background)
+  * [Components of a Cryptographic Protocol](#components-of-a-cryptographic-protocol)
+  * [TPM Crypto Support Library Design](#tpm-crypto-support-library-design)
+    * [Implications](#implications)
+  * [Specifying the libraries](#specifying-the-libraries)
 
 ## See Also
 
-- [Introduction](Introduction.md)
-- [Library Architecture](Library.Architecture.md)
-- [Tpm BigNum Library](Tpm.BigNum.Library.md)
-- [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
-- [Tpm Math Library](Tpm.Math.Library.md)
-- [Tpm Platform API](Tpm.Platform.Api.md)
-
+* [Introduction](Introduction.md)
+* [Library Architecture](Library.Architecture.md)
+* [Tpm BigNum Library](Tpm.BigNum.Library.md)
+* [Tpm Crypto Libraries](Tpm.Crypto.Libraries.md)
+* [Tpm Math Library](Tpm.Math.Library.md)
+* [Tpm Platform API](Tpm.Platform.Api.md)
 
 ## Background
 
@@ -35,8 +31,8 @@ combination of four groups of things:
 
 | Group | Algorithm Category              | Examples                                                                    |
 | :---: | :------------------------------ | :-------------------------------------------------------------------------- |
-|   1   | Symmetric primitives            | Expand AES Key Schedule<br>Encrypt a single 16-byte block                   |
-|   2   | Hash primitives                 | Start Hash<br>Hash Block<br>End Hash                                        |
+|   1   | Symmetric primitives            | Expand AES Key Schedule; encrypt a single 16-byte block                     |
+|   2   | Hash primitives                 | Start Hash; Hash Block; End Hash                                            |
 |   3   | Big Number (BN) math primitives | Compute a^e mod N, where a,e,N are “big” integers                           |
 |   4   | Cryptographic "Protocol"        | Details building these primitives into end-to-end cryptographic operations. |
 
@@ -44,14 +40,14 @@ Examples may help make this clearer.  Depending on mode, encrypting the simplest
 message (a single block of data) with AES involves at least two operations from
 category 1:
 
-- generating a key schedule, and
-- performing the block encryption.
+* generating a key schedule, and
+* performing the block encryption.
 
 Similarly, hashing a message requires at least three operations from category 2:
 
-- initializing the hash state, and
-- extending the data block(s), and
-- finalizing the hash.
+* initializing the hash state, and
+* extending the data block(s), and
+* finalizing the hash.
 
 Note: Correct Category 4 implementation is critical to security - many practical
 cryptographic weaknesses stem from errors in how the primitives are applied,

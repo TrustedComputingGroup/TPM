@@ -13,6 +13,8 @@ TPM2_ECC_Encrypt(ECC_Encrypt_In*  in,  // IN: input parameter list
 )
 {
     OBJECT* pubKey = HandleToObject(in->keyHandle);
+    pAssert_RC(pubKey != NULL);
+
     // Parameter validation
     if(pubKey->publicArea.type != TPM_ALG_ECC)
         return TPM_RC_KEY + RC_ECC_Encrypt_keyHandle;

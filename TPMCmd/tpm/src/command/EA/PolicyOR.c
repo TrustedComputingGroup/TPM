@@ -22,6 +22,7 @@ TPM2_PolicyOR(PolicyOR_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Compare and Update Internal Session policy if match
     for(i = 0; i < in->pHashList.count; i++)

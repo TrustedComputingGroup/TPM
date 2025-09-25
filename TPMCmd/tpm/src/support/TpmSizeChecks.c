@@ -74,17 +74,20 @@ BOOL TpmSizeChecks(void)
         }
 #    endif  // ALG_RSA
 #    if TABLE_DRIVEN_MARSHAL
-        printf("sizeof(MarshalData) = %zu\n", sizeof(MarshalData_st));
+        TPM_DEBUG_PRINTF("sizeof(MarshalData) = %zu\n", sizeof(MarshalData_st));
 #    endif
 
-        printf("Size of OBJECT = %zu\n", sizeof(OBJECT));
-        printf("Size of components in TPMT_SENSITIVE = %zu\n",
-               sizeof(TPMT_SENSITIVE));
-        printf("    TPMI_ALG_PUBLIC                 %zu\n", sizeof(TPMI_ALG_PUBLIC));
-        printf("    TPM2B_AUTH                      %zu\n", sizeof(TPM2B_AUTH));
-        printf("    TPM2B_DIGEST                    %zu\n", sizeof(TPM2B_DIGEST));
-        printf("    TPMU_SENSITIVE_COMPOSITE        %zu\n",
-               sizeof(TPMU_SENSITIVE_COMPOSITE));
+        TPM_DEBUG_PRINTF("Size of OBJECT = %zu\n", sizeof(OBJECT));
+        TPM_DEBUG_PRINTF("Size of components in TPMT_SENSITIVE = %zu\n",
+                         sizeof(TPMT_SENSITIVE));
+        TPM_DEBUG_PRINTF("    TPMI_ALG_PUBLIC                 %zu\n",
+                         sizeof(TPMI_ALG_PUBLIC));
+        TPM_DEBUG_PRINTF("    TPM2B_AUTH                      %zu\n",
+                         sizeof(TPM2B_AUTH));
+        TPM_DEBUG_PRINTF("    TPM2B_DIGEST                    %zu\n",
+                         sizeof(TPM2B_DIGEST));
+        TPM_DEBUG_PRINTF("    TPMU_SENSITIVE_COMPOSITE        %zu\n",
+                         sizeof(TPMU_SENSITIVE_COMPOSITE));
     }
     // Make sure that the size of the context blob is large enough for the largest
     // context
@@ -114,16 +117,17 @@ BOOL TpmSizeChecks(void)
 
         if(MAX_CONTEXT_SIZE < biggestContext)
         {
-            printf("MAX_CONTEXT_SIZE needs to be increased to at least %d (%d)\n",
-                   biggestContext,
-                   MAX_CONTEXT_SIZE);
+            TPM_DEBUG_PRINTF("MAX_CONTEXT_SIZE needs to be increased to at least %d "
+                             "(%d)\n",
+                             biggestContext,
+                             MAX_CONTEXT_SIZE);
             PASS = FALSE;
         }
         else if(MAX_CONTEXT_SIZE > biggestContext)
         {
-            printf("MAX_CONTEXT_SIZE can be reduced to %d (%d)\n",
-                   biggestContext,
-                   MAX_CONTEXT_SIZE);
+            TPM_DEBUG_PRINTF("MAX_CONTEXT_SIZE can be reduced to %d (%d)\n",
+                             biggestContext,
+                             MAX_CONTEXT_SIZE);
         }
     }
     {
@@ -140,12 +144,13 @@ BOOL TpmSizeChecks(void)
         SET_ATTRIBUTE(u.attributes, TPMA_OBJECT, fixedTPM);
         if(u.uint32Value != 2)
         {
-            printf("The bit allocation in a TPMA_OBJECT is not as expected");
+            TPM_DEBUG_PRINT("The bit allocation in a TPMA_OBJECT is not as "
+                            "expected");
             PASS = FALSE;
         }
         if(aSize != uSize)  // comparison of two sizeof() values annoys compiler
         {
-            printf("A TPMA_OBJECT is not the expected size.");
+            TPM_DEBUG_PRINT("A TPMA_OBJECT is not the expected size.");
             PASS = FALSE;
         }
     }
@@ -161,7 +166,8 @@ BOOL TpmSizeChecks(void)
                 FOR_EACH_ACT(CASE_ACT_NUMBER)
                 if(!_plat__ACT_GetImplemented(act))
                 {
-                    printf("TPM_RH_ACT_%1X is not implemented by platform\n", act);
+                    TPM_DEBUG_PRINTF(
+                        "TPM_RH_ACT_%1X is not implemented by platform\n", act);
                     PASS = FALSE;
                 }
                 default:
@@ -176,7 +182,8 @@ BOOL TpmSizeChecks(void)
         int t = MAX_DIGEST_SIZE;
         if(t < 20)
         {
-            printf("Check the MAX_DIGEST_SIZE computation (%d)", MAX_DIGEST_SIZE);
+            TPM_DEBUG_PRINTF("Check the MAX_DIGEST_SIZE computation (%d)",
+                             MAX_DIGEST_SIZE);
             PASS = FALSE;
         }
     }

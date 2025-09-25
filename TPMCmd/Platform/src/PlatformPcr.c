@@ -1,7 +1,7 @@
 
 // PCR platform interface functions
 #include "Platform.h"
-#include <public/TpmAlgorithmDefines.h>
+#include <tpm_public/TpmAlgorithmDefines.h>
 
 // use this as a convenient lookup for hash size for PCRs.
 UINT16 CryptHashGetDigestSize(TPM_ALG_ID hashAlg  // IN: hash algorithm to look up
@@ -97,7 +97,7 @@ PCR_Attributes _platPcr__GetPcrInitializationAttributes(UINT32 pcrNumber)
 BOOL _platPcr_IsPcrBankDefaultActive(TPM_ALG_ID pcrAlg)
 {
     // brute force search is fast enough for a small array.
-    for(int i = 0; i < ARRAYSIZE(DefaultActivePcrBanks); i++)
+    for(size_t i = 0; i < ARRAYSIZE(DefaultActivePcrBanks); i++)
     {
         if(DefaultActivePcrBanks[i] == pcrAlg)
         {

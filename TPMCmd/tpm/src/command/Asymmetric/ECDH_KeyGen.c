@@ -21,6 +21,7 @@ TPM2_ECDH_KeyGen(ECDH_KeyGen_In*  in,  // IN: input parameter list
     // Input Validation
 
     eccKey = HandleToObject(in->keyHandle);
+    pAssert_RC(eccKey != NULL);
 
     // Referenced key must be an ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)

@@ -102,10 +102,9 @@ LIB_EXPORT BOOL TpmMath_GetRandomBits(BYTE* pBuffer, size_t bits, RAND_STATE* ra
         //     2           0x03             6 = (8 - 2) % 8
         //     ... etc ...
         //     7           0x7F             1 = (8 - 7) % 8
-        int  excessBits = bits % 8;
-        int  shift      = (8 - excessBits) % 8;
-        BYTE mask       = ~(0xFF >> shift);
-        pBuffer[0]      = pBuffer[0] & mask;
+        static const BYTE mask[8] = {0xff, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f};
+        int excessBits            = bits % 8;
+        pBuffer[0]                = pBuffer[0] & mask[excessBits];
         return TRUE;
     }
     return FALSE;
@@ -169,5 +168,5 @@ LIB_EXPORT BOOL TpmMath_GetRandomInRange(
               && (ExtMath_IsZero(dest) || (ExtMath_UnsignedCmp(dest, limit) >= 0)))
             ;
     }
-    return !g_inFailureMode;
+    return !_plat__InFailureMode();
 }

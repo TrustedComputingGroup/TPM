@@ -39,9 +39,9 @@ LIB_EXPORT bigNum BnFromBytes(bigNum bn, const BYTE* bytes, NUMBYTES nBytes)
         pTo = (BYTE*)bn->d;
         for(; nBytes != 0; nBytes--)
             *pTo++ = *pFrom--;
-            // For a little-endian machine, the conversion is a straight byte
-            // reversal. For a big-endian machine, we have to put the words in
-            // big-endian byte order
+        // For a little-endian machine, the conversion is a straight byte
+        // reversal. For a big-endian machine, we have to put the words in
+        // big-endian byte order
 #if BIG_ENDIAN_TPM
         {
             crypt_word_t t;

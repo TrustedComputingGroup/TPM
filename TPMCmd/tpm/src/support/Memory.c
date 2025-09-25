@@ -55,12 +55,12 @@ LIB_EXPORT INT16 MemoryCopy2B(TPM2B*       dest,    // OUT: receiving TPM2B
                               unsigned int dSize  // IN: size of the receiving buffer
 )
 {
-    pAssert(dest != NULL);
-    if(source == NULL)
-        dest->size = 0;
-    else
+    pAssert_ZERO(dest != NULL);
+    dest->size = 0;
+    if(source != NULL)
     {
-        pAssert(source->size <= dSize);
+        NOT_REFERENCED(dSize);  // if pAsserts compiled out.
+        pAssert_ZERO(source->size <= dSize);
         MemoryCopy(dest->buffer, source->buffer, source->size);
         dest->size = source->size;
     }
@@ -78,7 +78,9 @@ void MemoryConcat2B(
                            //     aInOut.size)
 )
 {
-    pAssert(bIn->size <= aMaxSize - aInOut->size);
+    NOT_REFERENCED(aMaxSize);  // if pAsserts compiled out.
+    // if won't fit, enter failure mode and return unchanged.
+    pAssert_VOID_OK(bIn->size <= aMaxSize - aInOut->size);
     MemoryCopy(&aInOut->buffer[aInOut->size], &bIn->buffer, bIn->size);
     aInOut->size = aInOut->size + bIn->size;
     return;

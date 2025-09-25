@@ -18,7 +18,7 @@
 #ifndef BN_SUPPORT_INTERFACE_H
 #define BN_SUPPORT_INTERFACE_H
 // TODO_RENAME_INC_FOLDER:private refers to the TPM_CoreLib private headers
-#include "public/GpMacros.h"
+#include "tpm_public/GpMacros.h"
 #include <CryptoInterface.h>
 #include "BnValues.h"
 

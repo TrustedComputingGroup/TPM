@@ -47,8 +47,11 @@ TPM2_Quote(Quote_In*  in,  // IN: input parameter list
         return TPM_RCS_SCHEME + RC_Quote_inScheme;
 
     // Compute PCR digest
-    PCRComputeCurrentDigest(
+    TPM_RC result = PCRComputeCurrentDigest(
         hashAlg, &in->PCRselect, &quoted.attested.quote.pcrDigest);
+
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Copy PCR select.  "PCRselect" is modified in PCRComputeCurrentDigest
     // function
@@ -56,12 +59,15 @@ TPM2_Quote(Quote_In*  in,  // IN: input parameter list
 
     // Sign attestation structure.  A NULL signature will be returned if
     // signObject is NULL.
-    return SignAttestInfo(signObject,
-                          &in->inScheme,
-                          &quoted,
-                          &in->qualifyingData,
-                          &out->quoted,
-                          &out->signature);
+
+    result = SignAttestInfo(signObject,
+                            &in->inScheme,
+                            &quoted,
+                            &in->qualifyingData,
+                            &out->quoted,
+                            &out->signature);
+
+    return result;
 }
 
 #endif  // CC_Quote

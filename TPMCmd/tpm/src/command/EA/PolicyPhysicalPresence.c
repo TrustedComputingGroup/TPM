@@ -19,6 +19,7 @@ TPM2_PolicyPhysicalPresence(PolicyPhysicalPresence_In* in  // IN: input paramete
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Update policy hash
     // policyDigestnew = hash(policyDigestold || TPM_CC_PolicyPhysicalPresence)

@@ -33,7 +33,8 @@ EncryptDecryptShared(TPMI_DH_OBJECT      keyHandleIn,
     BOOL       OK;
     // Input Validation
     symKey = HandleToObject(keyHandleIn);
-    mode   = symKey->publicArea.parameters.symDetail.sym.mode.sym;
+    pAssert_RC(symKey != NULL);
+    mode = symKey->publicArea.parameters.symDetail.sym.mode.sym;
 
     // The input key should be a symmetric key
     if(symKey->publicArea.type != TPM_ALG_SYMCIPHER)

@@ -24,6 +24,7 @@ TPM2_PolicyLocality(PolicyLocality_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Get new locality setting in canonical form
     marshalBuffer[0] = 0;  // Code analysis says that this is not initialized

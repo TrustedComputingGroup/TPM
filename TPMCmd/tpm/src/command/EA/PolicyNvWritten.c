@@ -20,6 +20,7 @@ TPM2_PolicyNvWritten(PolicyNvWritten_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // If already set is this a duplicate (the same setting)? If it
     // is a conflicting setting, it is an error

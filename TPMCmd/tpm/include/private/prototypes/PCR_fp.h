@@ -153,7 +153,7 @@ void PCRExtend(TPMI_DH_PCR   handle,  // IN: PCR handle to be extended
 //
 // As a side-effect, 'selection' is modified so that only the implemented PCR
 // will have their bits still set.
-void PCRComputeCurrentDigest(
+TPM_RC PCRComputeCurrentDigest(
     TPMI_ALG_HASH       hashAlg,    // IN: hash algorithm to compute digest
     TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered on
                                     //     output)
@@ -164,11 +164,11 @@ void PCRComputeCurrentDigest(
 // This function is used to read a list of selected PCR.  If the requested PCR
 // number exceeds the maximum number that can be output, the 'selection' is
 // adjusted to reflect the actual output PCR.
-void PCRRead(TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered on
-                                             //     output)
-             TPML_DIGEST* digest,            // OUT: digest
-             UINT32*      pcrCounter  // OUT: the current value of PCR generation
-                                      //     number
+TPM_RC PCRRead(TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered on
+                                               //     output)
+               TPML_DIGEST* digest,            // OUT: digest
+               UINT32*      pcrCounter  // OUT: the current value of PCR generation
+                                        //     number
 );
 
 //*** PCRAllocate()

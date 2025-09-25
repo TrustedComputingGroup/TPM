@@ -60,9 +60,9 @@ loop:
     ExtMath_Add(bnR, bnE, ExtEcc_PointX(Q1));
     ExtMath_Mod(bnR, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnR,
-                                 "40F1EC59F793D9F49E09DCEF49130D41"
-                                 "94F79FB1EED2CAA55BACDB49C4E755D1"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnR,
+                                    "40F1EC59F793D9F49E09DCEF49130D41"
+                                    "94F79FB1EED2CAA55BACDB49C4E755D1"));
 #  endif
     // if r=0 or r+k=n, return to A3;
     if(ExtMath_IsZero(bnR))
@@ -76,9 +76,9 @@ loop:
     ExtMath_AddWord(bnT, bnD, 1);
     ExtMath_ModInverse(bnT, bnT, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnT,
-                                 "79BFCF3052C80DA7B939E0C6914A18CB"
-                                 "B2D96D8555256E83122743A7D4F5F956"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnT,
+                                    "79BFCF3052C80DA7B939E0C6914A18CB"
+                                    "B2D96D8555256E83122743A7D4F5F956"));
 #  endif
     // compute s = t * (k - r * dA) mod n
     ExtMath_ModMult(bnS, bnR, bnD, order);
@@ -87,9 +87,9 @@ loop:
     ExtMath_Add(bnS, bnK, bnS);
     ExtMath_ModMult(bnS, bnS, bnT, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnS,
-                                 "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
-                                 "67A457872FB09EC56327A67EC7DEEBE7"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnS,
+                                    "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+                                    "67A457872FB09EC56327A67EC7DEEBE7"));
 #  endif
     if(ExtMath_IsZero(bnS))
         goto loop;
@@ -99,12 +99,12 @@ loop:
 // is (r, s).
 // This is handled by the common return code
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnR,
-                                 "40F1EC59F793D9F49E09DCEF49130D41"
-                                 "94F79FB1EED2CAA55BACDB49C4E755D1"));
-    pAssert(TpmEccDebug_HexEqual(bnS,
-                                 "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
-                                 "67A457872FB09EC56327A67EC7DEEBE7"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnR,
+                                    "40F1EC59F793D9F49E09DCEF49130D41"
+                                    "94F79FB1EED2CAA55BACDB49C4E755D1"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnS,
+                                    "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+                                    "67A457872FB09EC56327A67EC7DEEBE7"));
 #  endif
     return TPM_RC_SUCCESS;
 }
@@ -131,20 +131,20 @@ TPM_RC TpmEcc_ValidateSignatureEcSm2(
 
 #  ifdef _SM2_SIGN_DEBUG
     // Make sure that the input signature is the test signature
-    pAssert(TpmEccDebug_HexEqual(bnR,
-                                 "40F1EC59F793D9F49E09DCEF49130D41"
-                                 "94F79FB1EED2CAA55BACDB49C4E755D1"));
-    pAssert(TpmEccDebug_HexEqual(bnS,
-                                 "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
-                                 "67A457872FB09EC56327A67EC7DEEBE7"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnR,
+                                    "40F1EC59F793D9F49E09DCEF49130D41"
+                                    "94F79FB1EED2CAA55BACDB49C4E755D1"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnS,
+                                    "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+                                    "67A457872FB09EC56327A67EC7DEEBE7"));
 #  endif
     // b)   compute t  := (r + s) mod n
     ExtMath_Add(bnT, bnR, bnS);
     ExtMath_Mod(bnT, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnT,
-                                 "2B75F07ED7ECE7CCC1C8986B991F441A"
-                                 "D324D6D619FE06DD63ED32E0C997C801"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnT,
+                                    "2B75F07ED7ECE7CCC1C8986B991F441A"
+                                    "D324D6D619FE06DD63ED32E0C997C801"));
 #  endif
     // c)   verify that t > 0
     OK = !ExtMath_IsZero(bnT);
@@ -155,10 +155,10 @@ TPM_RC TpmEcc_ValidateSignatureEcSm2(
     // d)   compute (x, y) := [s]G + [t]Q
     OK = ExtEcc_PointMultiplyAndAdd(P, NULL, bnS, ecQ, bnT, E);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(OK
-            && TpmEccDebug_HexEqual(ExtEcc_PointX(P),
-                                    "110FCDA57615705D5E7B9324AC4B856D"
-                                    "23E6D9188B2AE47759514657CE25D112"));
+    pAssert_RC(OK
+               && TpmEccDebug_HexEqual(ExtEcc_PointX(P),
+                                       "110FCDA57615705D5E7B9324AC4B856D"
+                                       "23E6D9188B2AE47759514657CE25D112"));
 #  endif
     // e)   compute r' := (e + x) mod n (the x coordinate is in bnT)
     OK = OK && ExtMath_Add(bnRp, bnE, ExtEcc_PointX(P));

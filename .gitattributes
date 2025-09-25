@@ -10,6 +10,8 @@
 *.vcproj    text eol=crlf
 # ditto for CMD.exe
 *.cmd       text eol=crlf
+
+# linux scripts must have LF
 *.sh        text eol=lf
 
 ###############################################################################

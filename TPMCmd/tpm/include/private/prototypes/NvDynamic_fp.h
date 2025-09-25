@@ -73,8 +73,8 @@ BOOL NvIsOwnerPersistentHandle(TPM_HANDLE handle  // IN: handle
 //      TPM_RC_NV_WRITELOCKED   Index is present but locked for writing and command
 //                              writes to the index
 TPM_RC
-NvIndexIsAccessible(TPMI_RH_NV_INDEX handle  // IN: handle
-);
+NvIndexIsAccessible(TPMI_RH_NV_INDEX handle,  // IN: handle
+                    BOOL             commandAcceptsVirtualHandles);
 
 //*** NvGetEvictObject()
 // This function is used to dereference an evict object handle and get a pointer

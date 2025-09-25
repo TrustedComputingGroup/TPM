@@ -289,10 +289,6 @@ LIB_EXPORT int _plat__WasPowerLost(void);
 //      FALSE(0)        if physical presence is not signaled
 LIB_EXPORT int _plat__PhysicalPresenceAsserted(void);
 
-//***_plat__Fail()
-// This is the platform depended failure exit for the TPM.
-LIB_EXPORT NORETURN void _plat__Fail(void);
-
 //** From Unique.c
 
 #if VENDOR_PERMANENT_AUTH_ENABLED == YES
@@ -323,23 +319,60 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t       which,
 LIB_EXPORT void _plat__GetPlatformManufactureData(uint8_t* pPlatformPersistentData,
                                                   uint32_t bufferSize);
 
-// return the 4 character Manufacturer Capability code.  This
+// return the 4 character Manufacturer Capability code (TPM_PT_MANUFACTURER).  This
 // should come from the platform library since that is provided by the manufacturer
-LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode();
+LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode(void);
 
-// return the 4 character VendorStrings for Capabilities.
+// return the 4 character VendorStrings for GetCapability (TPM_PT_VENDOR_STRING_1-4)
 // Index is ONE-BASED, and may be in the range [1,4] inclusive.
 // Any other index returns all zeros. The return value will be interpreted
 // as an array of 4 ASCII characters (with no null terminator)
 LIB_EXPORT uint32_t _plat__GetVendorCapabilityCode(int index);
 
 // return the most-significant 32-bits of the TPM Firmware Version reported by
-// getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh();
+// getCapability (TPM_PT_FIRMWARE_VERSION_1)
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh(void);
 
 // return the least-significant 32-bits of the TPM Firmware Version reported by
-// getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow();
+// getCapability (TPM_PT_FIRMWARE_VERSION_2)
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow(void);
+
+// return the Vendor TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
+LIB_EXPORT uint32_t _plat__GetVendorTpmType(void);
+
+// Struct to define TPM and platform specific capability value
+typedef struct _spec_capability_value
+{
+    uint32_t tpmSpecLevel;
+    uint32_t tpmSpecVersion;
+    uint32_t tpmSpecYear;
+    uint32_t tpmSpecDayOfYear;
+
+    uint32_t platformFamily;
+    uint32_t platfromLevel;
+    uint32_t platformRevision;
+    uint32_t platformYear;
+    uint32_t platformDayOfYear;
+} SPEC_CAPABILITY_VALUE;
+
+// return info on TPM and Platform Specific capability values.
+LIB_EXPORT void _plat_GetSpecCapabilityValue(SPEC_CAPABILITY_VALUE* returnData);
+
+// Return enabled self-tests on the platform when TPM SelfTest is called.
+//
+// pToTestVector is a byte array allocated by the TPM library, each bit in the array
+// represents a TPM_ALG_ID to be tested. The bit length of the vector is
+// (8 * toTestVectorSize), which is larger than or equal to TPM_ALG_LAST + 1.
+//
+// Initially the vector have bits set for all implemented algorithms or remaining
+// algorithms to test, based on fullTest option, and platform should update the vector
+// to indicate which tests are actually enabled on the platform based on the its
+// capabilities at the time of the call.
+LIB_EXPORT void _plat_GetEnabledSelfTest(
+    uint8_t  fullTest,         // IN: full test or not
+    uint8_t* pToTestVector,    // INOUT: initialized byte array of tracked tests
+    size_t   toTestVectorSize  // IN: size of the byte array in bytes
+);
 
 // return the TPM Firmware's current SVN.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void);
@@ -376,10 +409,29 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret(
 );
 #endif  // FW_LIMITED_SUPPORT
 
-// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
-LIB_EXPORT uint32_t _plat__GetTpmType();
+
+#if ENABLE_TPM_DEBUG_PRINT
+
+LIB_EXPORT void   _plat_debug_print(const char* str);
+LIB_EXPORT void   _plat_debug_print_buffer(const void* buf, const size_t size);
+LIB_EXPORT void   _plat_debug_print_int32(const char* name, uint32_t value);
+LIB_EXPORT void   _plat_debug_print_int64(const char* name, uint64_t value);
+LIB_EXPORT void   _plat_debug_printf(const char* fmt, ...);
+LIB_EXPORT size_t _plat_debug_snprintf(
+    char* buf, size_t bufSize, const char* fmt, ...);
+
+#endif  // ENABLE_TPM_DEBUG_PRINT
 
 // platform PCR initialization functions
 #include <platform_interface/prototypes/platform_pcr_fp.h>
+
+// platform initialization functions
+#include <platform_interface/prototypes/platform_init_fp.h>
+
+// platform failure mode functions
+#include <platform_interface/prototypes/platform_failure_mode_fp.h>
+
+// platform virtual NV functions
+#include <platform_interface/prototypes/platform_virtual_nv_fp.h>
 
 #endif  // _TPM_TO_PLATFORM_INTERFACE_H_

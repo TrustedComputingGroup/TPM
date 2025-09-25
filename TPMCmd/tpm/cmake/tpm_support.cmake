@@ -1,8 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
 include(${CMAKE_CURRENT_LIST_DIR}/package_utilities.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/misc_utilities.cmake)
 disallow_in_source_builds()

@@ -176,7 +176,7 @@ BOOL MillerRabin(Crypt_Int* bnW, RAND_STATE* rand)
               && ((ExtMath_UnsignedCmpWord(bnB, 1) <= 0)
                   || (ExtMath_UnsignedCmp(bnB, bnWm1) >= 0)))
             ;
-        if(g_inFailureMode)
+        if( _plat__InFailureMode())
             return FALSE;
 
         // 4.3 z = b^m mod w.
@@ -248,7 +248,7 @@ RsaCheckPrime(Crypt_Int* prime, UINT32 exponent, RAND_STATE* rand)
         ExtMath_SubtractWord(prime, prime, 2);
 
     if(TpmMath_IsProbablyPrime(prime, rand) == 0)
-        ERROR_EXIT(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
+        ERROR_EXIT( _plat__InFailureMode() ? TPM_RC_FAILURE : TPM_RC_VALUE);
 Exit:
     return retVal;
 #  else

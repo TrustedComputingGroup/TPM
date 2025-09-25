@@ -62,7 +62,7 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
 
     // Input Validation
     parentObject = HandleToObject(in->parentHandle);
-    pAssert(parentObject != NULL);
+    pAssert_RC(parentObject != NULL);
 
     // Does parent have the proper attributes?
     if(!ObjectIsParent(parentObject))
@@ -100,12 +100,14 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
     if(result != TPM_RC_SUCCESS)
         return result;
     // Fill in creation data
-    FillInCreationData(in->parentHandle,
-                       publicArea->nameAlg,
-                       &in->creationPCR,
-                       &in->outsideInfo,
-                       &out->creationData,
-                       &out->creationHash);
+    result = FillInCreationData(in->parentHandle,
+                                publicArea->nameAlg,
+                                &in->creationPCR,
+                                &in->outsideInfo,
+                                &out->creationData,
+                                &out->creationHash);
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Compute creation ticket
     result = TicketComputeCreation(EntityGetHierarchy(in->parentHandle),
@@ -116,18 +118,18 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
         return result;
 
     // Prepare output private data from sensitive
-    SensitiveToPrivate(&newObject->sensitive,
-                       &newObject->name,
-                       parentObject,
-                       publicArea->nameAlg,
-                       &out->outPrivate);
+    result               = SensitiveToPrivate(&newObject->sensitive,
+                                &newObject->name,
+                                parentObject,
+                                publicArea->nameAlg,
+                                &out->outPrivate);
 
     newObject->hierarchy = parentObject->hierarchy;
 
     // Finish by copying the remaining return values
     out->outPublic.publicArea = newObject->publicArea;
 
-    return TPM_RC_SUCCESS;
+    return result;
 }
 
 #endif  // CC_Create

@@ -1,3 +1,4 @@
+
 #include "Tpm.h"
 #include "SetCapability_fp.h"
 
@@ -14,6 +15,7 @@ TPM_RC
 TPM2_SetCapability(SetCapability_In* in  // IN: input parameter list
 )
 {
+    NOT_REFERENCED(in);
     // This reference implementation does not implement any settable capabilities.
     return TPM_RCS_VALUE + SetCapability_setCapabilityData;
 }

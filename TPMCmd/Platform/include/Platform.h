@@ -5,9 +5,9 @@
 #include <TpmConfiguration/TpmBuildSwitches.h>
 #include <TpmConfiguration/TpmProfile.h>
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
-#include <public/BaseTypes.h>
-#include <public/TPMB.h>
-#include <public/MinMax.h>
+#include <tpm_public/BaseTypes.h>
+#include <tpm_public/TPMB.h>
+#include <tpm_public/MinMax.h>
 
 #include "PlatformACT.h"
 #include "PlatformClock.h"
@@ -16,6 +16,7 @@
 // TODO_RENAME_INC_FOLDER:platform_interface refers to the TPM_CoreLib platform interface
 #include <platform_interface/tpm_to_platform_interface.h>
 #include <platform_interface/platform_to_tpm_interface.h>
+#include "PlatformInternal.h"
 
 #define GLOBAL_C
 #define NV_C

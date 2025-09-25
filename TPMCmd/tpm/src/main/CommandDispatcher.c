@@ -3,8 +3,6 @@
 #include "Tpm.h"
 #include "Marshal.h"
 
-#if TABLE_DRIVEN_DISPATCH || TABLE_DRIVEN_MARSHAL
-
 typedef TPM_RC(NoFlagFunction)(void* target, BYTE** buffer, INT32* size);
 typedef TPM_RC(FlagFunction)(void* target, BYTE** buffer, INT32* size, BOOL flag);
 
@@ -89,23 +87,8 @@ typedef struct COMMAND_DESCRIPTOR_t
 // The types list is constructed with a byte of 0xff at the end of the command
 // parameters and with an 0xff at the end of the response parameters.
 
-#  if COMPRESSED_LISTS
-#    define PAD_LIST 0
-#  else
-#    define PAD_LIST 1
-#  endif
-#  define _COMMAND_TABLE_DISPATCH_
-#  include "CommandDispatchData.h"
-
-#  define TEST_COMMAND TPM_CC_Startup
-
-#  define NEW_CC
-
-#else
-
-#  include "Commands.h"
-
-#endif
+#define _COMMAND_TABLE_DISPATCH_
+#include "CommandDispatchData.h"
 
 //* Marshal/Unmarshal Functions
 
@@ -114,25 +97,22 @@ typedef struct COMMAND_DESCRIPTOR_t
 TPM_RC
 ParseHandleBuffer(COMMAND* command)
 {
-    TPM_RC result;
-#if TABLE_DRIVEN_DISPATCH || TABLE_DRIVEN_MARSHAL
+    TPM_RC                result;
     COMMAND_DESCRIPTOR_t* desc;
     BYTE*                 types;
     BYTE                  type;
     BYTE                  dType;
 
     // Make sure that nothing strange has happened
-    pAssert(
+    pAssert_RC(
         command->index < sizeof(s_CommandDataArray) / sizeof(COMMAND_DESCRIPTOR_t*));
     // Get the address of the descriptor for this command
     desc = s_CommandDataArray[command->index];
 
-    pAssert(desc != NULL);
+    pAssert_RC(desc != NULL);
     // Get the associated list of unmarshaling data types.
     types = &((BYTE*)desc)[desc->typesOffset];
 
-    //    if(s_ccAttr[commandIndex].commandIndex == TEST_COMMAND)
-    //        commandIndex = commandIndex;
     // No handles yet
     command->handleNum = 0;
 
@@ -144,7 +124,7 @@ ParseHandleBuffer(COMMAND* command)
         // get the next type
         type = *types++)
     {
-#  if TABLE_DRIVEN_MARSHAL
+#if TABLE_DRIVEN_MARSHAL
         marshalIndex_t index;
         index  = unmarshalArray[dType] | ((type & 0x80) ? NULL_FLAG : 0);
         result = Unmarshal(index,
@@ -152,7 +132,7 @@ ParseHandleBuffer(COMMAND* command)
                            &command->parameterBuffer,
                            &command->parameterSize);
 
-#  else
+#else
         // See if unmarshaling of this handle type requires a flag
         if(dType < HANDLE_FIRST_FLAG_TYPE)
         {
@@ -174,7 +154,7 @@ ParseHandleBuffer(COMMAND* command)
                        &command->parameterSize,
                        (type & 0x80) != 0);
         }
-#  endif
+#endif
 
         // Got a handle
         // We do this first so that the match for the handle offset of the
@@ -185,21 +165,6 @@ ParseHandleBuffer(COMMAND* command)
             // handle indication set
             return result + TPM_RC_H + (command->handleNum * TPM_RC_1);
     }
-#else
-    BYTE**      handleBufferStart   = &command->parameterBuffer;
-    INT32*      bufferRemainingSize = &command->parameterSize;
-    TPM_HANDLE* handles             = &command->handles[0];
-    UINT32*     handleCount         = &command->handleNum;
-    *handleCount                    = 0;
-    switch(command->code)
-    {
-#  include "HandleProcess.h"
-#  undef handles
-        default:
-            FAIL(FATAL_ERROR_INTERNAL);
-            break;
-    }
-#endif
     return TPM_RC_SUCCESS;
 }
 
@@ -209,33 +174,6 @@ ParseHandleBuffer(COMMAND* command)
 TPM_RC
 CommandDispatcher(COMMAND* command)
 {
-#if !TABLE_DRIVEN_DISPATCH || TABLE_DRIVEN_MARSHAL
-    TPM_RC      result;
-    BYTE**      paramBuffer     = &command->parameterBuffer;
-    INT32*      paramBufferSize = &command->parameterSize;
-    BYTE**      responseBuffer  = &command->responseBuffer;
-    INT32*      respParmSize    = &command->parameterSize;
-    INT32       rSize;
-    TPM_HANDLE* handles = &command->handles[0];
-    //
-    command->handleNum = 0;           // The command-specific code knows how
-                                      // many handles there are. This is for
-                                      // cataloging the number of response
-                                      // handles
-    MemoryIoBufferAllocationReset();  // Initialize so that allocation will
-                                      // work properly
-    switch(GetCommandCode(command->index))
-    {
-#  include "CommandDispatcher.h"
-
-        default:
-            FAIL(FATAL_ERROR_INTERNAL);
-            break;
-    }
-Exit:
-    MemoryIoBufferZero();
-    return result;
-#else
     COMMAND_DESCRIPTOR_t* desc;
     BYTE*                 types;
     BYTE                  type;
@@ -254,12 +192,12 @@ Exit:
     TPM_RC                result;
     //
     // Get the address of the descriptor for this command
-    pAssert(
+    pAssert_RC(
         command->index < sizeof(s_CommandDataArray) / sizeof(COMMAND_DESCRIPTOR_t*));
     desc = s_CommandDataArray[command->index];
 
     // Get the list of parameter types for this command
-    pAssert(desc != NULL);
+    pAssert_RC(desc != NULL);
     types = &((BYTE*)desc)[desc->typesOffset];
 
     // Get a pointer to the list of parameter offsets
@@ -277,6 +215,11 @@ Exit:
     commandIn = MemoryGetInBuffer(maxInSize);
     // And the output parameters
     commandOut = (BYTE*)MemoryGetOutBuffer((UINT32)maxOutSize);
+
+    if(commandIn == NULL || commandOut == NULL)
+    {
+        return TPM_RC_FAILURE;
+    }
 
     // Get the address of the action code dispatch
     cmd = desc->command;
@@ -305,7 +248,7 @@ Exit:
     for(; (dType = (type & 0x7F)) <= PARAMETER_LAST_TYPE; type = *types++)
     {
         pNum++;
-#  if TABLE_DRIVEN_MARSHAL
+#if TABLE_DRIVEN_MARSHAL
         {
             marshalIndex_t index = unmarshalArray[dType];
             index |= (type & 0x80) ? NULL_FLAG : 0;
@@ -314,7 +257,7 @@ Exit:
                                &command->parameterBuffer,
                                &command->parameterSize);
         }
-#  else
+#else
         if(dType < PARAMETER_FIRST_FLAG_TYPE)
         {
             NoFlagFunction* f = (NoFlagFunction*)unmarshalArray[dType];
@@ -330,7 +273,7 @@ Exit:
                        &command->parameterSize,
                        (type & 0x80) != 0);
         }
-#  endif
+#endif
         if(result != TPM_RC_SUCCESS)
         {
             result += TPM_RC_P + (TPM_RC_1 * pNum);
@@ -400,24 +343,24 @@ Exit:
     // no pointers to data, all of the data being returned has to be in the
     // command action output buffer. If we try to marshal more bytes than
     // could fit into the output buffer, we need to fail.
-    for(; (dType = (type & 0x7F)) <= RESPONSE_PARAMETER_LAST_TYPE && !g_inFailureMode;
+    for(; (dType = (type & 0x7F)) <= RESPONSE_PARAMETER_LAST_TYPE
+          && !_plat__InFailureMode();
         type = *types++)
     {
-#  if TABLE_DRIVEN_MARSHAL
+#if TABLE_DRIVEN_MARSHAL
         marshalIndex_t index = marshalArray[dType];
         command->parameterSize += Marshal(
             index, &commandOut[offset], &command->responseBuffer, &maxOutSize);
-#  else
+#else
         const MARSHAL_t f = marshalArray[dType];
 
         command->parameterSize +=
             f(&commandOut[offset], &command->responseBuffer, &maxOutSize);
-#  endif
+#endif
         offset = *offsets++;
     }
     result = (maxOutSize < 0) ? TPM_RC_FAILURE : TPM_RC_SUCCESS;
 Exit:
     MemoryIoBufferZero();
     return result;
-#endif
 }

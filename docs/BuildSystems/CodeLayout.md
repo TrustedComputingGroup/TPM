@@ -1,15 +1,12 @@
-<!-- Copyright Microsoft Corporation. All Rights Reserved
-     Licensed subject to: https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE -->
-
 # Code Layout
-- [Code Layout](#code-layout)
-  - [Introduction](#introduction)
-  - [Form Follows Function](#form-follows-function)
-  - [Tpm Reference Code (TPMCmd folder)](#tpm-reference-code-tpmcmd-folder)
-  - [Tpm Core Library (TPMCmd/tpm folder)](#tpm-core-library-tpmcmdtpm-folder)
-  - [Tpm Core Library Includes (TPMCmd/tpm/include folder)](#tpm-core-library-includes-tpmcmdtpminclude-folder)
-  - [Tpm Core Library CryptoLibs (TPMCmd/tpm/cryptolibs folder)](#tpm-core-library-cryptolibs-tpmcmdtpmcryptolibs-folder)
-  - [Platform Library (TPMCmd/Platform folder)](#platform-library-tpmcmdplatform-folder)
+* [Code Layout](#code-layout)
+  * [Introduction](#introduction)
+  * [Form Follows Function](#form-follows-function)
+  * [Tpm Reference Code (TPMCmd folder)](#tpm-reference-code-tpmcmd-folder)
+  * [Tpm Core Library (TPMCmd/tpm folder)](#tpm-core-library-tpmcmdtpm-folder)
+  * [Tpm Core Library Includes (TPMCmd/tpm/include folder)](#tpm-core-library-includes-tpmcmdtpminclude-folder)
+  * [Tpm Core Library CryptoLibs (TPMCmd/tpm/cryptolibs folder)](#tpm-core-library-cryptolibs-tpmcmdtpmcryptolibs-folder)
+  * [Platform Library (TPMCmd/Platform folder)](#platform-library-tpmcmdplatform-folder)
 
 ## Introduction
 
@@ -30,6 +27,7 @@ subject to [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 The physical directory layout of the reference code is based on achieving two
 simultaneous goals:
+
 1. to build the TCG Reference Code, Simulator, and Platform library.
 2. to allow library consumers to consume only library components while injecting
 changes at multiple customization points. Items designated Replaceable can be
@@ -87,7 +85,6 @@ The structure of `TPMCmd/tpm/include`:
 | private            | Core and Sample crypto libraries (see below) | YES         | NO           |
 | public             | Various TPM  Header libraries (see below)    | YES         | NO           |
 
-
 ## Tpm Core Library CryptoLibs (TPMCmd/tpm/cryptolibs folder)
 
 The cryptolibs folder contains both maintained code and legacy code that is kept
@@ -111,4 +108,3 @@ More details about the Crypto design and customization can be found under [Archi
 | ------- | ------------------------------ | :---------: | :----------: |
 | include | Tpm_PlatformLib headers        | YES         | YES          |
 | src     | Tpm_PlatformLib source         | YES         | YES          |
-

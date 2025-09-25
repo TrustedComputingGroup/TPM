@@ -15,38 +15,38 @@ BOOL CryptIsSchemeAnonymous(TPM_ALG_ID scheme  // IN: the scheme algorithm to te
 
 //*** ParmDecryptSym()
 //  This function performs parameter decryption using symmetric block cipher.
-void ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
-                    TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
-                    UINT16     keySizeInBits,  // IN: the key size in bits
-                    TPM2B*     key,            // IN: KDF HMAC key
-                    TPM2B*     nonceCaller,    // IN: nonce caller
-                    TPM2B*     nonceTpm,       // IN: nonce TPM
-                    UINT32     dataSize,       // IN: size of parameter buffer
-                    BYTE*      data            // OUT: buffer to be decrypted
+TPM_RC ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
+                      TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
+                      UINT16     keySizeInBits,  // IN: the key size in bits
+                      TPM2B*     key,            // IN: KDF HMAC key
+                      TPM2B*     nonceCaller,    // IN: nonce caller
+                      TPM2B*     nonceTpm,       // IN: nonce TPM
+                      UINT32     dataSize,       // IN: size of parameter buffer
+                      BYTE*      data            // OUT: buffer to be decrypted
 );
 
 //*** ParmEncryptSym()
 //  This function performs parameter encryption using symmetric block cipher.
-void ParmEncryptSym(TPM_ALG_ID symAlg,         // IN: symmetric algorithm
-                    TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
-                    UINT16     keySizeInBits,  // IN: symmetric key size in bits
-                    TPM2B*     key,            // IN: KDF HMAC key
-                    TPM2B*     nonceCaller,    // IN: nonce caller
-                    TPM2B*     nonceTpm,       // IN: nonce TPM
-                    UINT32     dataSize,       // IN: size of parameter buffer
-                    BYTE*      data            // OUT: buffer to be encrypted
+TPM_RC ParmEncryptSym(TPM_ALG_ID symAlg,         // IN: symmetric algorithm
+                      TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
+                      UINT16     keySizeInBits,  // IN: symmetric key size in bits
+                      TPM2B*     key,            // IN: KDF HMAC key
+                      TPM2B*     nonceCaller,    // IN: nonce caller
+                      TPM2B*     nonceTpm,       // IN: nonce TPM
+                      UINT32     dataSize,       // IN: size of parameter buffer
+                      BYTE*      data            // OUT: buffer to be encrypted
 );
 
 //*** CryptXORObfuscation()
 // This function implements XOR obfuscation. It should not be called if the
 // hash algorithm is not implemented. The only return value from this function
 // is TPM_RC_SUCCESS.
-void CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
-                         TPM2B*     key,       // IN: KDF key
-                         TPM2B*     contextU,  // IN: contextU
-                         TPM2B*     contextV,  // IN: contextV
-                         UINT32     dataSize,  // IN: size of data buffer
-                         BYTE*      data       // IN/OUT: data to be XORed in place
+TPM_RC CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
+                           TPM2B*     key,       // IN: KDF key
+                           TPM2B*     contextU,  // IN: contextU
+                           TPM2B*     contextV,  // IN: contextV
+                           UINT32     dataSize,  // IN: size of data buffer
+                           BYTE*      data       // IN/OUT: data to be XORed in place
 );
 
 //*** CryptInit()
@@ -142,7 +142,7 @@ CryptSecretDecrypt(OBJECT*      decryptKey,   // IN: decrypt key
 
 //*** CryptParameterEncryption()
 // This function does in-place encryption of a response parameter.
-void CryptParameterEncryption(
+TPM_RC CryptParameterEncryption(
     TPM_HANDLE handle,             // IN: encrypt session handle
     TPM2B*     nonceCaller,        // IN: nonce caller
     INT32      bufferSize,         // IN: size of parameter buffer
@@ -236,7 +236,8 @@ BOOL CryptIsSplitSign(TPM_ALG_ID scheme  // IN: the algorithm selector
 );
 
 //*** CryptIsAsymSignScheme()
-// This function indicates if a scheme algorithm is a sign algorithm.
+// This function indicates if a scheme algorithm is a sign algorithm valid for the
+// public key type.
 BOOL CryptIsAsymSignScheme(TPMI_ALG_PUBLIC      publicType,  // IN: Type of the object
                            TPMI_ALG_ASYM_SCHEME scheme       // IN: the scheme
 );

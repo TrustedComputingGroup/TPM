@@ -60,7 +60,25 @@ enum TpmEndPointInfo
     tpmPlatformAvailable = 0x01,
     tpmUsesTbs           = 0x02,
     tpmInRawMode         = 0x04,
-    tpmSupportsPP        = 0x08
+    tpmSupportsPP        = 0x08,
+
+    // Valid only with PlatformAvailable set.
+    // System and TPM power control signals (SignalPowerOn/Off) are not supported.
+    NoPowerCtl = 0x10,
+
+    // Valid only with tpmPlatformAvailable set.
+    // TPM locality cannot be changed.
+    NoLocalityCtl = 0x20,
+
+    // Valid only with tpmPlatformAvailable set.
+    // NV control signals (SignalNvOn/Off) are not supported.
+    NoNvCtl = 0x40,
+
+    // indicates that no force failure mode is available in the protocol
+    NoForceFailure = 0x80,
+
+    // indicates Locality 4 Hash indications are not supported
+    NoHashDataCtl = 0x100
 };
 
 #ifdef _MSC_VER

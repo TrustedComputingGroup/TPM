@@ -32,6 +32,7 @@ TPM2_PolicyAuthorizeNV(PolicyAuthorizeNV_In* in)
     // Input Validation
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Skip checks if this is a trial policy
     if(!session->attributes.isTrialPolicy)
@@ -75,14 +76,12 @@ TPM2_PolicyAuthorizeNV(PolicyAuthorizeNV_In* in)
     PolicyDigestClear(session);
 
     // Update policyDigest
-    PolicyContextUpdate(TPM_CC_PolicyAuthorizeNV,
-                        EntityGetName(in->nvIndex, &name),
-                        NULL,
-                        NULL,
-                        0,
-                        session);
-
-    return TPM_RC_SUCCESS;
+    return PolicyContextUpdate(TPM_CC_PolicyAuthorizeNV,
+                               EntityGetName(in->nvIndex, &name),
+                               NULL,
+                               NULL,
+                               0,
+                               session);
 }
 
 #endif  // CC_PolicyAuthorize

@@ -24,6 +24,7 @@ TPM2_PolicyCpHash(PolicyCpHash_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // A valid cpHash must have the same size as session hash digest
     // NOTE: the size of the digest can't be zero because TPM_ALG_NULL

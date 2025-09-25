@@ -1,8 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
 # utilities for creating CMake packages that work correctly with find_package, export, and include
 # while enforcing some practices like blocking in-source builds
 #
@@ -37,7 +32,6 @@ function(install_and_export_config_targets SomeProjectName)
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
     # prefer (CMake 3.17) set(CONFIG_TEMPLATE_FILE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Package_Config.in.cmake")

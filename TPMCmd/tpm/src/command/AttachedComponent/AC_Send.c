@@ -32,7 +32,8 @@ TPM2_AC_Send(AC_Send_In*  in,  // IN: input parameter list
     TPM_HANDLE nvAlias = ((in->ac - AC_FIRST) + NV_AC_FIRST);
     NV_INDEX*  nvIndex = NvGetIndexInfo(nvAlias, &locator);
     OBJECT*    object  = HandleToObject(in->sendObject);
-    TPM_RC     result;
+    pAssert_RC(object != NULL);
+    TPM_RC result;
     // Input validation
     // If there is an NV alias, then the index must allow the authorization provided
     if(nvIndex != NULL)

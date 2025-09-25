@@ -83,3 +83,4 @@ const UINT16 g_rcIndex[15]  = {TPM_RC_1,
                                TPM_RC_F};
 
 BOOL         g_manufactured = FALSE;
+BOOL         g_initCompleted = FALSE;

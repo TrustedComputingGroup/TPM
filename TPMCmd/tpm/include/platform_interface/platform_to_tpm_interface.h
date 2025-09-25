@@ -6,4 +6,4 @@
 #include <platform_interface/prototypes/ExecCommand_fp.h>
 #include <platform_interface/prototypes/Manufacture_fp.h>
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
-#include <public/prototypes/TpmFail_fp.h>
+#include <tpm_public/prototypes/TpmFail_fp.h>

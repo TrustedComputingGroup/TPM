@@ -29,6 +29,7 @@ TPM2_MakeCredential(MakeCredential_In*  in,  // IN: input parameter list
 
     // Get object pointer
     object = HandleToObject(in->handle);
+    pAssert_RC(object != NULL);
 
     // input key must be an asymmetric, restricted decryption key
     // NOTE: Needs to be restricted to have a symmetric value.
@@ -51,10 +52,8 @@ TPM2_MakeCredential(MakeCredential_In*  in,  // IN: input parameter list
         return result;
 
     // Prepare output credential data from secret
-    SecretToCredential(
+    return SecretToCredential(
         &in->credential, &in->objectName.b, &data.b, object, &out->credentialBlob);
-
-    return TPM_RC_SUCCESS;
 }
 
 #endif  // CC_MakeCredential

@@ -1,8 +1,8 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
+# This is the default TPM Reference "BigNumber" (Math) implementation.
+# This depends on a lower level "BnMath" implementation from some crypto library
+# This is the higher of two layers in the Asymmetric Crypto code path.
+# The library at this layer uses the CMake library name Tpm_CryptoLib_Math_*
+# This specific library further expects a layer below name Tpm_CryptoLib_BnMath_*
 
 project(Tpm_CryptoLib_TpmBigNum VERSION 1.0)
 print_project_info()

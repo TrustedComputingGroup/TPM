@@ -16,6 +16,8 @@ TPM2_ECC_Decrypt(ECC_Decrypt_In*  in,  // IN: input parameter list
 )
 {
     OBJECT* key = HandleToObject(in->keyHandle);
+    pAssert_RC(key != NULL);
+
     // Parameter validation
     // Must be the correct type of key with correct attributes
     if(key->publicArea.type != TPM_ALG_ECC)

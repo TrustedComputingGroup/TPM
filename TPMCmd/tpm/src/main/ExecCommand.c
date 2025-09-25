@@ -45,11 +45,9 @@
 //
 //  'request' and 'response' may point to the same buffer
 //
-// Note: As of February, 2016, the failure processing has been moved to the
+// Note: The failure processing has been moved to the
 // platform-specific code. When the TPM code encounters an unrecoverable failure, it
-// will SET g_inFailureMode and call _plat__Fail(). That function should not return
-// but may call ExecuteCommand().
-//
+// will call _plat__Fail() and call _plat__InFailureMode() to query failure mode.
 LIB_EXPORT void ExecuteCommand(
     uint32_t        requestSize,   // IN: command buffer size
     unsigned char*  request,       // IN: command buffer
@@ -71,13 +69,25 @@ LIB_EXPORT void ExecuteCommand(
     // the sizes do not include the tag, command.code, requestSize, or the authorization
     // fields.
     //CommandResponseSizes();
+
     // Set flags for NV access state. This should happen before any other
     // operation that may require a NV write. Note, that this needs to be done
     // even when in failure mode. Otherwise, g_updateNV would stay SET while in
     // Failure mode and the NV would be written on each call.
     g_updateNV     = UT_NONE;
     g_clearOrderly = FALSE;
-    if(g_inFailureMode)
+
+    if(!g_initCompleted)
+    {
+        // no return because failure will happen immediately below. this is
+        // treated as fatal because it is a system level failure for there to be
+        // no TPM_INIT indication.  Since init is an out-of-band indication from
+        // Execute command, we don't return TPM_RC_INITIALIZE which refers to
+        // the TPM2_Startup command
+        FAIL_NORET(FATAL_ERROR_NO_INIT);
+    }
+
+    if(_plat__InFailureMode())
     {
         // Do failure mode processing
         TpmFailureMode(requestSize, request, responseSize, response);
@@ -91,11 +101,9 @@ LIB_EXPORT void ExecuteCommand(
     // will go into failure mode.
     NvCheckState();
 
-    // Due to the limitations of the simulation, TPM clock must be explicitly
-    // synchronized with the system clock whenever a command is received.
-    // This function call is not necessary in a hardware TPM. However, taking
-    // a snapshot of the hardware timer at the beginning of the command allows
-    // the time value to be consistent for the duration of the command execution.
+    // Taking a snapshot of the hardware timer at the beginning of the command
+    // allows the time value to be consistent for the duration of the command
+    // execution.  This will also update the NV time state if appropriate.
     TimeUpdateToCurrent();
 
     // Any command through this function will unceremoniously end the
@@ -143,6 +151,17 @@ LIB_EXPORT void ExecuteCommand(
         result = TPM_RC_COMMAND_CODE;
         goto Cleanup;
     }
+#if CC_ReadOnlyControl
+    // Check if the TPM is operating in Read-Only mode. If so, reject commands
+    // that are disallowed in this mode before performing any further auth checks.
+    // The execution of some commands may still be disallowed under certain conditions,
+    // but those will be evaluated in the corresponding command implementation.
+    if(gc.readOnly && IsDisallowedInReadOnlyMode(command.index))
+    {
+        result = TPM_RC_READ_ONLY;
+        goto Cleanup;
+    }
+#endif
 #if FIELD_UPGRADE_IMPLEMENTED == YES
     // If the TPM is in FUM, then the only allowed command is
     // TPM_CC_FieldUpgradeData.
@@ -240,45 +259,60 @@ LIB_EXPORT void ExecuteCommand(
     }
 
 Cleanup:
-    if(g_clearOrderly == TRUE && NV_IS_ORDERLY)
+    if(!_plat__InFailureMode())
     {
+        if(g_clearOrderly == TRUE && NV_IS_ORDERLY)
+        {
 #if USE_DA_USED
-        gp.orderlyState = g_daUsed ? SU_DA_USED_VALUE : SU_NONE_VALUE;
+            gp.orderlyState = g_daUsed ? SU_DA_USED_VALUE : SU_NONE_VALUE;
 #else
-        gp.orderlyState = SU_NONE_VALUE;
+            gp.orderlyState = SU_NONE_VALUE;
 #endif
-        NV_SYNC_PERSISTENT(orderlyState);
+            NV_SYNC_PERSISTENT(orderlyState);
+        }
+        // This implementation loads an "evict" object to a transient object slot in
+        // RAM whenever an "evict" object handle is used in a command so that the
+        // access to any object is the same. These temporary objects need to be
+        // cleared from RAM whether the command succeeds or fails.
+        ObjectCleanupEvict();
+
+        // The parameters and sessions have been marshaled. Now tack on the header and
+        // set the sizes.  This sets command.parameterSize to the size of the entire
+        // response.
+        BuildResponseHeader(&command, *response, result);
+
+        // Try to commit all the writes to NV if any NV write happened during this
+        // command execution. This check should be made for both succeeded and failed
+        // commands, because a failed one may trigger a NV write in DA logic as well.
+        // This is the only place in the command execution path that may call the NV
+        // commit. If the NV commit fails, the TPM should be put in failure mode.
+        // Don't write in failure mode because we can't trust what we are
+        // writing.
+        if((g_updateNV != UT_NONE) && !_plat__InFailureMode())
+        {
+            if(g_updateNV == UT_ORDERLY)
+            {
+                NvUpdateIndexOrderlyData();
+            }
+            if(!NvCommit())
+            {
+                FAIL_NORET(FATAL_ERROR_INTERNAL);
+            }
+            g_updateNV = UT_NONE;
+        }
+
+        pAssert_NORET((UINT32)command.parameterSize <= maxResponse);
+
+        // Clear unused bits in response buffer.
+        MemorySet(*response + *responseSize, 0, maxResponse - *responseSize);
+
+        // as a final act, and not before, update the response size.
+        *responseSize = (UINT32)command.parameterSize;
     }
-    // This implementation loads an "evict" object to a transient object slot in
-    // RAM whenever an "evict" object handle is used in a command so that the
-    // access to any object is the same. These temporary objects need to be
-    // cleared from RAM whether the command succeeds or fails.
-    ObjectCleanupEvict();
 
-    // The parameters and sessions have been marshaled. Now tack on the header and
-    // set the sizes
-    BuildResponseHeader(&command, *response, result);
-
-    // Try to commit all the writes to NV if any NV write happened during this
-    // command execution. This check should be made for both succeeded and failed
-    // commands, because a failed one may trigger a NV write in DA logic as well.
-    // This is the only place in the command execution path that may call the NV
-    // commit. If the NV commit fails, the TPM should be put in failure mode.
-    if((g_updateNV != UT_NONE) && !g_inFailureMode)
+    if(_plat__InFailureMode())
     {
-        if(g_updateNV == UT_ORDERLY)
-            NvUpdateIndexOrderlyData();
-        if(!NvCommit())
-            FAIL(FATAL_ERROR_INTERNAL);
-        g_updateNV = UT_NONE;
+        // something in the command triggered failure mode - handle command as a failure instead
+        TpmFailureMode(requestSize, request, responseSize, response);
     }
-    pAssert((UINT32)command.parameterSize <= maxResponse);
-
-    // Clear unused bits in response buffer.
-    MemorySet(*response + *responseSize, 0, maxResponse - *responseSize);
-
-    // as a final act, and not before, update the response size.
-    *responseSize = (UINT32)command.parameterSize;
-
-    return;
 }

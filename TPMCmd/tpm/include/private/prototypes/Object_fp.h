@@ -174,7 +174,8 @@ OBJECT* ObjectContextLoad(
 // This function frees an object slot.
 //
 // This function requires that the object is loaded.
-void FlushObject(TPMI_DH_OBJECT handle  // IN: handle to be freed
+// returns FALSE and enters failure mode if the handle is invalid.
+BOOL FlushObject(TPMI_DH_OBJECT handle  // IN: handle to be freed
 );
 
 //*** ObjectFlushHierarchy()

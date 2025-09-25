@@ -16,7 +16,8 @@ TPM2_PolicyGetDigest(PolicyGetDigest_In*  in,  // IN: input parameter list
     // Command Output
 
     // Get pointer to the session structure
-    session           = SessionGet(in->policySession);
+    session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     out->policyDigest = session->u2.policyDigest;
 

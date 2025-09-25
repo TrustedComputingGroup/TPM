@@ -1,7 +1,9 @@
 #include "Tpm.h"
 
 // This function is called to process a _TPM_Hash_Start indication.
-LIB_EXPORT void _TPM_Hash_Start(void)
+// It returns FALSE if the indication cannot be handled, and the TPM
+// will be in FailureMode.
+LIB_EXPORT BOOL _TPM_Hash_Start(void)
 {
     TPM_RC         result;
     TPMI_DH_OBJECT handle;
@@ -9,8 +11,11 @@ LIB_EXPORT void _TPM_Hash_Start(void)
     // If a DRTM sequence object exists, free it up
     if(g_DRTMHandle != TPM_RH_UNASSIGNED)
     {
-        FlushObject(g_DRTMHandle);
-        g_DRTMHandle = TPM_RH_UNASSIGNED;
+        // ensure g_DRTMHandle is cleared
+        // and Flush sequence object
+        TPMI_DH_OBJECT oldHandle = g_DRTMHandle;
+        g_DRTMHandle             = TPM_RH_UNASSIGNED;
+        VERIFY(FlushObject(oldHandle), FATAL_ERROR_INTERNAL, FALSE);
     }
 
     // Create an event sequence object and store the handle in global
@@ -39,17 +44,17 @@ LIB_EXPORT void _TPM_Hash_Start(void)
         }
         // If the first call to find a slot fails but none of the slots is occupied
         // then there's a big problem
-        pAssert(handle < TRANSIENT_LAST);
+        pAssert_BOOL(handle < TRANSIENT_LAST);
 
         // Free the slot
-        FlushObject(handle);
+        VERIFY(FlushObject(handle), FATAL_ERROR_INTERNAL, FALSE);
 
         // Try to create an event sequence object again.  This time, we must
         // succeed.
         result = ObjectCreateEventSequence(NULL, &g_DRTMHandle);
         if(result != TPM_RC_SUCCESS)
-            FAIL(FATAL_ERROR_INTERNAL);
+            FAIL_BOOL(FATAL_ERROR_INTERNAL);
     }
 
-    return;
+    return TRUE;
 }

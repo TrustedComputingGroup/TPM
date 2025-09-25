@@ -9,7 +9,7 @@
 
 //** Functions
 
-#if ALG_RSA
+#if ALG_RSA && CC_CertifyX509
 
 //*** X509AddSigningAlgorithmRSA()
 // This creates the singing algorithm data.
@@ -193,4 +193,4 @@ X509AddPublicRSA(OBJECT* object, ASN1MarshalContext* ctx)
     return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
 }
 
-#endif  // ALG_RSA
+#endif  // ALG_RSA && CC_CertifyX509

@@ -15,11 +15,14 @@ TPM2_PCR_Read(PCR_Read_In*  in,  // IN: input parameter list
 
     // Call PCR read function.  input pcrSelectionIn parameter could be changed
     // to reflect the actual PCR being returned
-    PCRRead(&in->pcrSelectionIn, &out->pcrValues, &out->pcrUpdateCounter);
+    TPM_RC result =
+        PCRRead(&in->pcrSelectionIn, &out->pcrValues, &out->pcrUpdateCounter);
+    if(result == TPM_RC_SUCCESS)
+    {
+        out->pcrSelectionOut = in->pcrSelectionIn;
+    }
 
-    out->pcrSelectionOut = in->pcrSelectionIn;
-
-    return TPM_RC_SUCCESS;
+    return result;
 }
 
 #endif  // CC_PCR_Read

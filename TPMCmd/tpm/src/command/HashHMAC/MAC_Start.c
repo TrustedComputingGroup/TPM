@@ -25,8 +25,10 @@ TPM2_MAC_Start(MAC_Start_In*  in,  // IN: input parameter list
     // Input Validation
 
     // Get HMAC key object and public area pointers
-    keyObject  = HandleToObject(in->handle);
+    keyObject = HandleToObject(in->handle);
+    pAssert_RC(keyObject != NULL);
     publicArea = &keyObject->publicArea;
+    pAssert_RC(publicArea != NULL);
 
     // Make sure that the key can do what is required
     result = CryptSelectMac(publicArea, &in->inScheme);

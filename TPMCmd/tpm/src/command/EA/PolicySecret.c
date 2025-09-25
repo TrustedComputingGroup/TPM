@@ -27,8 +27,16 @@ TPM2_PolicySecret(PolicySecret_In*  in,  // IN: input parameter list
     TPM2B_NAME entityName;
     UINT64     authTimeout = 0;
     // Input Validation
+
+#  if CC_ReadOnlyControl
+    // Don't allow on PIN PASS or PIN FAIL indices when in Read-Only mode
+    if(gc.readOnly && NvIsPinCountedIndex(in->authHandle))
+        return TPM_RC_READ_ONLY;
+#  endif  // CC_ReadOnlyControl
+
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     //Only do input validation if this is not a trial policy session
     if(session->attributes.isTrialPolicy == CLEAR)
@@ -48,12 +56,17 @@ TPM2_PolicySecret(PolicySecret_In*  in,  // IN: input parameter list
     // Internal Data Update
     // Update policy context with input policyRef and name of authorizing key
     // This value is computed even for trial sessions. Possibly update the cpHash
-    PolicyContextUpdate(TPM_CC_PolicySecret,
-                        EntityGetName(in->authHandle, &entityName),
-                        &in->policyRef,
-                        &in->cpHashA,
-                        authTimeout,
-                        session);
+    result = PolicyContextUpdate(TPM_CC_PolicySecret,
+                                 EntityGetName(in->authHandle, &entityName),
+                                 &in->policyRef,
+                                 &in->cpHashA,
+                                 authTimeout,
+                                 session);
+    if(result != TPM_RC_SUCCESS)
+    {
+        return result;
+    }
+
     // Command Output
     // Create ticket and timeout buffer if in->expiration < 0 and this is not
     // a trial session.
@@ -99,7 +112,7 @@ TPM2_PolicySecret(PolicySecret_In*  in,  // IN: input parameter list
         out->policyTicket.hierarchy     = TPM_RH_NULL;
         out->policyTicket.digest.t.size = 0;
     }
-    return TPM_RC_SUCCESS;
+    return result;
 }
 
 #endif  // CC_PolicySecret

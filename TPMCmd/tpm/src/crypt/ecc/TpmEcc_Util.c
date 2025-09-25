@@ -48,7 +48,7 @@ LIB_EXPORT BOOL TpmEcc_PointTo2B(
     const Crypt_EccCurve* E     // IN: curve descriptor for the point
 )
 {
-    pAssert(p && ecP && E);
+    pAssert_BOOL(p && ecP && E);
     TPM_ECC_CURVE curveId = ExtEcc_CurveGetCurveId(E);
     NUMBYTES      size    = CryptEccGetKeySizeForCurve(curveId);
     size                  = (UINT16)BITS_TO_BYTES(size);

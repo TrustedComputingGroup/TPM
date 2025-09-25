@@ -8,9 +8,11 @@ goto :SkipUsage
 
     echo    usage: getossl.cmd arch folder
     echo examples: getossl.cmd x86 c:\openssl
-    echo           getossl.cmd x64 c:\opensslx64
+    echo           getossl.cmd x64 c:\opensslx64 [ADD]
     echo.
     echo WARNING: This command is destructive - it will force-delete the existing local Openssl copy.
+    echo          except ADD will allow the x64 version to be added on top of the x86 version to
+    echo          allow either build.
     echo.
     goto :ExitBatch
 
@@ -49,15 +51,22 @@ if NOT EXIST TpmCmd\ (
     goto :Usage
 )
 
-if [%FLAVOR%] neq [x86] (
-    if [%FLAVOR%] neq [x64] (
+if /I [%FLAVOR%] neq [x86] (
+    if /I [%FLAVOR%] neq [x64] (
         echo.
         echo ERROR: architecture is invalid or unsupported
         echo FLAVOR must be x86 or x64, was [%FLAVOR%]
         goto :Usage
     )
 )
-
+set ADD_MODE=0
+if /I [%FLAVOR%] equ [x64] (
+    if /I [%3] equ [ADD] (
+        echo.
+        echo Adding x64 without deleting x86
+        set ADD_MODE=1
+    )
+)
 rem contains path relative to TpmCmd
 set TARGET_LIB_FOLDER_ROOT=lib
 set TARGET_LIB_FOLDER=
@@ -77,11 +86,12 @@ if [%FLAVOR%] equ [x86] (
 rem *** DO COPIES ***
 
 pushd TpmCmd\
-rd /s /q %TARGET_LIB_FOLDER_ROOT%
-rd /s /q %TARGET_INC_FOLDER_ROOT%
-
-mkdir %TARGET_LIB_FOLDER_ROOT%
-mkdir %TARGET_INC_FOLDER_ROOT%
+if %ADD_MODE% equ 0 (
+    rd /s /q %TARGET_LIB_FOLDER_ROOT%
+    rd /s /q %TARGET_INC_FOLDER_ROOT%
+    mkdir %TARGET_LIB_FOLDER_ROOT%
+    mkdir %TARGET_INC_FOLDER_ROOT%
+)
 
 if NOT EXIST %TARGET_LIB_FOLDER% (
     mkdir %TARGET_LIB_FOLDER%

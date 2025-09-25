@@ -6,11 +6,11 @@
 
 ---
 ## Guidelines for reporting bugs
-Non-security-critical bugs can be filed on the Issues tracker:
 
-https://github.com/Microsoft/ms-tpm-20-ref/issues
+See [SECURITY.md](SECURITY.md) for guidance on reporting security bugs to TCG.
 
-Security sensitive bugs should be reported to secure@microsoft.com
+Non-security-critical bugs can be filed on the "Issues" tracker for this
+repository.
 
 ## Guideline for submitting changes
 
@@ -35,20 +35,13 @@ membership and liaison programs is available at https://trustedcomputinggroup.or
 
 ## Contributing
 
-This project welcomes contributions and suggestions. Most contributions require you to
-agree to a Contributor License Agreement (CLA) declaring that you have the right to,
-and actually do, grant us the rights to use your contribution. For details, visit
-https://cla.microsoft.com.
+While all normative changes to the behavior of the TPM are made within Trusted
+Computing Group, this repository welcomes (non-security) bugfixes.
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need
-to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the
-instructions provided by the bot. You will only need to do this once across all repositories using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
-or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+Contributions are subject to the repository [license](LICENSE).
 
 ## Submitting a bug fix
+
 If you are new, please read the documentation beginning with [Introduction](docs/architecture/introduction.md)
 
 The following are prerequisites _*before*_ requesting change approval:

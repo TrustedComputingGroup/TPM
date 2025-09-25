@@ -4,8 +4,8 @@
 #ifndef _BNOSSL_H_
 #define _BNOSSL_H_
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
-#include <public/tpm_public.h>
-#include <public/prototypes/TpmFail_fp.h>
+#include <tpm_public/tpm_public.h>
+#include <tpm_public/prototypes/TpmFail_fp.h>
 #include <Ossl/BnToOsslMath.h>
 // TODO_RENAME_INC_FOLDER: these refer to TpmBigNum protected headers
 #include <BnSupport_Interface.h>

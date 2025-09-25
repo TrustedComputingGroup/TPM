@@ -1,6 +1,8 @@
 #ifndef _TPMECC_SIGNATURE_ECDSA_FP_H_
 #define _TPMECC_SIGNATURE_ECDSA_FP_H_
+
 #if ALG_ECC && ALG_ECDSA
+#  include <private/CryptRand.h>
 
 //*** TpmEcc_SignEcdsa()
 // This function implements the ECDSA signing algorithm. The method is described

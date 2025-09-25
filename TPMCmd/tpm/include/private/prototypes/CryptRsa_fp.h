@@ -1,8 +1,3 @@
-/*(Auto-generated)
- *  Created by TpmPrototypes; Version 3.0 July 18, 2017
- *  Date: Apr  2, 2019  Time: 03:18:00PM
- */
-
 #ifndef _CRYPT_RSA_FP_H_
 #define _CRYPT_RSA_FP_H_
 

@@ -10,8 +10,11 @@ TPM_RC
 TPM2_PolicyRestart(PolicyRestart_In* in  // IN: input parameter list
 )
 {
+    SESSION* session = SessionGet(in->sessionHandle);
+    pAssert_RC(session != NULL);
+
     // Initialize policy session data
-    SessionResetPolicyData(SessionGet(in->sessionHandle));
+    SessionResetPolicyData(session);
 
     return TPM_RC_SUCCESS;
 }

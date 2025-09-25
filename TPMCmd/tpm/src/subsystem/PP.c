@@ -27,8 +27,7 @@ void PhysicalPresencePreInstall_Init(void)
     // Any command that is PP_REQUIRED should be SET
     for(commandIndex = 0; commandIndex < COMMAND_COUNT; commandIndex++)
     {
-        if(s_commandAttributes[commandIndex] & IS_IMPLEMENTED
-           && s_commandAttributes[commandIndex] & PP_REQUIRED)
+        if(s_commandAttributes[commandIndex] & PP_REQUIRED)
             SET_BIT(commandIndex, gp.ppList);
     }
     // Write PP list to NV

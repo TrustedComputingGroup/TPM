@@ -1,9 +1,3 @@
-# Microsoft Reference Implementation for TPM 2.0
-# Copyright (c) Microsoft Corporation
-# This software is being made available under certain license terms, as detailed at
-# https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE
-#
-
 project(Tpm_CryptoLib_TpmBigNum_Headers VERSION 1.0)
 print_project_info()
 add_library(Tpm_CryptoLib_TpmBigNum_Headers INTERFACE)

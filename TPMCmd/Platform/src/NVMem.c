@@ -79,6 +79,7 @@ static long NvFileSize(int leaveAt)
     {
         case SEEK_SET:
             filePos = 0;
+            // [[fallthrough]];
         case SEEK_CUR:
             fseek(s_NvFile, filePos, SEEK_SET);
             break;
@@ -173,7 +174,7 @@ LIB_EXPORT int _plat__NVEnable(
 }
 
 //***_plat__NVDisable()
-// Disable NV memory
+// Disable NV memory, and potentially delete it.
 LIB_EXPORT void _plat__NVDisable(
     void*  platParameter,  // platform specific parameter
     size_t paramSize       // size of parameter. If size == 0, then
@@ -182,9 +183,8 @@ LIB_EXPORT void _plat__NVDisable(
 )
 {
     NOT_REFERENCED(paramSize);  // to keep compiler quiet
-    int delete = ((intptr_t)platParameter != 0)
-                     ? TRUE
-                     : FALSE;  // IN: If TRUE (!=0), delete the NV contents.
+    // IN: If TRUE (!=0), delete the NV contents.
+    int delete = ((intptr_t)platParameter != 0) ? TRUE : FALSE;
     NOT_REFERENCED(delete);  // to keep compiler quiet when FILE_BACKED_NV == NO
 
 #if FILE_BACKED_NV

@@ -26,6 +26,7 @@ TPM2_RSA_Encrypt(RSA_Encrypt_In*  in,  // IN: input parameter list
     TPMT_RSA_DECRYPT* scheme;
     // Input Validation
     rsaKey = HandleToObject(in->keyHandle);
+    pAssert_RC(rsaKey != NULL);
 
     // selected key must be an RSA key
     if(rsaKey->publicArea.type != TPM_ALG_RSA)

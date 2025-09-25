@@ -61,7 +61,7 @@ void CryptCmacData(SMAC_STATES* state, UINT32 size, const BYTE* buffer)
     {
         FOR_EACH_SYM(ENCRYPT_CASE)
         default:
-            FAIL(FATAL_ERROR_INTERNAL);
+            FAIL_VOID(FATAL_ERROR_INTERNAL);
     }
     while(size > 0)
     {
@@ -111,9 +111,10 @@ CryptCmacEnd(SMAC_STATES* state, UINT32 outSize, BYTE* outBuffer)
     xorVal = ((subkey.t.buffer[0] & 0x80) == 0) ? 0 : 0x87;
     ShiftLeft(&subkey.b);
     subkey.t.buffer[subkey.t.size - 1] ^= xorVal;
+
     // this is a sanity check to make sure that the algorithm is working properly.
-    // remove this check when debug is done
-    pAssert(cState->bcount <= cState->iv.t.size);
+    pAssert_ZERO(cState->bcount <= cState->iv.t.size);
+
     // If the buffer is full then no need to compute subkey 2.
     if(cState->bcount < cState->iv.t.size)
     {

@@ -3,6 +3,8 @@
 # included below. This software may be subject to other third party and
 # contributor rights, including patent rights, and no such rights are granted
 # under this license.
+# Autotools is not officially supported. This file is included in order to ease
+# the transition to CMake for users, and will go away in the future.
 #
 # Copyright (c) Intel Corporation
 #

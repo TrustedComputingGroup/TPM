@@ -30,6 +30,7 @@ TPM2_PolicyTicket(PolicyTicket_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // NOTE: A trial policy session is not allowed to use this command.
     // A ticket is used in place of a previously given authorization. Since
@@ -93,14 +94,12 @@ TPM2_PolicyTicket(PolicyTicket_In* in  // IN: input parameter list
         FAIL(FATAL_ERROR_INTERNAL);
 
     // Update policy context
-    PolicyContextUpdate(commandCode,
-                        &in->authName,
-                        &in->policyRef,
-                        &in->cpHashA,
-                        authTimeout,
-                        session);
-
-    return TPM_RC_SUCCESS;
+    return PolicyContextUpdate(commandCode,
+                               &in->authName,
+                               &in->policyRef,
+                               &in->cpHashA,
+                               authTimeout,
+                               session);
 }
 
 #endif  // CC_PolicyTicket

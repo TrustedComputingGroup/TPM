@@ -82,7 +82,7 @@ static BOOL PackExponent(TPM2B_PRIVATE_KEY_RSA* packed, privateExponent* Z)
     UINT16 primeSize = (UINT16)BITS_TO_BYTES(ExtMath_MostSigBitNum(Z->P));
     UINT16 pS        = primeSize;
     //
-    pAssert((primeSize * 5) <= sizeof(packed->t.buffer));
+    pAssert((size_t)(primeSize * 5) <= sizeof(packed->t.buffer));
     packed->t.size = (primeSize * 5) + RSA_prime_flag;
     for(i = 0; i < 5; i++)
         if(!ExtMath_IntToBytes(
@@ -321,7 +321,7 @@ static TPM_RC OaepEncode(
     dbSize = hLen + padLen + message->size;
 
     DRBG_Generate(rand, mySeed, (UINT16)hLen);
-    if(g_inFailureMode)
+    if( _plat__InFailureMode())
         ERROR_EXIT(TPM_RC_FAILURE);
     // mask = MGF1 (seed, nSize  hLen  1)
     CryptMGF_KDF(dbSize, mask, hashAlg, hLen, seed, 0);
@@ -466,7 +466,7 @@ static TPM_RC RSAES_PKCS1v1_5Encode(TPM2B* padded,   // OUT: the pad data
 
     // Fill with random bytes
     DRBG_Generate(rand, &padded->buffer[2], (UINT16)ps);
-    if(g_inFailureMode)
+    if( _plat__InFailureMode())
         return TPM_RC_FAILURE;
 
     // Set the delimiter for the random field to 0
@@ -574,7 +574,7 @@ static TPM_RC PssEncode(TPM2B*      out,      // OUT: the encoded buffer
 
     // Get set the salt
     DRBG_Generate(rand, salt, saltSize);
-    if(g_inFailureMode)
+    if( _plat__InFailureMode())
         return TPM_RC_FAILURE;
 
     // Create the hash of the pad || input hash || salt

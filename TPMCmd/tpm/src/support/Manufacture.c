@@ -46,7 +46,7 @@ LIB_EXPORT int TPM_Manufacture(
 
     // trigger failure mode if called in error.
     int nvReadyState = _plat__GetNvReadyState();
-    pAssert(nvReadyState == NV_READY);  // else failure mode
+    pAssert_NORET(nvReadyState == NV_READY);  // else failure mode
     if(nvReadyState != NV_READY)
     {
         return MANUF_NV_NOT_READY;
@@ -132,6 +132,7 @@ LIB_EXPORT int TPM_Manufacture(
 LIB_EXPORT int TPM_TearDown(void)
 {
     g_manufactured = FALSE;
+    g_initCompleted = FALSE;
     _plat__TearDown();
     return TEARDOWN_OK;
 }

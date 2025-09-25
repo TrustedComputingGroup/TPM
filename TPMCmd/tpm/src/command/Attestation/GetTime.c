@@ -46,12 +46,14 @@ TPM2_GetTime(GetTime_In*  in,  // IN: input parameter list
 
     // Sign attestation structure.  A NULL signature will be returned if
     // signObject is NULL.
-    return SignAttestInfo(signObject,
-                          &in->inScheme,
-                          &timeInfo,
-                          &in->qualifyingData,
-                          &out->timeInfo,
-                          &out->signature);
+    TPM_RC rc = SignAttestInfo(signObject,
+                               &in->inScheme,
+                               &timeInfo,
+                               &in->qualifyingData,
+                               &out->timeInfo,
+                               &out->signature);
+
+    return rc;
 }
 
 #endif  // CC_GetTime

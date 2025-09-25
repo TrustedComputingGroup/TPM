@@ -9,8 +9,12 @@
 #define SESSION_PROCESS_C
 
 #include "Tpm.h"
-#include "ACT.h"
+#include "tpm_public/ACT.h"
 #include "Marshal.h"
+#include <platform_interface/prototypes/platform_virtual_nv_fp.h>
+#if SEC_CHANNEL_SUPPORT
+#  include "SecChannel_fp.h"
+#endif  // SEC_CHANNEL_SUPPORT
 
 //
 //**  Authorization Support Functions
@@ -49,7 +53,18 @@ BOOL IsDAExempted(TPM_HANDLE handle  // IN: entity handle
         }
         case TPM_HT_NV_INDEX:
         {
-            NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
+            NV_INDEX* nvIndex = NULL;
+            NV_INDEX  ekIndex = {0};
+            if(_plat__IsNvVirtualIndex(handle))
+            {
+                _plat__NvVirtual_PopulateNvIndexInfo(
+                    handle, &ekIndex.publicArea, &ekIndex.authValue);
+                nvIndex = &ekIndex;
+            }
+            else
+            {
+                nvIndex = NvGetIndexInfo(handle, NULL);
+            }
             result = IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, NO_DA);
             break;
         }
@@ -88,6 +103,7 @@ static TPM_RC IncrementLockout(UINT32 sessionIndex)
     else
     {
         session = SessionGet(sessionHandle);
+        pAssert_RC(session);
         // If the session is bound to lockout, then use that as the relevant
         // handle. This means that an authorization failure with a bound session
         // bound to lockoutAuth will take precedence over any other
@@ -102,7 +118,7 @@ static TPM_RC IncrementLockout(UINT32 sessionIndex)
     }
     if(handle == TPM_RH_LOCKOUT)
     {
-        pAssert(gp.lockOutAuthEnabled == TRUE);
+        pAssert_RC(gp.lockOutAuthEnabled == TRUE);
 
         // lockout is no longer enabled
         gp.lockOutAuthEnabled = FALSE;
@@ -202,7 +218,7 @@ static BOOL IsPolicySessionRequired(COMMAND_INDEX commandIndex,  // IN: command 
         if(type == TPM_HT_TRANSIENT)
         {
             OBJECT* object = HandleToObject(s_associatedHandles[sessionIndex]);
-
+            pAssert_BOOL(object != NULL);
             if(!IS_ATTRIBUTE(
                    object->publicArea.objectAttributes, TPMA_OBJECT, adminWithPolicy))
                 return FALSE;
@@ -292,7 +308,8 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
                 OBJECT*     object;
                 TPMA_OBJECT attributes;
                 //
-                object     = HandleToObject(handle);
+                object = HandleToObject(handle);
+                pAssert_BOOL(object != NULL);
                 attributes = object->publicArea.objectAttributes;
 
                 // authValue is always available for a sequence object.
@@ -320,10 +337,24 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
             // NV Index.
             {
                 NV_REF    locator;
-                NV_INDEX* nvIndex = NvGetIndexInfo(handle, &locator);
+                NV_INDEX* nvIndex = NULL;
                 TPMA_NV   nvAttributes;
                 //
-                pAssert(nvIndex != 0);
+
+                if(_plat__IsNvVirtualIndex(handle))
+                {
+                    NV_INDEX tempIndex = {0};
+                    _plat__NvVirtual_PopulateNvIndexInfo(
+                        handle, &tempIndex.publicArea, &tempIndex.authValue);
+                    nvIndex = &tempIndex;
+
+                    locator = (NV_REF)0;
+                }
+                else
+                {
+                    nvIndex = NvGetIndexInfo(handle, &locator);
+                }
+                pAssert_BOOL(nvIndex != 0);
 
                 nvAttributes = nvIndex->publicArea.attributes;
 
@@ -344,6 +375,10 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
                         NV_PIN pin;
                         if(!IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN))
                             break;  // return false
+
+                        if(locator == (NV_REF)0)
+                            break;  // return false
+
                         // get the index values
                         pin.intVal = NvGetUINT64Data(nvIndex, locator);
                         if(pin.pin.pinCount < pin.pin.pinLimit)
@@ -427,6 +462,7 @@ static BOOL IsAuthPolicyAvailable(TPM_HANDLE    handle,        // IN: handle of 
             // An evict object would already have been loaded and given a
             // transient object handle by this point.
             OBJECT* object = HandleToObject(handle);
+            pAssert_BOOL(object != NULL);
             // Policy authorization is not available for an object with only
             // public portion loaded.
             if(object->attributes.publicOnly == CLEAR)
@@ -589,7 +625,7 @@ static TPM2B_DIGEST* GetCpHash(COMMAND* command, TPMI_ALG_HASH hashAlg)
 {
     TPM2B_DIGEST* cpHash = GetCpHashPointer(command, hashAlg);
     //
-    pAssert(cpHash->t.size != 0);
+    pAssert_NULL(cpHash && cpHash->t.size != 0);
     return cpHash;
 }
 
@@ -688,6 +724,66 @@ BOOL CompareParametersHash(COMMAND* command,  // IN: main parsing structure
     return MemoryEqual2B(&session->u1.pHash.b, &pHash.b);
 }
 
+#if SEC_CHANNEL_SUPPORT
+//*** CompareScKeyNameHash()
+// This function computes the secure channel key name hash (from the requester and/or TPM key
+// used to establish the secure channel session) and compares it to the scKeyNameHash in the
+// session data, returning true if they are equal.
+BOOL CompareScKeyNameHash(
+    SESSION*    session,     // IN: session structure
+    TPM2B_NAME* reqKeyName,  // IN: requester secure channel key name
+    TPM2B_NAME* tpmKeyName   // IN: TPM secure channel key name
+)
+{
+    HASH_STATE   hashState;
+    TPM2B_DIGEST scKeyNameHash;
+    UINT16       zeroSize = 0x0000;
+
+    // Compute secure channel key name hash
+    // scKeyNameHash = hash(reqKeyName.size || reqKeyName.name || tpmKeyName.size || tpmKeyName.name)
+    //  Start hash
+    scKeyNameHash.t.size = CryptHashStart(&hashState, session->authHashAlg);
+
+    //  Include reqKeyName if it needs to be checked, otherwise include Empty Buffer
+    if(session->attributes.checkReqKey)
+    {
+        //  Add reqKeyName.size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), reqKeyName->t.size);
+
+        //  Add reqKeyName.name
+        CryptDigestUpdate2B(&hashState, &reqKeyName->b);
+    }
+    else
+    {
+        //  Add zero size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), zeroSize);
+    }
+
+    //  Include tpmKeyName if it needs to be checked, otherwise include Empty Buffer
+    if(session->attributes.checkTpmKey)
+    {
+        //  Add tpmKeyName.size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), tpmKeyName->t.size);
+
+        //  Add tpmKeyName.name
+        CryptDigestUpdate2B(&hashState, &tpmKeyName->b);
+    }
+    else
+    {
+        //  Add zero size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), zeroSize);
+    }
+
+    //  Complete hash
+    CryptHashEnd2B(&hashState, &scKeyNameHash.b);
+
+    // and compare
+    return MemoryEqual(session->scKeyNameHash.t.buffer,
+                       scKeyNameHash.t.buffer,
+                       scKeyNameHash.t.size);
+}
+#endif  // SEC_CHANNEL_SUPPORT
+
 //*** CheckPWAuthSession()
 // This function validates the authorization provided in a PWAP session. It
 // compares the input value to authValue of the authorized entity. Argument
@@ -766,7 +862,7 @@ static TPM_RC CheckPWAuthSession(
 //      sessionAttributes   A byte indicating the attributes associated with the
 //                          particular use of the session.
 */
-static TPM2B_DIGEST* ComputeCommandHMAC(
+static TPM_RC ComputeCommandHMAC(
     COMMAND*      command,       // IN: primary control structure
     UINT32        sessionIndex,  // IN: index of session to be processed
     TPM2B_DIGEST* hmac           // OUT: authorization HMAC
@@ -799,6 +895,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
             // Will add the nonce for the decrypt session.
             SESSION* decryptSession =
                 SessionGet(s_sessionHandles[s_decryptSessionIndex]);
+            pAssert_RC(decryptSession != NULL);
             nonceDecrypt = &decryptSession->nonceTPM;
         }
         // Now repeat for the encrypt session.
@@ -809,12 +906,14 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
             // Have to have the nonce for the encrypt session.
             SESSION* encryptSession =
                 SessionGet(s_sessionHandles[s_encryptSessionIndex]);
+            pAssert_RC(encryptSession != NULL);
             nonceEncrypt = &encryptSession->nonceTPM;
         }
     }
 
     // Continue with the HMAC processing.
     session = SessionGet(s_sessionHandles[sessionIndex]);
+    pAssert_RC(session != NULL);
 
     // Generate HMAC key.
     MemoryCopy2B(&key.b, &session->sessionKey.b, sizeof(key.t.buffer));
@@ -839,7 +938,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
     if(key.t.size == 0 && s_inputAuthValues[sessionIndex].t.size == 0)
     {
         hmac->t.size = 0;
-        return hmac;
+        return TPM_RC_SUCCESS;
     }
     // Start HMAC
     hmac->t.size = CryptHmacStart2B(&hmacState, session->authHashAlg, &key.b);
@@ -861,7 +960,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
     // Complete the HMAC computation
     CryptHmacEnd2B(&hmacState, &hmac->b);
 
-    return hmac;
+    return TPM_RC_SUCCESS;
 }
 
 //*** CheckSessionHMAC()
@@ -887,7 +986,9 @@ static TPM_RC CheckSessionHMAC(
     TPM2B_DIGEST hmac;  // authHMAC for comparing
                         //
     // Compute authHMAC
-    ComputeCommandHMAC(command, sessionIndex, &hmac);
+    TPM_RC result = ComputeCommandHMAC(command, sessionIndex, &hmac);
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Compare the input HMAC with the authHMAC computed above.
     if(!MemoryEqual2B(&s_inputAuthValues[sessionIndex].b, &hmac.b))
@@ -924,6 +1025,8 @@ static TPM_RC CheckSessionHMAC(
 //      TPM_RC_PP                   PP is required but not asserted
 //      TPM_RC_NV_UNAVAILABLE       NV is not available for write
 //      TPM_RC_NV_RATE              NV is rate limiting
+//      TPM_RC_CHANNEL              No secure channel is active
+//      TPM_RC_CHANNEL_KEY          Secure channel key is incorrect
 static TPM_RC CheckPolicyAuthSession(
     COMMAND* command,      // IN: primary parsing structure
     UINT32   sessionIndex  // IN: index of session to be processed
@@ -936,6 +1039,7 @@ static TPM_RC CheckPolicyAuthSession(
     //
     // Initialize pointer to the authorization session.
     session = SessionGet(s_sessionHandles[sessionIndex]);
+    pAssert_RC(session != NULL);
 
     // If the command is TPM2_PolicySecret(), make sure that
     // either password or authValue is required
@@ -1053,6 +1157,26 @@ static TPM_RC CheckPolicyAuthSession(
            != (session->attributes.nvWrittenState == SET))
             return TPM_RC_POLICY_FAIL;
     }
+#if SEC_CHANNEL_SUPPORT
+    if(session->attributes.checkSecureChannel)
+    {
+        TPM2B_NAME reqKeyName;
+        TPM2B_NAME tpmKeyName;
+
+        // Check that the authorized TPM command is protected by an SPDM session and
+        // if so, get the names of the associated requester and TPM key
+        if(!IsSpdmSessionActive(&reqKeyName, &tpmKeyName))
+            return TPM_RC_CHANNEL;
+
+        // If required, check the requester or TPM secure channel key name by comparing scKeyNameHash
+        if(session->attributes.checkReqKey == SET
+           || session->attributes.checkTpmKey == SET)
+        {
+            if(!CompareScKeyNameHash(session, &reqKeyName, &tpmKeyName))
+                return TPM_RC_CHANNEL_KEY;
+        }
+    }
+#endif  // SEC_CHANNEL_SUPPORT
     return TPM_RC_SUCCESS;
 }
 
@@ -1143,6 +1267,7 @@ static TPM_RC RetrieveSessionData(
             return TPM_RC_REFERENCE_S0 + sessionIndex;
         sessionType = HandleGetType(s_sessionHandles[sessionIndex]);
         session     = SessionGet(s_sessionHandles[sessionIndex]);
+        pAssert_RC(session != NULL);
 
         // Check if the session is an HMAC/policy session.
         if((session->attributes.isPolicy == SET && sessionType == TPM_HT_HMAC_SESSION)
@@ -1312,7 +1437,7 @@ static TPM_RC CheckAuthSession(
     TPM_HT     sessionHandleType = HandleGetType(sessionHandle);
     BOOL       authUsed;
     //
-    pAssert(sessionHandle != TPM_RH_UNASSIGNED);
+    pAssert_RC(sessionHandle != TPM_RH_UNASSIGNED);
 
     // Take care of physical presence
     if(associatedHandle == TPM_RH_PLATFORM)
@@ -1326,6 +1451,7 @@ static TPM_RC CheckAuthSession(
     if(sessionHandle != TPM_RS_PW)
     {
         session = SessionGet(sessionHandle);
+        pAssert_RC(session != NULL);
 
         // Set includeAuth to indicate if DA checking will be required and if the
         // authValue will be included in any HMAC.
@@ -1397,17 +1523,34 @@ static TPM_RC CheckAuthSession(
     if((TPM_HT_NV_INDEX == HandleGetType(associatedHandle)) && authUsed)
     {
         NV_REF    locator;
-        NV_INDEX* nvIndex = NvGetIndexInfo(associatedHandle, &locator);
+        NV_INDEX* nvIndex = NULL;
         NV_PIN    pinData;
         TPMA_NV   nvAttributes;
+        NV_INDEX  tempIndex = {0};
+
+        if(_plat__IsNvVirtualIndex(associatedHandle))
+        {
+            _plat__NvVirtual_PopulateNvIndexInfo(
+                associatedHandle, &tempIndex.publicArea, &tempIndex.authValue);
+            nvIndex = &tempIndex;
+
+            locator = (NV_REF)0;
+        }
+        else
+        {
+            nvIndex = NvGetIndexInfo(associatedHandle, &locator);
+        }
+
         //
-        pAssert(nvIndex != NULL);
+        pAssert_RC(nvIndex != NULL);
         nvAttributes = nvIndex->publicArea.attributes;
         // If this is a PIN FAIL index and the value has been written
         // then we can update the counter (increment or clear)
         if(IsNvPinFailIndex(nvAttributes)
            && IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN))
         {
+            if(locator == (NV_REF)0)
+                return TPM_RC_AUTH_UNAVAILABLE;
             pinData.intVal = NvGetUINT64Data(nvIndex, locator);
             if(result != TPM_RC_SUCCESS)
                 pinData.pin.pinCount++;
@@ -1424,6 +1567,8 @@ static TPM_RC CheckAuthSession(
                 && IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN)
                 && result == TPM_RC_SUCCESS)
         {
+            if(locator == (NV_REF)0)
+                return TPM_RC_AUTH_UNAVAILABLE;
             // If the access is valid, then increment the use counter
             pinData.intVal = NvGetUINT64Data(nvIndex, locator);
             pinData.pin.pinCount++;
@@ -1490,7 +1635,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
         return result;
     // There is no command in the TPM spec that has more handles than
     // MAX_SESSION_NUM.
-    pAssert(command->handleNum <= MAX_SESSION_NUM);
+    pAssert_RC(command->handleNum <= MAX_SESSION_NUM);
 
     // Associate the session with an authorization handle.
     for(i = 0; i < command->handleNum; i++)
@@ -1528,6 +1673,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
         else
         {
             session = SessionGet(s_sessionHandles[sessionIndex]);
+            pAssert_RC(session != NULL);
 
             // A trial session can not appear in session area, because it cannot
             // be used for authorization, audit or encrypt/decrypt.
@@ -1566,7 +1712,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
                 return TPM_RCS_ATTRIBUTES + errorIndex;
 
             // no authValue included in any of the HMAC computations
-            pAssert(session != NULL);
+            pAssert_RC(session != NULL);
             session->attributes.includeAuth = CLEAR;
 
             // check HMAC for encrypt/decrypt/audit only sessions
@@ -1603,7 +1749,8 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
         {
             extraKey.b.size = 0;
         }
-        size   = DecryptSize(command->index);
+        size = DecryptSize(command->index);
+        pAssert_RC(command->parameterSize <= INT32_MAX);
         result = CryptParameterDecryption(s_sessionHandles[s_decryptSessionIndex],
                                           &s_nonceCaller[s_decryptSessionIndex].b,
                                           command->parameterSize,
@@ -1720,7 +1867,7 @@ static void UpdateAuditDigest(
     TPM2B_DIGEST* cpHash = GetCpHash(command, hashAlg);
     TPM2B_DIGEST* rpHash = ComputeRpHash(command, hashAlg);
     //
-    pAssert(cpHash != NULL);
+    pAssert_VOID_OK(cpHash != NULL);
 
     // digestNew :=  hash (digestOld || cpHash || rpHash)
     // Start hash computation.
@@ -1803,6 +1950,7 @@ static void UpdateAuditSessionStatus(
         if(s_sessionHandles[i] == TPM_RS_PW)
             continue;
         session = SessionGet(s_sessionHandles[i]);
+        pAssert_VOID_OK(session != NULL);
 
         // If a session is used for audit
         if(IS_ATTRIBUTE(s_attributes[i], TPMA_SESSION, audit))
@@ -1974,7 +2122,8 @@ static TPM2B_NONCE* BuildSingleResponseAuth(
 {
     // Fill in policy/HMAC based session response.
     SESSION* session = SessionGet(s_sessionHandles[sessionIndex]);
-    //
+    pAssert_NULL(session != NULL);
+
     // If the session is a policy session with isPasswordNeeded SET, the
     // authorization field is empty.
     if(HandleGetType(s_sessionHandles[sessionIndex]) == TPM_HT_POLICY_SESSION
@@ -2002,6 +2151,7 @@ static void UpdateAllNonceTPM(COMMAND* command  // IN: controlling structure
         if(s_sessionHandles[i] != TPM_RS_PW)
         {
             session = SessionGet(s_sessionHandles[i]);
+            pAssert_VOID_OK(session != NULL);
             // Update nonceTPM in both internal session and response.
             CryptRandomGenerate(session->nonceTPM.t.size, session->nonceTPM.t.buffer);
         }
@@ -2024,7 +2174,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
 {
     TPM_RC result = TPM_RC_SUCCESS;
 
-    pAssert(command->authSize == 0);
+    pAssert_RC(command->authSize == 0);
 
     // Reset the parameter buffer to point to the start of the parameters so that
     // there is a starting point for any rpHash that might be generated and so there
@@ -2035,6 +2185,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
     if(command->tag == TPM_ST_SESSIONS)
     {
         UpdateAllNonceTPM(command);
+        VERIFY_NOT_FAILED();
 
         // Encrypt first parameter if applicable. Parameter encryption should
         // happen after nonce update and before any rpHash is computed.
@@ -2057,6 +2208,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
                                    &extraKey);
             }
             size = EncryptSize(command->index);
+            pAssert_RC(command->parameterSize <= INT32_MAX);
             // This function operates on internally-generated data that is
             // expected to be well-formed for parameter encryption.
             // In the event that there is a bug elsewhere in the code and the
@@ -2069,7 +2221,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
                                      (UINT16)size,
                                      &extraKey,
                                      command->parameterBuffer);
-            if(g_inFailureMode)
+            if(_plat__InFailureMode())
             {
                 result = TPM_RC_FAILURE;
                 goto Cleanup;
@@ -2079,6 +2231,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
     // Audit sessions should be processed regardless of the tag because
     // a command with no session may cause a change of the exclusivity state.
     UpdateAuditSessionStatus(command);
+    VERIFY_NOT_FAILED();
 #if CC_GetCommandAuditDigest
     // Command Audit
     if(CommandAuditIsRequired(command->index))
@@ -2089,7 +2242,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
     {
         UINT32 i;
         //
-        pAssert(command->sessionNum > 0);
+        pAssert_RC(command->sessionNum > 0);
 
         // Iterate over each session in the command session area, and create
         // corresponding sessions for response.
@@ -2111,6 +2264,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
                 // Compute the response HMAC and get a pointer to the nonce used.
                 // This function will also update the values if needed. Note, the
                 nonceTPM = BuildSingleResponseAuth(command, i, &responseAuth);
+                pAssert_RC(nonceTPM != NULL);
             }
             command->authSize +=
                 TPM2B_NONCE_Marshal(nonceTPM, &command->responseBuffer, NULL);
@@ -2119,7 +2273,10 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
             command->authSize +=
                 TPM2B_DIGEST_Marshal(&responseAuth, &command->responseBuffer, NULL);
             if(!IS_ATTRIBUTE(s_attributes[i], TPMA_SESSION, continueSession))
+            {
                 SessionFlush(s_sessionHandles[i]);
+                VERIFY_NOT_FAILED();
+            }
         }
     }
 

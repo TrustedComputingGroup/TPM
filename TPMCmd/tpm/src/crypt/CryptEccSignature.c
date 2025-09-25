@@ -167,7 +167,7 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
             break;
 #  endif
         default:
-            FAIL(FATAL_ERROR_INTERNAL);
+            FAIL_RC(FATAL_ERROR_INTERNAL);
     }
 Exit:
     CRYPT_CURVE_FREE(E);
@@ -210,7 +210,7 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
     // Validate that the required parameters are provided.
     // Note: E has to be provided if computing E := [r]Q or E := [r]M. Will do
     // E := [r]Q if both M and B are NULL.
-    pAssert(r != NULL && E != NULL);
+    pAssert_RC(r != NULL && E != NULL);
 
     // Initialize the output points in case they are not computed
     ClearPoint2B(K);
@@ -218,7 +218,7 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
     ClearPoint2B(E);
 
     // Sizes of the r parameter may not be zero
-    pAssert(r->t.size > 0);
+    pAssert_RC(r->t.size > 0);
 
     // If B is provided, compute K=[d]B and L=[r]B
     if(B != NULL)
@@ -228,7 +228,7 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
         CRYPT_POINT_VAR(pK);
         CRYPT_POINT_VAR(pL);
         //
-        pAssert(d != NULL && K != NULL && L != NULL);
+        pAssert_RC(d != NULL && K != NULL && L != NULL);
 
         if(!ExtEcc_IsPointOnCurve(pB, curve))
             ERROR_EXIT(TPM_RC_VALUE);
@@ -256,7 +256,7 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
         CRYPT_POINT_VAR(pE);
         //
         // Make sure that a place was provided for the result
-        pAssert(E != NULL);
+        pAssert_RC(E != NULL);
 
         // if this is the third point multiply, check for cancel first
         if((B != NULL) && _plat__IsCanceled())

@@ -1,6 +1,3 @@
-<!-- Copyright Microsoft Corporation. All Rights Reserved
-     Licensed subject to: https://github.com/microsoft/ms-tpm-20-ref/blob/main/LICENSE -->
-
 # TPM Reference Code - Platform Library API
 
 - [TPM Reference Code - Platform Library API](#tpm-reference-code---platform-library-api)

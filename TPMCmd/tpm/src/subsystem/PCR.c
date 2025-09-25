@@ -15,6 +15,7 @@
 //** Includes, Defines, and Data Definitions
 #define PCR_C
 #include "Tpm.h"
+#include <tpm_public/GpMacros.h>
 
 // verify values from pcrstruct.h. not <= because group #0 is reserved
 // indicating no auth/policy support
@@ -57,7 +58,8 @@ BOOL PCRBelongsAuthGroup(TPMI_DH_PCR handle,     // IN: handle of PCR
         pAssert_BOOL(*groupIndex < NUM_AUTHVALUE_PCR_GROUP);
         return TRUE;
     }
-
+#else
+    NOT_REFERENCED(handle);
 #endif
     return FALSE;
 }
@@ -93,6 +95,8 @@ BOOL PCRBelongsPolicyGroup(
         pAssert_BOOL(*groupIndex < NUM_POLICY_PCR_GROUP);
         return TRUE;
     }
+#else
+    NOT_REFERENCED(handle);
 #endif
     return FALSE;
 }
@@ -112,6 +116,7 @@ static BOOL PCRBelongsTCBGroup(TPMI_DH_PCR handle  // IN: handle of PCR
         _platPcr__GetPcrInitializationAttributes(pcr);
     return currentPcrAttributes.doNotIncrementPcrCounter;
 #else
+    NOT_REFERENCED(handle);
     return FALSE;
 #endif
 }
@@ -135,6 +140,7 @@ BOOL PCRPolicyIsAvailable(TPMI_DH_PCR handle  // IN: PCR handle
 TPM2B_AUTH* PCRGetAuthValue(TPMI_DH_PCR handle  // IN: PCR handle
 )
 {
+#if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     UINT32 groupIndex;
 
     if(PCRBelongsAuthGroup(handle, &groupIndex))
@@ -142,6 +148,9 @@ TPM2B_AUTH* PCRGetAuthValue(TPMI_DH_PCR handle  // IN: PCR handle
         return &gc.pcrAuthValues.auth[groupIndex];
     }
     else
+#else
+    NOT_REFERENCED(handle);
+#endif
     {
         return NULL;
     }
@@ -156,6 +165,7 @@ PCRGetAuthPolicy(TPMI_DH_PCR   handle,  // IN: PCR handle
                  TPM2B_DIGEST* policy   // OUT: policy of PCR
 )
 {
+#if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     UINT32 groupIndex;
 
     if(PCRBelongsPolicyGroup(handle, &groupIndex))
@@ -164,6 +174,9 @@ PCRGetAuthPolicy(TPMI_DH_PCR   handle,  // IN: PCR handle
         return gp.pcrPolicies.hashAlg[groupIndex];
     }
     else
+#else
+    NOT_REFERENCED(handle);
+#endif
     {
         policy->t.size = 0;
         return TPM_ALG_NULL;
@@ -211,7 +224,9 @@ void PCRManufacture(void)
     }
 
     // Store the initial configuration to NV
+#if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     NV_SYNC_PERSISTENT(pcrPolicies);
+#endif
     NV_SYNC_PERSISTENT(pcrAllocated);
 
     return;
@@ -744,7 +759,7 @@ void PCRExtend(TPMI_DH_PCR   handle,  // IN: PCR handle to be extended
 //
 // As a side-effect, 'selection' is modified so that only the implemented PCR
 // will have their bits still set.
-void PCRComputeCurrentDigest(
+TPM_RC PCRComputeCurrentDigest(
     TPMI_ALG_HASH       hashAlg,    // IN: hash algorithm to compute digest
     TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered on
                                     //     output)
@@ -760,7 +775,7 @@ void PCRComputeCurrentDigest(
 
     // Initialize the hash
     digest->t.size = CryptHashStart(&hashState, hashAlg);
-    pAssert(digest->t.size > 0 && digest->t.size < UINT16_MAX);
+    pAssert_RC(digest->t.size > 0 && digest->t.size < UINT16_MAX);
 
     // Iterate through the list of PCR selection structures
     for(i = 0; i < selection->count; i++)
@@ -779,7 +794,7 @@ void PCRComputeCurrentDigest(
             {
                 // Get pointer to the digest data for the bank
                 pcrData = GetPcrPointer(selection->pcrSelections[i].hash, pcr);
-                pAssert(pcrData != NULL);
+                pAssert_RC(pcrData != NULL);
                 CryptDigestUpdate(&hashState, pcrSize, pcrData);  // add to digest
             }
         }
@@ -787,18 +802,18 @@ void PCRComputeCurrentDigest(
     // Complete hash stack
     CryptHashEnd2B(&hashState, &digest->b);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** PCRRead()
 // This function is used to read a list of selected PCR.  If the requested PCR
 // number exceeds the maximum number that can be output, the 'selection' is
 // adjusted to reflect the actual output PCR.
-void PCRRead(TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered on
-                                             //     output)
-             TPML_DIGEST* digest,            // OUT: digest
-             UINT32*      pcrCounter  // OUT: the current value of PCR generation
-                                      //     number
+TPM_RC PCRRead(TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered on
+                                               //     output)
+               TPML_DIGEST* digest,            // OUT: digest
+               UINT32*      pcrCounter  // OUT: the current value of PCR generation
+                                        //     number
 )
 {
     TPMS_PCR_SELECTION* select;
@@ -841,7 +856,7 @@ void PCRRead(TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered 
 
                 // Get pointer to the digest data for the bank
                 pcrData = GetPcrPointer(selection->pcrSelections[i].hash, pcr);
-                pAssert(pcrData != NULL);
+                pAssert_RC(pcrData != NULL);
                 // Add to the data to digest
                 MemoryCopy(digest->digests[digest->count].t.buffer,
                            pcrData,
@@ -867,7 +882,7 @@ void PCRRead(TPML_PCR_SELECTION* selection,  // IN/OUT: PCR selection (filtered 
 
     *pcrCounter = gr.pcrCounter;
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** PCRAllocate()
@@ -912,7 +927,7 @@ PCRAllocate(TPML_PCR_SELECTION* allocate,      // IN: required allocation
             }
         }
         // The j loop must exit with a match.
-        pAssert(j < newAllocate.count);
+        pAssert_RC(j < newAllocate.count);
     }
 
     // Max PCR in a bank is MIN(implemented PCR, PCR with attributes defined)
@@ -1249,7 +1264,7 @@ PCRCapGetHandles(TPMI_DH_PCR  handle,     // IN: start handle
     TPMI_YES_NO more = NO;
     UINT32      i;
 
-    pAssert(HandleGetType(handle) == TPM_HT_PCR);
+    VERIFY(HandleGetType(handle) == TPM_HT_PCR, FATAL_ERROR_INTERNAL, NO);
 
     // Initialize output handle list
     handleList->count = 0;
@@ -1283,7 +1298,7 @@ PCRCapGetHandles(TPMI_DH_PCR  handle,     // IN: start handle
 // This function is used to check whether a PCR handle exists.
 BOOL PCRCapGetOneHandle(TPMI_DH_PCR handle)  // IN: handle
 {
-    pAssert(HandleGetType(handle) == TPM_HT_PCR);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_PCR);
 
     if((handle & HR_HANDLE_MASK) <= PCR_LAST)
     {

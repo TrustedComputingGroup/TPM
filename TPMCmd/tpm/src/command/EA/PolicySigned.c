@@ -31,6 +31,7 @@ TPM2_PolicySigned(PolicySigned_In*  in,  // IN: input parameter list
     // Input Validation
     // Set up local pointers
     session = SessionGet(in->policySession);  // the session structure
+    pAssert_RC(session);
 
     // Only do input validation if this is not a trial policy session
     if(session->attributes.isTrialPolicy == CLEAR)
@@ -97,12 +98,18 @@ TPM2_PolicySigned(PolicySigned_In*  in,  // IN: input parameter list
     // Internal Data Update
     // Update policy with input policyRef and name of authorization key
     // These values are updated even if the session is a trial session
-    PolicyContextUpdate(TPM_CC_PolicySigned,
-                        EntityGetName(in->authObject, &entityName),
-                        &in->policyRef,
-                        &in->cpHashA,
-                        authTimeout,
-                        session);
+    result = PolicyContextUpdate(TPM_CC_PolicySigned,
+                                 EntityGetName(in->authObject, &entityName),
+                                 &in->policyRef,
+                                 &in->cpHashA,
+                                 authTimeout,
+                                 session);
+
+    if(result != TPM_RC_SUCCESS)
+    {
+        return result;
+    }
+
     // Command Output
     // Create ticket and timeout buffer if in->expiration < 0 and this is not
     // a trial session.
@@ -149,7 +156,7 @@ TPM2_PolicySigned(PolicySigned_In*  in,  // IN: input parameter list
         out->policyTicket.hierarchy     = TPM_RH_NULL;
         out->policyTicket.digest.t.size = 0;
     }
-    return TPM_RC_SUCCESS;
+    return result;
 }
 
 #endif  // CC_PolicySigned

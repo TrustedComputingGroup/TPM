@@ -202,8 +202,8 @@ BOOL SessionStartup(STARTUP_TYPE type)
 BOOL SessionIsLoaded(TPM_HANDLE handle  // IN: session handle
 )
 {
-    pAssert(HandleGetType(handle) == TPM_HT_POLICY_SESSION
-            || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_POLICY_SESSION
+                 || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
 
     handle = handle & HR_HANDLE_MASK;
 
@@ -231,8 +231,8 @@ BOOL SessionIsLoaded(TPM_HANDLE handle  // IN: session handle
 BOOL SessionIsSaved(TPM_HANDLE handle  // IN: session handle
 )
 {
-    pAssert(HandleGetType(handle) == TPM_HT_POLICY_SESSION
-            || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_POLICY_SESSION
+                 || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
 
     handle = handle & HR_HANDLE_MASK;
     // if out of range of possible active session, or not assigned, or
@@ -300,18 +300,18 @@ SESSION* SessionGet(TPM_HANDLE handle  // IN: session handle
     size_t       slotIndex;
     CONTEXT_SLOT sessionIndex;
 
-    pAssert(HandleGetType(handle) == TPM_HT_POLICY_SESSION
-            || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
+    pAssert_NULL(HandleGetType(handle) == TPM_HT_POLICY_SESSION
+                 || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
 
     slotIndex = handle & HR_HANDLE_MASK;
 
-    pAssert(slotIndex < MAX_ACTIVE_SESSIONS);
+    pAssert_NULL(slotIndex < MAX_ACTIVE_SESSIONS);
 
     // get the contents of the session array.  Because session is loaded, we
     // should always get a valid sessionIndex
     sessionIndex = gr.contextArray[slotIndex] - 1;
 
-    pAssert(sessionIndex < MAX_LOADED_SESSIONS);
+    pAssert_NULL(sessionIndex < MAX_LOADED_SESSIONS);
 
     return &s_sessions[sessionIndex].session;
 }
@@ -344,7 +344,7 @@ static TPM_RC ContextIdSessionCreate(
                          //     be occupied by the created session
 )
 {
-    pAssert(sessionIndex < MAX_LOADED_SESSIONS);
+    pAssert_RC(sessionIndex < MAX_LOADED_SESSIONS);
 
     // check to see if creating the context is safe
     // Is this going to be an assignment for the last session context
@@ -403,8 +403,8 @@ SessionCreate(TPM_SE         sessionType,    // IN: the session type
     CONTEXT_SLOT slotIndex;
     SESSION*     session = NULL;
 
-    pAssert(sessionType == TPM_SE_HMAC || sessionType == TPM_SE_POLICY
-            || sessionType == TPM_SE_TRIAL);
+    pAssert_RC(sessionType == TPM_SE_HMAC || sessionType == TPM_SE_POLICY
+               || sessionType == TPM_SE_TRIAL);
 
     // If there are no open spots in the session array, then no point in searching
     if(s_freeSessionSlots == 0)
@@ -487,7 +487,7 @@ SessionCreate(TPM_SE         sessionType,    // IN: the session type
 
         // Get authValue of associated entity
         EntityGetAuthValue(bind, (TPM2B_AUTH*)&key);
-        pAssert(key.t.size + seed->t.size <= sizeof(key.t.buffer));
+        pAssert_RC((size_t)(key.t.size + seed->t.size) <= sizeof(key.t.buffer));
 
         // Concatenate authValue and seed
         MemoryConcat2B(&key.b, &seed->b, sizeof(key.t.buffer));
@@ -543,7 +543,7 @@ SessionContextSave(TPM_HANDLE       handle,    // IN: session handle
     UINT32       contextIndex;
     CONTEXT_SLOT slotIndex;
 
-    pAssert(SessionIsLoaded(handle));
+    pAssert_RC(SessionIsLoaded(handle));
 
     // check to see if the gap is already maxed out
     // Need to have a saved session
@@ -558,7 +558,7 @@ SessionContextSave(TPM_HANDLE       handle,    // IN: session handle
         *contextID = gr.contextCounter;
 
     contextIndex = handle & HR_HANDLE_MASK;
-    pAssert(contextIndex < MAX_ACTIVE_SESSIONS);
+    pAssert_RC(contextIndex < MAX_ACTIVE_SESSIONS);
 
     // Extract the session slot number referenced by the contextArray
     // because we are going to overwrite this with the low order
@@ -619,8 +619,8 @@ SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved co
     UINT32       contextIndex;
     CONTEXT_SLOT slotIndex;
 
-    pAssert(HandleGetType(*handle) == TPM_HT_POLICY_SESSION
-            || HandleGetType(*handle) == TPM_HT_HMAC_SESSION);
+    pAssert_RC(HandleGetType(*handle) == TPM_HT_POLICY_SESSION
+               || HandleGetType(*handle) == TPM_HT_HMAC_SESSION);
 
     // Don't bother looking if no openings
     if(s_freeSessionSlots == 0)
@@ -632,7 +632,7 @@ SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved co
             break;
 
     // if no spot found, then this is an internal error
-    pAssert(slotIndex < MAX_LOADED_SESSIONS);
+    pAssert_RC(slotIndex < MAX_LOADED_SESSIONS);
 
     contextIndex = *handle & HR_HANDLE_MASK;  // extract the index
 
@@ -643,7 +643,7 @@ SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved co
        && contextIndex != s_oldestSavedSession)
         return TPM_RC_CONTEXT_GAP;
 
-    pAssert(contextIndex < MAX_ACTIVE_SESSIONS);
+    pAssert_RC(contextIndex < MAX_ACTIVE_SESSIONS);
 
     // set the contextArray value to point to the session slot where
     // the context is loaded
@@ -678,15 +678,16 @@ void SessionFlush(TPM_HANDLE handle  // IN: loaded or saved session handle
     CONTEXT_SLOT slotIndex;
     UINT32       contextIndex;  // Index into contextArray
 
-    pAssert((HandleGetType(handle) == TPM_HT_POLICY_SESSION
-             || HandleGetType(handle) == TPM_HT_HMAC_SESSION)
-            && (SessionIsLoaded(handle) || SessionIsSaved(handle)));
+    pAssert_VOID_OK((HandleGetType(handle) == TPM_HT_POLICY_SESSION
+                     || HandleGetType(handle) == TPM_HT_HMAC_SESSION)
+                    && (SessionIsLoaded(handle) || SessionIsSaved(handle)));
 
     // Flush context ID of this session
     // Convert handle to an index into the contextArray
     contextIndex = handle & HR_HANDLE_MASK;
 
-    pAssert(contextIndex < sizeof(gr.contextArray) / sizeof(gr.contextArray[0]));
+    pAssert_VOID_OK(
+        contextIndex < sizeof(gr.contextArray) / sizeof(gr.contextArray[0]));
 
     // Get the current contents of the array
     slotIndex = gr.contextArray[contextIndex];
@@ -770,7 +771,7 @@ void SessionResetPolicyData(SESSION* session  // IN: the session to reset
 )
 {
     SESSION_ATTRIBUTES oldAttributes;
-    pAssert(session != NULL);
+    pAssert_VOID_OK(session != NULL);
 
     // Will need later
     oldAttributes = session->attributes;
@@ -823,7 +824,7 @@ SessionCapGetLoaded(TPMI_SH_POLICY handle,     // IN: start handle
     TPMI_YES_NO more = NO;
     UINT32      i;
 
-    pAssert(HandleGetType(handle) == TPM_HT_LOADED_SESSION);
+    VERIFY(HandleGetType(handle) == TPM_HT_LOADED_SESSION, FATAL_ERROR_ASSERT, NO);
 
     // Initialize output handle list
     handleList->count = 0;
@@ -850,6 +851,7 @@ SessionCapGetLoaded(TPMI_SH_POLICY handle,     // IN: start handle
                     // assume that this is going to be an HMAC session
                     handle  = i + HMAC_SESSION_FIRST;
                     session = SessionGet(handle);
+                    VERIFY(session != NULL, FATAL_ERROR_ASSERT, NO);
                     if(session->attributes.isPolicy)
                         handle = i + POLICY_SESSION_FIRST;
                     handleList->handle[handleList->count] = handle;
@@ -873,7 +875,7 @@ SessionCapGetLoaded(TPMI_SH_POLICY handle,     // IN: start handle
 // This function returns whether a session handle exists and is loaded.
 BOOL SessionCapGetOneLoaded(TPMI_SH_POLICY handle)  // IN: handle
 {
-    pAssert(HandleGetType(handle) == TPM_HT_LOADED_SESSION);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_LOADED_SESSION);
 
     if((handle & HR_HANDLE_MASK) < MAX_ACTIVE_SESSIONS
        && gr.contextArray[(handle & HR_HANDLE_MASK)])
@@ -946,7 +948,7 @@ SessionCapGetSaved(TPMI_SH_HMAC handle,     // IN: start handle
 // This function returns whether a session handle exists and is saved.
 BOOL SessionCapGetOneSaved(TPMI_SH_HMAC handle)  // IN: handle
 {
-    pAssert(HandleGetType(handle) == TPM_HT_SAVED_SESSION);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_SAVED_SESSION);
 
     if((handle & HR_HANDLE_MASK) < MAX_ACTIVE_SESSIONS
        && gr.contextArray[(handle & HR_HANDLE_MASK)])

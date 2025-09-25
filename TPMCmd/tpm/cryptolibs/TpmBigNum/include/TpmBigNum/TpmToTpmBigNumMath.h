@@ -14,9 +14,9 @@
 #define MATH_LIB_TPMBIGNUM
 
 // TODO_RENAME_INC_FOLDER: private refers to the TPM_CoreLib private headers
-#include <public/GpMacros.h>  // required for TpmFail_fp.h
-#include <public/Capabilities.h>
-#include <public/TpmTypes.h>  // requires capabilities & GpMacros
+#include <tpm_public/GpMacros.h>  // required for TpmFail_fp.h
+#include <tpm_public/Capabilities.h>
+#include <tpm_public/TpmTypes.h>  // requires capabilities & GpMacros
 #include "BnValues.h"
 
 #ifndef LIB_INCLUDE

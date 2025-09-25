@@ -8,6 +8,9 @@
 
 //** Functions
 
+const char TPM_PT_FAMILY_INDICATOR_VALUE[] = "2.0";
+TPM_STATIC_ASSERT(sizeof(TPM_PT_FAMILY_INDICATOR_VALUE) == sizeof(UINT32));
+
 //*** TPMPropertyIsDefined()
 // This function accepts a property selection and, if so, sets 'value'
 // to the value of the property.
@@ -22,28 +25,30 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                                  UINT32* value      // OUT: property value
 )
 {
+    SPEC_CAPABILITY_VALUE spec_capability_value = {0};
+    _plat_GetSpecCapabilityValue(&spec_capability_value);
     switch(property)
     {
         case TPM_PT_FAMILY_INDICATOR:
             // from the title page of the specification
             // For this specification, the value is "2.0".
-            *value = TPM_SPEC_FAMILY;
+            *value = BYTE_ARRAY_TO_UINT32(TPM_PT_FAMILY_INDICATOR_VALUE);
             break;
         case TPM_PT_LEVEL:
             // from the title page of the specification
-            *value = TPM_SPEC_LEVEL;
+            *value = spec_capability_value.tpmSpecLevel;
             break;
         case TPM_PT_REVISION:
             // from the title page of the specification
-            *value = TPM_SPEC_VERSION;
+            *value = spec_capability_value.tpmSpecVersion;
             break;
         case TPM_PT_DAY_OF_YEAR:
             // computed from the date value on the title page of the specification
-            *value = TPM_SPEC_DAY_OF_YEAR;
+            *value = spec_capability_value.tpmSpecDayOfYear;
             break;
         case TPM_PT_YEAR:
             // from the title page of the specification
-            *value = TPM_SPEC_YEAR;
+            *value = spec_capability_value.tpmSpecYear;
             break;
 
         case TPM_PT_MANUFACTURER:
@@ -74,15 +79,19 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
         case TPM_PT_VENDOR_TPM_TYPE:
             // vendor-defined value indicating the TPM model
             // We just make up a number here
-            *value = _plat__GetTpmType();
+            *value = _plat__GetVendorTpmType();
             break;
 
         case TPM_PT_FIRMWARE_VERSION_1:
             // more significant 32-bits of a vendor-specific value
+            // note this value originates in the platform, and is set into gp
+            // during TPM_Manufacture.
             *value = gp.firmwareV1;
             break;
         case TPM_PT_FIRMWARE_VERSION_2:
             // less significant 32-bits of a vendor-specific value
+            // note this value originates in the platform, and is set into gp
+            // during TPM_Manufacture.
             *value = gp.firmwareV2;
             break;
         case TPM_PT_INPUT_BUFFER:
@@ -145,10 +154,8 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                 SET_ATTRIBUTE(attributes.att, TPMA_MEMORY, sharedNV);
                 SET_ATTRIBUTE(attributes.att, TPMA_MEMORY, objectCopiedToRam);
 
-                // Note: For a LSb0 machine, the bits in a bit field are in the correct
-                // order even if the machine is MSB0. For a MSb0 machine, a TPMA will
-                // be an integer manipulated by masking (USE_BIT_FIELD_STRUCTURES will
-                // be NO) so the bits are manipulate correctly.
+                // A TPMA will be an integer manipulated by masking so the bits
+                // are manipulated correctly regardless of machine endianness.
                 *value = attributes.u32;
                 break;
             }
@@ -247,24 +254,26 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             // platform specific values for the TPM_PT_PS parameters from
             // the relevant platform-specific specification
             // In this reference implementation, all of these values are 0.
-            *value = PLATFORM_FAMILY;
+            *value = spec_capability_value.platformFamily;
             break;
         case TPM_PT_PS_LEVEL:
             // level of the platform-specific specification
-            *value = PLATFORM_LEVEL;
+            *value = spec_capability_value.platfromLevel;
             break;
         case TPM_PT_PS_REVISION:
-            // specification Revision times 100 for the platform-specific
-            // specification
-            *value = PLATFORM_VERSION;
+            // The platform spec version is recorded such that 0x00000101 means version 1.01
+            // Note this differs from some TPM/TCG specifications, but matches the behavior of Windows.
+            // more recent TCG specs have discontinued using this field, but Windows displays it, so we
+            // retain it using the historical encoding.
+            *value = spec_capability_value.platformRevision;
             break;
         case TPM_PT_PS_DAY_OF_YEAR:
             // platform-specific specification day of year using TCG calendar
-            *value = PLATFORM_DAY_OF_YEAR;
+            *value = spec_capability_value.platformDayOfYear;
             break;
         case TPM_PT_PS_YEAR:
             // platform-specific specification year using the CE
-            *value = PLATFORM_YEAR;
+            *value = spec_capability_value.platformYear;
             break;
         case TPM_PT_SPLIT_MAX:
             // number of split signing operations supported by the TPM
@@ -275,48 +284,19 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             break;
         case TPM_PT_TOTAL_COMMANDS:
             // total number of commands implemented in the TPM
-            // Since the reference implementation does not have any
-            // vendor-defined commands, this will be the same as the
-            // number of library commands.
             {
-#if COMPRESSED_LISTS
-                (*value) = COMMAND_COUNT;
-#else
-                COMMAND_INDEX commandIndex;
-                *value = 0;
-
-                // scan all implemented commands
-                for(commandIndex = GetClosestCommandIndex(0);
-                    commandIndex != UNIMPLEMENTED_COMMAND_INDEX;
-                    commandIndex = GetNextCommandIndex(commandIndex))
-                {
-                    (*value)++;  // count of all implemented
-                }
-#endif
+                *value = COMMAND_COUNT;
                 break;
             }
         case TPM_PT_LIBRARY_COMMANDS:
             // number of commands from the TPM library that are implemented
             {
-#if COMPRESSED_LISTS
                 *value = LIBRARY_COMMAND_ARRAY_SIZE;
-#else
-                COMMAND_INDEX commandIndex;
-                *value = 0;
-
-                // scan all implemented commands
-                for(commandIndex = GetClosestCommandIndex(0);
-                    commandIndex < LIBRARY_COMMAND_ARRAY_SIZE;
-                    commandIndex = GetNextCommandIndex(commandIndex))
-                {
-                    (*value)++;
-                }
-#endif
                 break;
             }
         case TPM_PT_VENDOR_COMMANDS:
             // number of vendor commands that are implemented
-            *value = VENDOR_COMMAND_ARRAY_SIZE;
+            *value = VENDOR_COMMAND_ARRAY_COUNT;
             break;
         case TPM_PT_NV_BUFFER_MAX:
             // Maximum data size in an NV write command
@@ -367,10 +347,8 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                 // In this implementation, EPS is always generated by TPM
                 SET_ATTRIBUTE(flags.attr, TPMA_PERMANENT, tpmGeneratedEPS);
 
-                // Note: For a LSb0 machine, the bits in a bit field are in the correct
-                // order even if the machine is MSB0. For a MSb0 machine, a TPMA will
-                // be an integer manipulated by masking (USE_BIT_FIELD_STRUCTURES will
-                // be NO) so the bits are manipulate correctly.
+                // A TPMA will be an integer manipulated by masking so the bits
+                // are manipulated correctly regardless of machine endianness.
                 *value = flags.u32;
                 break;
             }
@@ -391,13 +369,15 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                     SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, ehEnable);
                 if(gc.phEnableNV)
                     SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, phEnableNV);
+#if CC_ReadOnlyControl
+                if(gc.readOnly)
+                    SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, readOnly);
+#endif
                 if(g_prevOrderlyState != SU_NONE_VALUE)
                     SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, orderly);
 
-                // Note: For a LSb0 machine, the bits in a bit field are in the correct
-                // order even if the machine is MSB0. For a MSb0 machine, a TPMA will
-                // be an integer manipulated by masking (USE_BIT_FIELD_STRUCTURES will
-                // be NO) so the bits are manipulate correctly.
+                // A TPMA will be an integer manipulated by masking so the bits
+                // are manipulated correctly regardless of machine endianness.
                 *value = flags.u32;
                 break;
             }

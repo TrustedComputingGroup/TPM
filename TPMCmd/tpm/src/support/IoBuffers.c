@@ -38,7 +38,7 @@ BYTE* MemoryGetInBuffer(UINT32 size  // Size, in bytes, required for the input
                                      // unmarshaling
 )
 {
-    pAssert(size <= sizeof(s_actionIoBuffer));
+    pAssert_NULL(size <= sizeof(s_actionIoBuffer));
 // In this implementation, a static buffer is set aside for the command action
 // buffers. The buffer is shared between input and output. This is because
 // there is no need to allocate for the worst case input and worst case output
@@ -58,7 +58,7 @@ BYTE* MemoryGetOutBuffer(UINT32 size  // required size of the buffer
 )
 {
     BYTE* retVal = (BYTE*)(&s_actionIoBuffer[s_actionIoAllocation / UoM]);
-    pAssert((size + s_actionIoAllocation) < (sizeof(s_actionIoBuffer)));
+    pAssert_NULL((size + s_actionIoAllocation) < (sizeof(s_actionIoBuffer)));
     // In this implementation, a static buffer is set aside for the command action
     // output buffer.
     memset(retVal, 0, size);

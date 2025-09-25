@@ -33,7 +33,7 @@ BOOL X509FindExtensionByOID(ASN1UnmarshalContext* ctxIn,  // IN: the context to 
 {
     INT16 length;
     //
-    pAssert(ctxIn != NULL);
+    pAssert_BOOL(ctxIn != NULL);
     // Make the search non-destructive of the input if ctx provided. Otherwise, use
     // the provided context.
     if(ctx == NULL)

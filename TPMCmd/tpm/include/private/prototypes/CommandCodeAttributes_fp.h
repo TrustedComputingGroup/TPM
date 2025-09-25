@@ -91,6 +91,10 @@ BOOL IsSessionAllowed(COMMAND_INDEX commandIndex  // IN: the command to be check
 // This function determines if a command has a handle in the response
 BOOL IsHandleInResponse(COMMAND_INDEX commandIndex);
 
+//*** IsDisallowedInReadOnlyMode()
+// This function determines if a command is disallowed when operating in Read-Only mode
+BOOL IsDisallowedInReadOnlyMode(COMMAND_INDEX commandIndex);
+
 //*** IsWriteOperation()
 // Checks to see if an operation will write to an NV Index and is subject to being
 // blocked by read-lock

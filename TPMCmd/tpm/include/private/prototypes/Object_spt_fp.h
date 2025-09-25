@@ -94,7 +94,7 @@ PublicAttributesValidation(
 //*** FillInCreationData()
 // Fill in creation data for an object.
 //  Return Type: void
-void FillInCreationData(
+TPM_RC FillInCreationData(
     TPMI_DH_OBJECT       parentHandle,   // IN: handle of parent
     TPMI_ALG_HASH        nameHashAlg,    // IN: name hash algorithm
     TPML_PCR_SELECTION*  creationPCR,    // IN: PCR selection
@@ -172,7 +172,7 @@ UnwrapOuter(OBJECT* protector,   // IN: The object that provides
 //  a) marshals TPM2B_SENSITIVE structure into the buffer of TPM2B_PRIVATE
 //  b) applies encryption to the sensitive area; and
 //  c) applies outer integrity computation.
-void SensitiveToPrivate(
+TPM_RC SensitiveToPrivate(
     TPMT_SENSITIVE* sensitive,  // IN: sensitive structure
     TPM2B_NAME*     name,       // IN: the name of the object
     OBJECT*         parent,     // IN: The parent object
@@ -218,7 +218,7 @@ PrivateToSensitive(TPM2B*     inPrivate,  // IN: input private structure
 //  a) marshals TPMT_SENSITIVE structure into the buffer of TPM2B_PRIVATE;
 //  b) applies inner wrap to the sensitive area if required; and
 //  c) applies outer wrap if required.
-void SensitiveToDuplicate(
+TPM_RC SensitiveToDuplicate(
     TPMT_SENSITIVE* sensitive,    // IN: sensitive structure
     TPM2B*          name,         // IN: the name of the object
     OBJECT*         parent,       // IN: The new parent object
@@ -278,11 +278,11 @@ DuplicateToSensitive(
 //  b) encrypts the private buffer, excluding the leading integrity HMAC area;
 //  c) computes integrity HMAC and append to the beginning of the buffer; and
 //  d) sets the total size of TPM2B_ID_OBJECT buffer.
-void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
-                        TPM2B*           name,        // IN: the name of the object
-                        TPM2B*           seed,        // IN: an external seed.
-                        OBJECT*          protector,   // IN: the protector
-                        TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
+TPM_RC SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
+                          TPM2B*           name,        // IN: the name of the object
+                          TPM2B*           seed,        // IN: an external seed.
+                          OBJECT*          protector,   // IN: the protector
+                          TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
 );
 
 //*** CredentialToSecret()

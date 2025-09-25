@@ -85,8 +85,8 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
                 CryptRsaLoadPrivateExponent(&object->publicArea, &object->sensitive);
 #  endif
             // Make sure things fit
-            pAssert(out->context.contextBlob.t.size
-                    <= sizeof(out->context.contextBlob.t.buffer));
+            pAssert_RC(out->context.contextBlob.t.size
+                       <= sizeof(out->context.contextBlob.t.buffer));
             // Copy the whole internal OBJECT structure to context blob
             MemoryCopy(outObject, object, objectSize);
 
@@ -128,15 +128,15 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
                 integritySize + fingerprintSize + sizeof(*session);
 
             // Make sure things fit
-            pAssert(out->context.contextBlob.t.size
-                    < sizeof(out->context.contextBlob.t.buffer));
+            pAssert_RC(out->context.contextBlob.t.size
+                       < sizeof(out->context.contextBlob.t.buffer));
 
             // Copy the whole internal SESSION structure to context blob.
             // Save space for fingerprint at the beginning of the buffer
             // This is done before anything else so that the actual context
             // can be reclaimed after this call
-            pAssert(sizeof(*session) <= sizeof(out->context.contextBlob.t.buffer)
-                                            - integritySize - fingerprintSize);
+            pAssert_RC(sizeof(*session) <= sizeof(out->context.contextBlob.t.buffer)
+                                               - integritySize - fingerprintSize);
             MemoryCopy(
                 out->context.contextBlob.t.buffer + integritySize + fingerprintSize,
                 session,
@@ -166,8 +166,8 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
 
     // Save fingerprint at the beginning of encrypted area of context blob.
     // Reserve the integrity space
-    pAssert(sizeof(out->context.sequence)
-            <= sizeof(out->context.contextBlob.t.buffer) - integritySize);
+    pAssert_RC(sizeof(out->context.sequence)
+               <= sizeof(out->context.contextBlob.t.buffer) - integritySize);
     MemoryCopy(out->context.contextBlob.t.buffer + integritySize,
                &out->context.sequence,
                sizeof(out->context.sequence));

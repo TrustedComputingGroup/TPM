@@ -37,6 +37,20 @@ NvWriteAccessChecks(
     TPMA_NV    attributes   // IN: the attributes of 'nvHandle'
 );
 
+//*** NvReadOnlyModeChecks()
+// Common routine to verify whether an NV command is allowed on an index
+// with the given 'attributes' while the TPM is in Read-Only mode
+// Used by TPM2_NV_Write, TPM2_NV_Extend, TPM2_SetBits, TPM2_NV_WriteLock
+// and TPM2_NV_ReadLock
+//  Return Type: TPM_RC
+//      TPM_RC_SUCCESS     The command is allowed
+//      TPM_RC_READ_ONLY   The TPM is in Read-Only mode and the command is
+//                         not allowed
+//
+TPM_RC
+NvReadOnlyModeChecks(TPMA_NV attributes  // IN: the attributes of the index to check
+);
+
 //*** NvClearOrderly()
 // This function is used to cause gp.orderlyState to be cleared to the
 // non-orderly state.
@@ -49,6 +63,15 @@ NvClearOrderly(void);
 //      TRUE(1)         is pin pass
 //      FALSE(0)        is not pin pass
 BOOL NvIsPinPassIndex(TPM_HANDLE index  // IN: Handle to check
+);
+
+//*** NvIsPinCountedIndex()
+// Function to check to see if an NV index is either a PIN Pass
+// or a PIN FAIL Index
+//  Return Type: BOOL
+//      TRUE(1)         is pin pass or pin fail
+//      FALSE(0)        is neither pin pass nor pin fail
+BOOL NvIsPinCountedIndex(TPM_HANDLE index  // IN: Handle to check
 );
 
 //*** NvGetIndexName()

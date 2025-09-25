@@ -1,7 +1,7 @@
 # Official TPM 2.0 Reference Implementation #
 
 
-- [Official TPM 2.0 Reference Implementation (by Microsoft)](#official-tpm-20-reference-implementation-by-microsoft)
+- [Official TPM 2.0 Reference Implementation](#official-tpm-20-reference-implementation)
   - [Build Status](#build-status)
   - [Introduction](#introduction)
   - [Architecture Introduction](#architecture-introduction)

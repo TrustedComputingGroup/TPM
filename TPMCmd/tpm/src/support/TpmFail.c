@@ -8,7 +8,7 @@
 // structures is not important as this function does not use any of the structures
 // in TpmTypes.h and only include it for the #defines of the capabilities,
 // properties, and command code values.
-#include "TpmTypes.h"
+#include "tpm_public/TpmTypes.h"
 
 //** Typedefs
 // These defines are used primarily for sizing of the local response buffer.
@@ -71,8 +71,13 @@ typedef union
 // compelling reason to move all the typedefs to Global.h and this structure
 // to Global.c.
 #ifndef __IGNORE_STATE__  // Don't define this value
-static BYTE response[sizeof(RESPONSES)];
+static BYTE failure_response_buffer[1000 + sizeof(RESPONSES)];
 #endif
+
+// the total size of the failure_response_buffer must be at least:
+// 4 * sizeof(UINT32) + sizeof(UINT16) since that's what TPM_CC_GetTestResult
+// returns
+TPM_STATIC_ASSERT(sizeof(failure_response_buffer) > 100);
 
 //** Local Functions
 
@@ -114,69 +119,78 @@ static BOOL Unmarshal16(UINT16* target, BYTE** buffer, INT32* size)
     return TRUE;
 }
 
-//** Public Functions
-
-//*** SetForceFailureMode()
-// This function is called by the simulator to enable failure mode testing.
-#if ALLOW_FORCE_FAILURE_MODE
-LIB_EXPORT void SetForceFailureMode(void)
-{
-    g_forceFailureMode = TRUE;
-    return;
-}
-#endif  // ALLOW_FORCE_FAILURE_MODE
-
-//*** TpmFail()
+//*** EnterFailureMode()
 // This function is called by TPM.lib when a failure occurs. It will set up the
 // failure values to be returned on TPM2_GetTestResult().
-NORETURN void TpmFail(
+NORETURN_IF_LONGJMP void EnterFailureMode(
 #if FAIL_TRACE
     const char* function,
     int         line,
-#else
+#endif
     uint64_t locationCode,
-#endif
-    int failureCode)
+    int      failureCode)
 {
-    // Save the values that indicate where the error occurred.
-    // On a 64-bit machine, this may truncate the address of the string
-    // of the function name where the error occurred.
-#if FAIL_TRACE
-    s_failFunctionName = function;
-    s_failFunction     = (UINT32)(ptrdiff_t)function;
-    s_failLine         = line;
-#else
-    s_failFunction = (UINT32)(locationCode >> 32);
-    s_failLine     = (UINT32)(locationCode);
-#endif
-    s_failCode = failureCode;
+    TPM_DEBUG_TRACE();
+    if(_plat__InFailureMode())
+    {
+        TPM_DEBUG_PRINT("Fail On Fail, Original Failure:");
 
-    // We are in failure mode
-    g_inFailureMode = TRUE;
+#if FAIL_TRACE
+        TPM_DEBUG_PRINTF("Function:", _plat__GetFailureFunctionName());
+        TPM_DEBUG_PRINTF("    Line:", _plat__GetFailureLine());
+#endif
+
+        TPM_DEBUG_PRINTF("    Code:", _plat__GetFailureCode());
+        uint32_t failureLocation_low = (uint32_t)(_plat__GetFailureLocation());
+        uint32_t failureLocation_hi  = (uint32_t)(_plat__GetFailureLocation() >> 32);
+        // reference in case printing is disabled
+        NOT_REFERENCED(failureLocation_low);
+        NOT_REFERENCED(failureLocation_hi);
+        TPM_DEBUG_PRINTF(
+            "Location: %08x:%08x", failureLocation_hi, failureLocation_low);
+        TPM_DEBUG_PRINT("New Failure:");
+#if FAIL_TRACE
+        TPM_DEBUG_PRINTF("Function:", function);
+        TPM_DEBUG_PRINTF("    Line:", line);
+#endif
+
+        TPM_DEBUG_PRINTF("    Code:", failureCode);
+        failureLocation_low = (uint32_t)(locationCode);
+        failureLocation_hi  = (uint32_t)(locationCode >> 32);
+        // reference in case printing is disabled
+        NOT_REFERENCED(failureLocation_low);
+        NOT_REFERENCED(failureLocation_hi);
+        TPM_DEBUG_PRINTF(
+            "Location: %08x:%08x", failureLocation_hi, failureLocation_low);
+    }
 
     // Notify the platform that we hit a failure.
     //
-    // In the LONGJMP case, the reference platform code is expected to long-jmp
-    // back to the ExecuteCommand call and output a failure response.
+    // In the LONGJMP_SUPPORTED case, the reference platform code is expected to
+    // long-jmp back to the ExecuteCommand call and output a failure response.
     //
-    // In the NO_LONGJMP case, this is a notification to the platform, and the
-    // platform may take any (implementation-defined) behavior, including no-op,
-    // debugging, or whatever. The core library is expected to surface the failure
-    // back to ExecuteCommand through error propagation and return an appropriate
-    // failure reply.
-    _plat__Fail();
+    // In the !LONGJMP_SUPPORTED case, this is a notification to the platform,
+    // and the platform may take any (implementation-defined) behavior,
+    // including no-op, debugging, or whatever. The core library is expected to
+    // surface the failure back to ExecuteCommand through error propagation and
+    // return an appropriate failure reply.
+    //
+    // The general expectation is for the platform to ignore this and not update
+    // the failure data if the platform is already in failure
+    _plat__Fail(function, line, locationCode, failureCode);
 }
 
 //*** TpmFailureMode(
-// This function is called by the interface code when the platform is in failure
-// mode.
+// This function is called by ExecuteCommand code to construct failure responses
+// when the platform is in failure mode.
 void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
                     unsigned char*  inRequest,        // IN: command buffer
                     uint32_t*       outResponseSize,  // OUT: response buffer size
                     unsigned char** outResponse       // OUT: response buffer
 )
 {
-    UINT32 marshalSize;
+    TPM_DEBUG_TRACE();
+    UINT32 marshalSize;  // final size of the response.
     UINT32 capability;
     HEADER header;  // unmarshaled command header
     UINT32 pt;      // unmarshaled property type
@@ -184,33 +198,57 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
     UINT8* buffer = inRequest;
     INT32  size   = inRequestSize;
 
+    //TPM_DEBUG_PRINT("In TpmFailureMode)");
+
     // If there is no command buffer, then just return TPM_RC_FAILURE
     if(inRequestSize == 0 || inRequest == NULL)
+    {
         goto FailureModeReturn;
+    }
     // If the header is not correct for TPM2_GetCapability() or
     // TPM2_GetTestResult() then just return the in failure mode response;
     if(!(Unmarshal16(&header.tag, &buffer, &size)
          && Unmarshal32(&header.size, &buffer, &size)
          && Unmarshal32(&header.code, &buffer, &size)))
+    {
         goto FailureModeReturn;
+    }
     if(header.tag != TPM_ST_NO_SESSIONS || header.size < 10)
+    {
         goto FailureModeReturn;
+    }
+
     switch(header.code)
     {
         case TPM_CC_GetTestResult:
+        {
             // make sure that the command size is correct
             if(header.size != 10)
+            {
                 goto FailureModeReturn;
-            buffer      = &response[10];
-            marshalSize = MarshalUint16(3 * sizeof(UINT32), &buffer);
-            marshalSize += MarshalUint32(s_failFunction, &buffer);
-            marshalSize += MarshalUint32(s_failLine, &buffer);
-            marshalSize += MarshalUint32(s_failCode, &buffer);
-            if(s_failCode == FATAL_ERROR_NV_UNRECOVERABLE)
+            }
+            buffer                      = &failure_response_buffer[10];
+
+            UINT16 sizeofTestResultData = 8     // size of Failure Location
+                                          + 4;  // sizeof(_plat__GetFailureCode);
+
+            marshalSize = MarshalUint16(sizeofTestResultData, &buffer);
+            UINT32 low  = (UINT32)(_plat__GetFailureLocation() & 0xFFFFFFFF);
+            UINT32 high = (UINT32)((_plat__GetFailureLocation() >> 32) & 0xFFFFFFFF);
+            marshalSize += MarshalUint32(high, &buffer);
+            marshalSize += MarshalUint32(low, &buffer);
+            marshalSize += MarshalUint32(_plat__GetFailureCode(), &buffer);
+            // the final code isn't part of the TestResultData size and is always UINT32
+            if(_plat__GetFailureCode() == FATAL_ERROR_NV_UNRECOVERABLE)
+            {
                 marshalSize += MarshalUint32(TPM_RC_NV_UNINITIALIZED, &buffer);
+            }
             else
+            {
                 marshalSize += MarshalUint32(TPM_RC_FAILURE, &buffer);
-            break;
+            }
+        }
+        break;
         case TPM_CC_GetCapability:
             // make sure that the size of the command is exactly the size
             // returned for the capability, property, and count
@@ -229,7 +267,7 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
             if(pt < TPM_PT_MANUFACTURER)
                 pt = TPM_PT_MANUFACTURER;
             // set up for return
-            buffer = &response[10];
+            buffer = &failure_response_buffer[10];
             // if the request was for a PT less than the last one
             // then we indicate more, otherwise, not.
             if(pt < TPM_PT_FIRMWARE_VERSION_2)
@@ -276,7 +314,7 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
                     case TPM_PT_VENDOR_TPM_TYPE:
                         // vendor-defined value indicating the TPM model
                         // We just make up a number here
-                        pt = _plat__GetTpmType();
+                        pt = _plat__GetVendorTpmType();
                         break;
 
                     case TPM_PT_FIRMWARE_VERSION_1:
@@ -294,10 +332,11 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
             marshalSize += MarshalUint32(pt, &buffer);
             break;
         default:  // default for switch (cc)
+            //TPM_DEBUG_PRINT(" goto FailureModeReturn from default");
             goto FailureModeReturn;
     }
     // Now do the header
-    buffer      = response;
+    buffer      = failure_response_buffer;
     marshalSize = marshalSize + 10;              // Add the header size to the
                                                  // stuff already marshaled
     MarshalUint16(TPM_ST_NO_SESSIONS, &buffer);  // structure tag
@@ -305,15 +344,21 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
     MarshalUint32(TPM_RC_SUCCESS, &buffer);      // response code
 
     *outResponseSize = marshalSize;
-    *outResponse     = (unsigned char*)&response;
+    *outResponse     = (unsigned char*)&failure_response_buffer;
     return;
+
 FailureModeReturn:
-    buffer      = response;
+    TPM_DEBUG_TRACEX("returning.");
+
+    buffer = failure_response_buffer;
+    //TPM_DEBUG_PRINT("FailureModeReturn:1");
     marshalSize = MarshalUint16(TPM_ST_NO_SESSIONS, &buffer);
+    //TPM_DEBUG_PRINT("FailureModeReturn:2");
     marshalSize += MarshalUint32(10, &buffer);
+    //TPM_DEBUG_PRINT("FailureModeReturn:3");
     marshalSize += MarshalUint32(TPM_RC_FAILURE, &buffer);
     *outResponseSize = marshalSize;
-    *outResponse     = (unsigned char*)response;
+    *outResponse     = (unsigned char*)failure_response_buffer;
     return;
 }
 

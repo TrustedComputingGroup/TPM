@@ -24,7 +24,8 @@ TPM2_MAC(MAC_In*  in,  // IN: input parameter list
 
     // Input Validation
     // Get MAC key object and public area pointers
-    keyObject  = HandleToObject(in->handle);
+    keyObject = HandleToObject(in->handle);
+    pAssert_RC(keyObject != NULL);
     publicArea = &keyObject->publicArea;
 
     // If the key is not able to do a MAC, indicate that the handle selects an

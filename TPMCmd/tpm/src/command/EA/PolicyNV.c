@@ -34,6 +34,7 @@ TPM2_PolicyNV(PolicyNV_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     //If this is a trial policy, skip all validations and the operation
     if(session->attributes.isTrialPolicy == CLEAR)
