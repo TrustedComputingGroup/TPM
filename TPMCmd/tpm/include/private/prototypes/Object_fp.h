@@ -154,6 +154,16 @@ ObjectCreateEventSequence(TPM2B_AUTH*     auth,      // IN: authValue
                           TPMI_DH_OBJECT* newHandle  // OUT: sequence object handle
 );
 
+//*** ObjectCreateEventSequenceHcrtmDrtm()
+// This function creates an event sequence object for Hcrtm/Drtm case,
+// it is called in _TPM_Hash_Start().
+//  Return Type: TPM_RC
+//      TPM_RC_OBJECT_MEMORY        if there is no free slot for an object
+TPM_RC
+ObjectCreateEventSequenceHcrtmDrtm(TPM2B_AUTH*     auth,      // IN: authValue
+                                   TPMI_DH_OBJECT* newHandle  // OUT: sequence object handle
+);
+
 //*** ObjectTerminateEvent()
 // This function is called to close out the event sequence and clean up the hash
 // context states.

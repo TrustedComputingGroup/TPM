@@ -538,6 +538,38 @@ ObjectCreateEventSequence(TPM2B_AUTH*     auth,      // IN: authValue
     return TPM_RC_SUCCESS;
 }
 
+//*** ObjectCreateEventSequenceHcrtmDrtm()
+// This function creates an event sequence object for HCRTM/DRTM use case.
+//  Return Type: TPM_RC
+//      TPM_RC_OBJECT_MEMORY        if there is no free slot for an object
+TPM_RC
+ObjectCreateEventSequenceHcrtmDrtm(
+    TPM2B_AUTH      *auth,          // IN: authValue
+    TPMI_DH_OBJECT  *newHandle      // OUT: sequence object handle
+    )
+{
+    HASH_OBJECT* hashObject = AllocateSequenceSlot(newHandle, auth);
+    TPMI_DH_PCR  pcrHandle  = TPMIsStarted()? PCR_FIRST + DRTM_PCR : PCR_FIRST + HCRTM_PCR;
+    UINT32       i;
+    TPM_ALG_ID   hash;
+    //
+    // See if slot allocated
+    if(hashObject == NULL)
+        return TPM_RC_OBJECT_MEMORY;
+    // Set the event sequence attribute
+    hashObject->attributes.eventSeq = SET;
+
+    // Initialize hash states for each implemented PCR algorithms
+    for(i = 0; i < HASH_COUNT; i++)
+    {
+        hash = CryptHashGetAlgByIndex(i);
+        // make sure that the PCR is implemented for this algorithm
+        if(PcrIsAllocated(pcrHandle, hash))
+            CryptHashStart(&hashObject->state.hashState[i], hash);
+    }
+    return TPM_RC_SUCCESS;
+}
+
 //*** ObjectTerminateEvent()
 // This function is called to close out the event sequence and clean up the hash
 // context states.

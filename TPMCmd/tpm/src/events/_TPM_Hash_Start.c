@@ -18,12 +18,12 @@ LIB_EXPORT BOOL _TPM_Hash_Start(void)
         VERIFY(FlushObject(oldHandle), FATAL_ERROR_INTERNAL, FALSE);
     }
 
-    // Create an event sequence object and store the handle in global
+    // Create an event sequence object for Hcrtm/Drtm and store the handle in global
     // g_DRTMHandle. A TPM_RC_OBJECT_MEMORY error may be returned at this point
     // The NULL value for the first parameter will cause the sequence structure to
     // be allocated without being set as present. This keeps the sequence from
     // being left behind if the sequence is terminated early.
-    result = ObjectCreateEventSequence(NULL, &g_DRTMHandle);
+    result = ObjectCreateEventSequenceHcrtmDrtm(NULL, &g_DRTMHandle);
 
     // If a free slot was not available, then free up a slot.
     if(result != TPM_RC_SUCCESS)
@@ -51,7 +51,7 @@ LIB_EXPORT BOOL _TPM_Hash_Start(void)
 
         // Try to create an event sequence object again.  This time, we must
         // succeed.
-        result = ObjectCreateEventSequence(NULL, &g_DRTMHandle);
+        result = ObjectCreateEventSequenceHcrtmDrtm(NULL, &g_DRTMHandle);
         if(result != TPM_RC_SUCCESS)
             FAIL_BOOL(FATAL_ERROR_INTERNAL);
     }
